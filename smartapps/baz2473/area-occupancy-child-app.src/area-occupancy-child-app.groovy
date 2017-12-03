@@ -713,7 +713,7 @@ def exitMotionSensorsWhenDoorIsOpenActiveEventHandler(evt) {
 def exitMotionSensorsWhenDoorIsOpenInactiveEventHandler(evt) {
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
-    if (['vacant'].contains(areaState)) {
+    if (!['vacant'].contains(areaState)) {
     if (adjacentDoors) {
         def adjacentDoorsState = adjacentDoors.currentValue("contact")
         if (adjacentDoorsState.contains("open")) {
@@ -721,19 +721,25 @@ def exitMotionSensorsWhenDoorIsOpenInactiveEventHandler(evt) {
     mainAction()
 }}}}
 def exitMotionSensorsWhenDoorIsClosedActiveEventHandler(evt) {
+    def child = getChildDevice(getArea())
+    def areaState = child.getAreaState()
+    if (!['vacant'].contains(areaState)) {
     if (adjacentDoors) {
         def adjacentDoorsState = adjacentDoors.currentValue("contact")
         if (!adjacentDoorsState.contains("open")) {
     log.info "Re-Evaluation Caused By A (CLOSED) Exit Motion Sensor Being 'ACTIVE'"
     mainAction()
-}}}
+}}}}
 def exitMotionSensorsWhenDoorIsClosedInactiveEventHandler(evt) {
+    def child = getChildDevice(getArea())
+    def areaState = child.getAreaState()
+    if (!['vacant'].contains(areaState)) {
     if (adjacentDoors) {
         def adjacentDoorsState = adjacentDoors.currentValue("contact")
         if (!adjacentDoorsState.contains("open")) {
     log.info "Re-Evaluation Caused By A (CLOSED) Exit Motion Sensor Being 'INACTIVE'"
     mainAction()
-}}} 
+}}}} 
 def forceVacantIf() {
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
@@ -832,29 +838,47 @@ def occupied() {
                                                                                                         
 }}}
 def otherAreaVacantOccupancyStatusEventHandler(evt) {
+    def child = getChildDevice(getArea())
+    def areaState = child.getAreaState()
+    if (!['vacant'].contains(areaState)) {
     log.info "Vacant Force Check Performed by $otherArea Occupancy Changing To Vacant"
     forceVacantIf()
-}
+}}
 def otherAreaOccupiedOccupancyStatusEventHandler(evt) {
+    def child = getChildDevice(getArea())
+    def areaState = child.getAreaState()
+    if (!['vacant'].contains(areaState)) {
     log.info "Vacant Force Check Performed by $otherArea Occupancy Changing To Occupied"
     forceVacantIf()
-}
+}}
 def otherAreaEngagedOccupancyStatusEventHandler(evt) {
+    def child = getChildDevice(getArea())
+    def areaState = child.getAreaState()
+    if (!['vacant'].contains(areaState)) {
     log.info "Vacant Force Check Performed by $otherArea Occupancy Changing To Engaged"
     forceVacantIf()
-}
+}}
 def otherAreaCheckingOccupancyStatusEventHandler(evt) {
+    def child = getChildDevice(getArea())
+    def areaState = child.getAreaState()
+    if (!['vacant'].contains(areaState)) {
     log.info "Vacant Force Check Performed by $otherArea Occupancy Changing To Checking"
     forceVacantIf()
-}
+}}
 def otherAreaHeavyuseOccupancyStatusEventHandler(evt) {
+    def child = getChildDevice(getArea())
+    def areaState = child.getAreaState()
+    if (!['vacant'].contains(areaState)) {
     log.info "Vacant Force Check Performed by $otherArea Occupancy Changing To Heavy Use"
     forceVacantIf()
-}
+}}
 def otherAreaDonotdisturbOccupancyStatusEventHandler(evt) {
+    def child = getChildDevice(getArea())
+    def areaState = child.getAreaState()
+    if (!['vacant'].contains(areaState)) {
     log.info "Vacant Force Check Performed by $otherArea Occupancy Changing To Do Not Disturb"
     forceVacantIf()
-}
+}}
 def presenceAwayEventHandler(evt) { 
     vacantCheck() 
 }  
