@@ -687,29 +687,53 @@ def	entryMotionInactiveEventHandler(evt) {
     mainAction() 
 }
 def exitMotionActiveEventHandler(evt) { 
+    def child = getChildDevice(getArea())
+    def areaState = child.getAreaState()
+    if (!['vacant'].contains(areaState)) {
     log.info "Re-Evaluation Caused By An Exit Motion Sensor Being 'ACTIVE'"
     mainAction() 
-}
+}}
 def exitMotionInactiveEventHandler(evt) { 
+    def child = getChildDevice(getArea())
+    def areaState = child.getAreaState()
+    if (!['vacant'].contains(areaState)) {
     log.info "Re-Evaluation Caused By An Exit Motion Sensor Being 'INACTIVE'"
     mainAction() 
-}
+}}
 def exitMotionSensorsWhenDoorIsOpenActiveEventHandler(evt) {
+    def child = getChildDevice(getArea())
+    def areaState = child.getAreaState()
+    if (!['vacant'].contains(areaState)) {
+    if (adjacentDoors) {
+        def adjacentDoorsState = adjacentDoors.currentValue("contact")
+        if (adjacentDoorsState.contains("open")) {
     log.info "Re-Evaluation Caused By An (OPEN) Exit Motion Sensor Being 'ACTIVE'"
     mainAction()
-}
+}}}}
 def exitMotionSensorsWhenDoorIsOpenInactiveEventHandler(evt) {
+    def child = getChildDevice(getArea())
+    def areaState = child.getAreaState()
+    if (['vacant'].contains(areaState)) {
+    if (adjacentDoors) {
+        def adjacentDoorsState = adjacentDoors.currentValue("contact")
+        if (adjacentDoorsState.contains("open")) {
     log.info "Re-Evaluation Caused By An (OPEN) Exit Motion Sensor Being 'INACTIVE'"
     mainAction()
-}
+}}}}
 def exitMotionSensorsWhenDoorIsClosedActiveEventHandler(evt) {
+    if (adjacentDoors) {
+        def adjacentDoorsState = adjacentDoors.currentValue("contact")
+        if (!adjacentDoorsState.contains("open")) {
     log.info "Re-Evaluation Caused By A (CLOSED) Exit Motion Sensor Being 'ACTIVE'"
     mainAction()
-}
+}}}
 def exitMotionSensorsWhenDoorIsClosedInactiveEventHandler(evt) {
+    if (adjacentDoors) {
+        def adjacentDoorsState = adjacentDoors.currentValue("contact")
+        if (!adjacentDoorsState.contains("open")) {
     log.info "Re-Evaluation Caused By A (CLOSED) Exit Motion Sensor Being 'INACTIVE'"
     mainAction()
-} 
+}}} 
 def forceVacantIf() {
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
