@@ -13,6 +13,9 @@ definition (
     description: "This app creates the AREAS you wish to monitor the occupancy status of.",
     category: "My Apps",
     singleInstance: true,
+    iconUrl: "https://raw.githubusercontent.com/Baz2473/Personal/master/Ao1.png",
+	iconX2Url: "https://raw.githubusercontent.com/Baz2473/Personal/master/Ao2.png",
+	iconX3Url: "https://raw.githubusercontent.com/Baz2473/Personal/master/Ao3.png"
 )
 
 preferences	{
