@@ -217,10 +217,10 @@ section("Subscriptions!") {
              if(doors && monitoredDoor == true) { input "monitoredDoorsClosingSubscribed", "bool", title: "Monitored Doors Closing?", required: false, submitOnChange: true, defaultValue: true }
              if(adjacentDoors && monitoredDoor2 == true) { input "adjacentMonitoredDoorOpeningSubscribed", "bool", title: "Adjacent Monitored Doors Opening?", required: false, submitOnChange: true, defaultValue: true }
              if(adjacentDoors && monitoredDoor2 == true) { input "adjacentMonitoredDoorClosingSubscribed", "bool", title: "Adjacent Monitored Doors Closing?", required: false, submitOnChange: true, defaultValue: true }
-             if(dimmableSwitches1 && switchOnModeControl == false && switchOnControl == true) { input "onSwitchesAndLightsSubscribed1", "bool", title: "Lights Turning ON", required: false, submitOnChange: true, defaultValue: true }
-             if(dimmableSwitches2 && switchOnModeControl == true && switchOnControl == true) { input "onSwitchesAndLightsSubscribed2", "bool", title: "Lights Turning ON", required: false, submitOnChange: true, defaultValue: true }
-             if(switches2 && delayedOff == true && offRequired == true) { input "dimmingLightsSubscribed", "bool", title: "Lights Dimming Off", required: false, submitOnChange: true, defaultValue: true }
-             if(switches3 && instantOff == true && offRequired == true) { input "instantOffSwitchesAndLightsSubscribed", "bool", title: "Lights Turning Off", required: false, submitOnChange: true }
+             if(dimmableSwitches1 && switchOnModeControl == false && switchOnControl == true) { input "onSwitchesAndLightsSubscribed1", "bool", title: "Lights Turning ON", required: false, submitOnChange: true, defaultValue: false }
+             if(dimmableSwitches2 && switchOnModeControl == true && switchOnControl == true) { input "onSwitchesAndLightsSubscribed2", "bool", title: "Lights Turning ON", required: false, submitOnChange: true, defaultValue: false }
+             if(switches2 && delayedOff == true && offRequired == true) { input "dimmingLightsSubscribed", "bool", title: "Lights Dimming Off", required: false, submitOnChange: true, defaultValue: false }
+             if(switches3 && instantOff == true && offRequired == true) { input "instantOffSwitchesAndLightsSubscribed", "bool", title: "Lights Turning Off", required: false, submitOnChange: false }
              if(entryMotionSensors) { input "entryMotionActiveSubscribed", "bool", title: "Entry Motion Active", required: false, submitOnChange: true, defaultValue: true }
              if(entryMotionSensors) { input "entryMotionInactiveSubscribed", "bool", title: "Entry Motion Inactive", required: false, submitOnChange: true, defaultValue: true }
           if(subscriptionsSelected == true) {
