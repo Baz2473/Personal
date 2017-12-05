@@ -991,8 +991,10 @@ def switches2OffEventHandler(evt) {
     mainAction() 
 }
 def switches2Off() {
-    switches2.off()
-}
+    //switches2.off()
+    switches2.each {
+    it.setLevel(0)
+}}
 def switches3OnEventHandler(evt) { 
     log.info "Re-Evaluated by Switches3 On"
     mainAction() 
