@@ -191,9 +191,11 @@ if (exitMotionSensors || entryMotionTimeout || monitoredDoor2 == true) {
 }} 
 if (heavyuseControl == true) {
     section("How Many Times Must $app.label Change To Occupied\nBefore Activating 'Heavy Use'?") {
+             input "instantHeavyuse", "bool", title: "INSTANT Heavy Use?", required: false, defaultValue: false, submitOnChange: true
+             if (!instantHeavyuse == true) {
              input "numberBeforeHeavyuseActivation", "number", title: "How Many Times?", required: true, submitOnChange: true
-             input "minutesBeforeHeavyuseActivation", "number", title: "Within How Many Minutes?", required: true, submitOnChange: true             
-}}             
+             input "minutesBeforeHeavyuseActivation", "number", title: "Within How Many Minutes?", required: true, submitOnChange: true      
+}}}             
 if (heavyuseControl == true) {
     section("How Long (If Not Entered) Until You Require\n$app.label's 'Heavy Use State'\nTo Switch 'OFF'?") {
              input "heavyuseTimeout", "number", title: "How Many Seconds?", required: true, submitOnChange: true
@@ -468,13 +470,15 @@ def mainAction() {
     if (entryMotionState.value.contains("active")) {     
         if(dimmableSwitches1 && switchOnControl == true && switchOnModeControl == false && ['automationon'].contains(automationState)) {
            dimmableSwitches1.each {
+           it.on()
            def currentLevel = it.currentValue("level")
            if (currentLevel < setLevelTo) { 
                it.setLevel(setLevelTo)
                }}}
         if(dimmableSwitches2 && switchOnControl == true && switchOnModeControl == true && ['automationon'].contains(automationState)) {
            def currentMode = location.currentMode
-           dimmableSwitches2.each {    
+           dimmableSwitches2.each {  
+           it.on()
            def currentLevel = it.currentValue("level")
            if (currentMode.name == duringMode1 && currentLevel < setLevelTo1) {
                it.setLevel(setLevelTo1)
@@ -860,16 +864,23 @@ def monitoredDoorClosedEventHandler(evt) {
     mainAction() 
 }
 def occupied() {
+    state.occupiedTime = now()
     def child = getChildDevice(getArea())
         child.generateEvent('occupied')
         if(occupancyStatusChangesSubscribed == true) { 
            log.info "Re-Evaluation Caused By $app.label Changing To Occupied"
            mainAction() 
            }
-        state.occupiedTime = now()
+        //////////////////////////////////////////////////////////////
+        if (instantHeavyuse == true && heavyuseControl == true) {
+        if (state.occupiedTime < state.vacantTime + 2000) {
+        log.info "Heavy Use Has Been Activated By The 'NEW INSTANT' Method!"
+        heavyuse()
+        }}
+        /////////////////////////////////////////////////////////////////////////////
         state.occupiedCounter = state.occupiedCounter + 1
         log.info "Occupied Counter Is At $state.occupiedCounter"
-        if (heavyuseControl == true && minutesBeforeHeavyuseActivation) {
+        if (instantHeavyuse == false && heavyuseControl == true && minutesBeforeHeavyuseActivation) {
             log.info "The Occupied State Counter Will Reset In $minutesBeforeHeavyuseActivation Minutes"
             runIn(minutesBeforeHeavyuseActivation * 60, resetOccupiedCounter) 
             }
@@ -1011,6 +1022,7 @@ def turnOnAtThisTime() {
          log.info "the time turn ON test completed"
 }}}
 def vacant() { 
+    state.vacantTime = now()
     def child = getChildDevice(getArea())
     child.generateEvent('vacant')
     if(occupancyStatusChangesSubscribed == true) {
