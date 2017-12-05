@@ -31,11 +31,14 @@ def areaName() {
 	      paragraph "Area Name:\n${app.label}"
 }}  
      section("Select Your Choice Of Activation Method!") {
-     if(!contactOrAccelerationActivated) {
+     if(!contactOrAccelerationActivated && !followedBy) {
      input "motionActivated", "bool", title: "Motion?", defaultValue: false, submitOnChange: true
      }
-     if(!motionActivated) {
-     input "contactOrAccelerationActivated", "bool", title: "Contact/Acceleration?", defaultValue: false, submitOnChange: true
+     if(!motionActivated && !followedBy) {
+     input "contactOrAccelerationActivated", "bool", title: "Seperate Contact/Acceleration?", defaultValue: false, submitOnChange: true
+     }
+     if(!motionActivated && !contactOrAccelerationActivated) {
+     input "followedBy", "bool", title: "Followed By?", defaultValue: false, submitOnChange: true
      }
 }
 if(motionActivated == true) {
@@ -269,11 +272,32 @@ if (!exitContactChosen == true) {
                      if (onlyIfInactive2 == true) { 
                          input "onlyIfThisSensor2", "capability.motionSensor", title: "These Motion Sensor(s)?\nMust Be Inactive!", required: true, multiple: true, submitOnChange: true                                                 
 }}}}}}
+if (followedBy == true) {
+    section("Please Select The 2 Actioins Required To Activate Occupied & Vacant!") {
+             input "firstAction", "capability.contactSensor", title: "Which Contact Sensor?", required: true, multiple: false, submitOnChange: true
+             input "secondAction", "capability.accelerationSensor", title: "Which Acceleration Sensor?", required: true, multiple: false, submitOnChange: true
+}}
+if (followedBy == true && !switches4) {
+    section("Do You Want Any Light(s)\nTo Automatically Turn 'ON'?") {
+             input "switch4OnControl", "bool", title: "Auto 'ON' Control?\n(Optional)", defaultValue: false, submitOnChange: true
+}}
+if (followedBy == true && switch4OnControl == true) {
+    section("Turn ON Which Switch(s)?\nWhen '$app.label' Changes To 'OCCUPIED'") {
+             input "switches4", "capability.switch", title: "Switch(s)?\n(Required)", required: true, multiple: true, submitOnChange: true            
+}}
+if (switches4) {
+    section("Do You Want Any Switch(s)\nTo Turn 'OFF'!!\nWhen $app.label Changes To Vacant?") {
+             input "instant4Off", "bool", title: "Instant Off!!", defaultValue: false, submitOnChange: true
+}}
+if (instant4Off == true) {
+    section("Turn OFF Which Switch(s)\nWhen $app.label Changes to 'VACANT'") {
+             input "switches5", "capability.switch", title: "Which Switch(s)\n(Required)", required: true, multiple: true, submitOnChange: true
+}}
 section("Notifications?") {
            input "sendNotifications", "bool", title: "Send Notifications?", defaultValue: false, submitOnChange: true
            if (sendNotifications == true) {
            if (exitMotionSensors || exitContactSensors || exitAccelerationSensors || exitContactFBExitContactSensors || exitContactFBExitAccelerationSensors ||
-               exitAccelerationFBExitContactSensors || exitAccelerationFBExitAccelerationSensors) {
+               exitAccelerationFBExitContactSensors || exitAccelerationFBExitAccelerationSensors || followedBy) {
                input "sendVacantNotification", "bool", title: "When $app.label Changes To\n'Vacant'?", required: false, submitOnChange: true
                if (sendVacantNotification == true) {
                          input "vacantMessage", "text", title: "What Message?", required: true
@@ -284,7 +308,7 @@ section("Notifications?") {
                                     paragraph "Sending an 'Vacant' notification is only available if you select a source for detecting vacancy!" 
                                     }
            if (entryMotionSensors || entryContactSensors || entryAccelerationSensors || entryContactFBEntryContactSensors || entryContactFBEntryAccelerationSensors ||
-               entryAccelerationFBEntryContactSensors || entryAccelerationFBEntryAccelerationSensors) {               
+               entryAccelerationFBEntryContactSensors || entryAccelerationFBEntryAccelerationSensors || followedBy) {               
                input "sendOccupiedNotification", "bool", title: "When $app.label Changes To\n'Occupied'?", required: false, submitOnChange: true
                if (sendOccupiedNotification == true) {
 		                 input "occupiedMessage", "text", title: "What Message?", required: true
@@ -384,6 +408,14 @@ if (!childCreated()) {
     if (exitMotionSensorsWhenDoorIsClosed && monitoredDoor2 == true && exitMotionWhenDoorIsClosedInactiveSubscribed == true) {
         subscribe(exitMotionSensorsWhenDoorIsClosed, "motion.inactive", exitMotionSensorsWhenDoorIsClosedInactiveEventHandler)
         }
+    if (followedBy == true && firstAction) {
+        subscribe(firstAction, "contact.open", followedByContactOpenedEventHandler)
+        state.backDoorHasBeenOpened = false
+        }    
+    if (followedBy == true && secondAction) {
+        subscribe(secondAction, "acceleration.active", followedByAccelerationActiveEventHandler)
+        state.gateHasBeenOpened = false
+        }        
     if (otherArea && otherAreaCheck == true && otherAreaSubscribedVacant == true) {
         subscribe(otherArea, "occupancyStatus.vacant", otherAreaVacantOccupancyStatusEventHandler)
         }
@@ -742,6 +774,38 @@ def exitMotionSensorsWhenDoorIsClosedInactiveEventHandler(evt) {
     log.info "Re-Evaluation Caused By A (CLOSED) Exit Motion Sensor Being 'INACTIVE'"
     mainAction()
 }}}} 
+def followedByAccelerationActiveEventHandler(evt) {
+    if (state.backDoorHasBeenOpened == true) {
+        state.backDoorHasBeenOpened = false
+        occupied()
+        if (switches4) {
+        switches4.on()
+        }
+        unschedule(resetBackDoor)
+        } else {
+                if (state.gateHasBeenOpened == false) {
+                state.gateHasBeenOpened = true
+                runIn(30, resetGate)
+                } else {
+                        state.gateHasBeenOpened = false
+                        unschedule(resetGate)
+}}}
+def followedByContactOpenedEventHandler(evt) {
+    if (state.gateHasBeenOpened == true) {
+        state.gateHasBeenOpened = false
+        vacant()
+        if (switches5) {
+        switches5.off()
+        }
+        unschedule(resetGate)
+        } else {
+                if (state.backDoorHasBeenOpened == false) {
+                state.backDoorHasBeenOpened = true
+                runIn(30, resetBackDoor)
+                } else {
+                        state.backDoorHasBeenOpened = false
+                        unschedule(resetBackDoor)
+}}}
 def forceVacantIf() {
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
@@ -883,7 +947,13 @@ def otherAreaDonotdisturbOccupancyStatusEventHandler(evt) {
 }}
 def presenceAwayEventHandler(evt) { 
     vacantCheck() 
-}  
+} 
+def resetBackDoor() {
+    state.backDoorHasBeenOpened = false
+}
+def resetGate() {
+    state.gateHasBeenOpened = false
+}
 def resetOccupiedCounter() {
     log.info "The Occupied Counter Has Been Reset Dut To Inactivity For Your Entire Time Count"
     state.occupiedCounter = 0
