@@ -141,7 +141,7 @@ if (exitMotionSensors || entryMotionTimeout || monitoredDoor2 == true) {
 }}
 if (offRequired == true) {
     section("Only If A Chosen Area Is 'Vacant'?") {
-             input "thisArea", "capability.estimatedTimeOfArrival", title: "What Area?", defaultValue: null, multiple: true, required: false, submitOnChange: true
+             input "thisArea", "capability.estimatedTimeOfArrival", title: "What Area?", defaultValue: null, multiple: false, required: false, submitOnChange: true
 }}
 if (offRequired == true) {
     section("Do You Want 'Any' Light's\nTo Instantly Turn 'OFF'!!\nWhen $app.label Changes To Vacant?") {
@@ -339,6 +339,9 @@ section("Time Actions") {
                  input "switchOffAtThisTime", "capability.switch", title: "Which Switch(s)?", required: true, multiple: true, submitOnChange: true
                  input "offAtThisTime", "time", title: "At What Time?", required: true, submitOnChange: true 
          }}}
+section("Which Light(s) Are In $app.label?") {
+             input "checkableLights", "capability.switch", title: "Which Light(s)?\n(Required)", required: true, multiple: true, submitOnChange: true
+}
 }}                                                
 //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -361,6 +364,10 @@ if (!childCreated()) {
         }
     if (awayModes && noAwayMode == true || resetAutomationMode && resetAutomation == true) { 
         subscribe(location, modeEventHandler) 
+        }
+    if (checkableLights) {
+        subscribe(checkableLights, "switch.on", checkableLightsSwitchedOnEventHandler)
+        subscribe(checkableLights, "switch.off", checkableLightsSwitchedOffEventHandler)
         }
     if (dimmableSwitches1 && switchOnControl == true && switchOnModeControl == false && onSwitchesAndLightsSubscribed1 == true) {
         subscribe(dimmableSwitches1, "switch.on", dimmableSwitches1OnEventHandler)////
@@ -520,7 +527,7 @@ def mainAction() {
                                                                     occupied()
                                                                     } 
 }}}}}
-                       else {     
+                       else { 
                              if (['vacant','vacanton'].contains(areaState)) { 
                                    occupied()
                                    }       
@@ -563,7 +570,7 @@ def mainAction() {
                             if (switches3State.value.contains("on") && ['vacant','vacanton'].contains(areaState) && ['automationon'].contains(automationState)) { 
                                 if (thisArea) { 
                                     def thisAreaState = thisArea.currentState("occupancyStatus")
-                                    if (thisAreaState.value.contains("vacant","vacanton")) {
+                                    if (thisAreaState.value.contains("vacant")) {
                                         switches3.off()
                                         }}
                                          else {
@@ -571,10 +578,10 @@ def mainAction() {
                                                }}}
                         if (switches2 && delayedOff == true && offRequired == true) { 
                             def switches2State = switches2.currentState("switch")  
-                            if (switches2State.value.contains("on") && ['vacant','vacanton'].contains(areaState) && ['automationon'].contains(automationState)) { 
+                            if (switches2State.value.contains("on") && ["vacant","vacanton"].contains(areaState) && ['automationon'].contains(automationState)) { 
                                 if (thisArea) { 
                                     def thisAreaState = thisArea.currentState("occupancyStatus")
-                                    if (thisAreaState.value.contains("vacant","vacanton")) {
+                                    if (thisAreaState.value.contains("vacant")) {
                                         runIn(dimDownTime, dimLights)
                                         }}
                                          else {
@@ -590,6 +597,51 @@ def adjacentMonitoredDoorOpeningEventHandler(evt) {
     log.info "Re-Evaluation Caused By An Ajacent Monitored Door Opening"
     mainAction()
 }
+//*
+def checkableLightsSwitchedOnEventHandler(evt) {
+    def child = getChildDevice(getArea())
+    def areaState = child.getAreaState()
+    if (['vacant'].contains(areaState)) { 
+          child.generateEvent('vacanton')
+          } else {
+                  if (['occupied'].contains(areaState)) { 
+                        child.generateEvent('occupiedon')
+                        } else {
+                                if (['engaged'].contains(areaState)) { 
+                                      child.generateEvent('engagedon')
+                                      } else {
+                                              if (['checking'].contains(areaState)) { 
+                                                    child.generateEvent('checkingon')
+                                                    } else {
+                                                            if (['heavyuse'].contains(areaState)) { 
+                                                                  child.generateEvent('heavyuseon')
+                                                                  } else {
+                                                                          if (['donotdisturb'].contains(areaState)) { 
+                                                                                child.generateEvent('donotdisturbon')
+                                                                 
+                                                    
+}}}}}}}
+def checkableLightsSwitchedOffEventHandler(evt) {
+    def child = getChildDevice(getArea())
+    def areaState = child.getAreaState()
+    if (['vacanton'].contains(areaState)) { 
+          child.generateEvent('vacant')
+          } else {
+                  if (['occupiedon'].contains(areaState)) { 
+                        child.generateEvent('occupied')
+                        } else {
+                                if (['engagedon'].contains(areaState)) { 
+                                      child.generateEvent('engaged')
+                                      } else {
+                                              if (['checkingon'].contains(areaState)) { 
+                                                    child.generateEvent('checking')
+                                                    } else {
+                                                            if (['heavyuseon'].contains(areaState)) { 
+                                                                  child.generateEvent('heavyuse')
+                                                                  } else {
+                                                                          if (['donotdisturbon'].contains(areaState)) { 
+                                                                                child.generateEvent('donotdisturb')
+}}}}}}} //*/
 def checking() {
 def child = getChildDevice(getArea())
     if (dimmableSwitches1) {
@@ -598,8 +650,9 @@ def child = getChildDevice(getArea())
             child.generateEvent('checkingon')
            } else {                
                    child.generateEvent('checking')
-                   }}
-    //child.generateEvent('checking')
+                   }} else {
+    child.generateEvent('checking')
+    }
     if(occupancyStatusChangesSubscribed) { 
        log.info "Re-Evaluation Caused By $app.label Changing To Checking"
        mainAction() 
@@ -688,8 +741,9 @@ def child = getChildDevice(getArea())
             child.generateEvent('donotdisturbon')
            } else {                
                    child.generateEvent('donotdisturb')
-                   }}
-    //child.generateEvent('donotdisturb')
+                   }} else {
+    child.generateEvent('donotdisturb')
+    }
     if(occupancyStatusChangesSubscribed) {
        log.info "Re-Evaluation Caused By $app.label Changing To Do Not Disturb"
        mainAction() 
@@ -702,8 +756,9 @@ def engaged() {
             child.generateEvent('engagedon')
            } else {                
                    child.generateEvent('engaged')
-                   }}
-        //child.generateEvent('engaged')
+                   }} else {
+        child.generateEvent('engaged')
+        }
         if(occupancyStatusChangesSubscribed == true) { 
            log.info "Re-Evaluation Caused By $app.label Changing To Engaged"
            mainAction() 
@@ -854,8 +909,9 @@ def child = getChildDevice(getArea())
             child.generateEvent('heavyuseon')
            } else {                
                    child.generateEvent('heavyuse')
-                   }}
-    //child.generateEvent('heavyuse')
+                   }} else {
+    child.generateEvent('heavyuse')
+    }
     if(occupancyStatusChangesSubscribed) { 
        log.info "Re-Evaluation Caused By $app.label Changing To Heavy Use"
        mainAction() 
@@ -905,8 +961,9 @@ def occupied() {
             child.generateEvent('occupiedon')
            } else {                
                    child.generateEvent('occupied')
-                   }}
-        //child.generateEvent('occupied')           
+                   }} else {
+        child.generateEvent('occupied')
+        }
         if(occupancyStatusChangesSubscribed == true) { 
            log.info "Re-Evaluation Caused By $app.label Changing To Occupied"
            mainAction() 
@@ -1075,8 +1132,9 @@ def vacant() {
             child.generateEvent('vacanton')
            } else {                
                    child.generateEvent('vacant')
-                   }}
-    //child.generateEvent('vacant')               
+                   }} else {
+    child.generateEvent('vacant')
+    }
     if(occupancyStatusChangesSubscribed == true) {
        log.info "Re-Evaluation Caused By $app.label Changing To Vacant"
        mainAction() 
