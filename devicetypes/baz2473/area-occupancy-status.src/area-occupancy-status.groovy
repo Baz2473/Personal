@@ -43,7 +43,7 @@ metadata {
     	multiAttributeTile(name: "occupancyStatus", width: 2, height: 2, canChangeBackground: false)		{
 			tileAttribute ("device.occupancyStatus", key: "PRIMARY_CONTROL")		{
 				attributeState "vacant", label: 'OFF', icon:"st.Home.home18", backgroundColor:"#ffffff"
-                attributeState "vacanton", label: 'ON', icon:"st.Home.home18", backgroundColor:"#ffffff"
+                attributeState "vacanton", label: 'ON', icon:"st.Home.home18", backgroundColor:"#fcff00"
                 attributeState "occupied", label: 'OFF', action: "vacant", icon:"st.Home.home4", backgroundColor:"#32cd32"
                 attributeState "occupiedon", label: 'ON', action: "vacant", icon:"st.Home.home4", backgroundColor:"#32cd32"
                 attributeState "checking", label: 'OFF', action: "vacant", icon:"st.Health & Wellness.health9", backgroundColor:"#e86d13"
