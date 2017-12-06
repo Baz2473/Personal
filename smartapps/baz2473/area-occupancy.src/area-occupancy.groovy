@@ -1,8 +1,9 @@
 /*
+  Copyright (C) 2017 Baz2473
+  
   Name: Area Occupancy
 
   Version: 1.0.0
-  Initial Release.
 
 */
 
