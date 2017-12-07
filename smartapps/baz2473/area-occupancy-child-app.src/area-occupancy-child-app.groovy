@@ -570,6 +570,7 @@ def mainAction() {
                                      if (thisAreaState.value.contains("vacant")) {
                                          switches3.off()
                                          } else { 
+                                                 log.info "Checking For Vacancy Again In 30 Seconds"
                                                  runIn(30, checkOtherAreaAgain)
                                                  }} else {
                                                           if (thisArea && andThisArea) { 
@@ -578,6 +579,7 @@ def mainAction() {
                                                               if (thisAreaState.value.contains("vacant") && andThisAreaState.value.contains("vacant")) {
                                                                   switches3.off()     
                                                                   } else {
+                                                                          log.info "Checking For Vacancy Again In 30 Seconds"
                                                                           runIn(30, checkOtherAreaAgain)
                                                                           }} else {
                                                                                    switches3.off()
@@ -590,6 +592,7 @@ def mainAction() {
                                     if (thisAreaState.value.contains("vacant")) {
                                         runIn(dimDownTime, dimLights)
                                         } else {
+                                                log.info "Checking For Vacancy Again In 30 Seconds"
                                                 runIn(30, checkOtherAreaAgain)                                
                                                 }} else {
                                                          if (thisArea && andThisArea) { 
@@ -598,6 +601,7 @@ def mainAction() {
                                                              if (thisAreaState.value.contains("vacant") && andThisAreaState.value.contains("vacant")) {
                                                                  runIn(dimDownTime, dimLights)   
                                                                  } else {
+                                                                         log.info "Checking For Vacancy Again In 30 Seconds"
                                                                          runIn(30, checkOtherAreaAgain)
                                                                          }} else {
                                                                                   runIn(dimDownTime, dimLights)
