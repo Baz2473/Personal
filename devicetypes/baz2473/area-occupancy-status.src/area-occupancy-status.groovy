@@ -42,16 +42,16 @@ metadata {
 	tiles(scale: 2)		{
     	multiAttributeTile(name: "occupancyStatus", width: 2, height: 2, canChangeBackground: false)		{
 			tileAttribute ("device.occupancyStatus", key: "PRIMARY_CONTROL")		{
-				attributeState "vacant", label: 'OFF', icon:"st.Home.home18", backgroundColor:"#ffffff"
-                attributeState "vacanton", label: 'ON', icon:"st.Home.home18", backgroundColor:"#fcff00"
-                attributeState "occupied", label: 'OFF', action: "vacant", icon:"st.Home.home4", backgroundColor:"#32cd32"
+				attributeState "vacant", label: 'OFF', icon:"st.Home.home18", backgroundColor:"#606060"
+                attributeState "vacanton", label: 'ON', icon:"st.Home.home18", backgroundColor:"#c1b419"
+                attributeState "occupied", label: 'OFF', action: "vacant", icon:"st.Home.home4", backgroundColor:"#156700"
                 attributeState "occupiedon", label: 'ON', action: "vacant", icon:"st.Home.home4", backgroundColor:"#32cd32"
-                attributeState "checking", label: 'OFF', action: "vacant", icon:"st.Health & Wellness.health9", backgroundColor:"#e86d13"
-                attributeState "checkingon", label: 'ON', action: "vacant", icon:"st.Health & Wellness.health9", backgroundColor:"#e86d13"
-				attributeState "engaged", label: 'OFF', action: "vacant", icon:"st.locks.lock.locked", backgroundColor:"#ff0000"
+                attributeState "checking", label: 'OFF', action: "vacant", icon:"st.Health & Wellness.health9", backgroundColor:"#bf6700"
+                attributeState "checkingon", label: 'ON', action: "vacant", icon:"st.Health & Wellness.health9", backgroundColor:"#ff8a00"
+				attributeState "engaged", label: 'OFF', action: "vacant", icon:"st.locks.lock.locked", backgroundColor:"#af0000"
                 attributeState "engagedon", label: 'ON', action: "vacant", icon:"st.locks.lock.locked", backgroundColor:"#ff0000"
-                attributeState "donotdisturb", label: 'OFF', action: "vacant", icon:"st.Office.office6", backgroundColor:"#00abf5"
-                attributeState "donotdisturbon", label: 'ON', action: "vacant", icon:"st.Office.office6", backgroundColor:"#00abf5"
+                attributeState "donotdisturb", label: 'OFF', action: "vacant", icon:"st.Office.office6", backgroundColor:"#410099"
+                attributeState "donotdisturbon", label: 'ON', action: "vacant", icon:"st.Office.office6", backgroundColor:"#6d00ff"
 				attributeState "heavyuse", label: 'OFF', action: "vacant", icon:"st.Health & Wellness.health5", backgroundColor:"#8a5128"
                 attributeState "heavyuseon", label: 'ON', action: "vacant", icon:"st.Health & Wellness.health5", backgroundColor:"#8a5128"
             }
