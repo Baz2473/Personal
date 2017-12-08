@@ -100,7 +100,17 @@ if (monitoredDoor == true) {
 if ((exitMotionSensors || entryMotionTimeout) && doors) {
     section("IMPORTANT!!!\nInput $app.label's 'ACTUAL' Motion Sensor's 'Timeout'") {
              input "actualEntrySensorsTimeout", "number", title: "How Many Seconds?\n(Required) ",required: true, defaultValue: null, submitOnChange: true
-}}
+             input "actionOnDoorOpening", "bool", title: "Do You Want To Turn ON A Light\nWhen $doors Opens?", defaultValue: false, submitOnChange: true
+             if (actionOnDoorOpening == true) {
+                 input "doorOpeningAction", "capability.switchLevel", title: "Which Light Do You Want To Turn On?", multiple: true, required: true, submitOnChange: true
+                 input "setLevelAt", "number", title: "Set Light Level To What? %\n(Required)", required: true, multiple: false, range: "1..100", submitOnChange: true, defaultValue: null 
+                 if (setLevelAt) {  
+                     input "onlyDuringCertainTimes", "bool", title: "Only During Certain Times?", defaultValus: false, submitOnChange: true
+                     if (onlyDuringCertainTimes == true) {
+                         input "fromTime", "time", title: "From?", required: true
+                         input "toTime", "time", title: "Until?", required: true
+    
+}}}}}
 if ((exitMotionSensors || entryMotionTimeout || monitoredDoor2 == true) && !switches) {
     section("Do You Want 'Any' Light(s)\nTo Automatically Turn 'ON'?") {
              input "switchOnControl", "bool", title: "Auto 'ON' Control?\n(Optional)", defaultValue: false, submitOnChange: true
@@ -509,7 +519,7 @@ def mainAction() {
            }} 
                if (doors) {                      
                    def doorsState = doors.currentState("contact") 
-                   if (!doorsState.value.contains("open") && ['donotdisturb','donotdisturbon','vacant','vacanton'].contains(areaState)) {
+                   if (!doorsState.value.contains("open") && ['donotdisturb','donotdisturbon'/*,'vacant','vacanton'*/].contains(areaState)) {
                         engaged()
                         } else {
                                 if (!doorsState.value.contains("open") && ['occupied','occupiedon','heavyuse','heavyuseon'].contains(areaState)) { 
@@ -969,7 +979,6 @@ def	modeEventHandler(evt) {
         leftHome() 
 }}    
 def monitoredDoorOpenedEventHandler(evt) { 
-    log.info "Re-Evaluated by A Monitored Door Opening"
     unschedule(engaged)
     unschedule(vacant)
     unschedule(donotdisturb)
@@ -978,8 +987,35 @@ def monitoredDoorOpenedEventHandler(evt) {
     unschedule(dimLights)
     unschedule(heavyuseCheck)
     unschedule(checkOtherAreaAgain)
-    mainAction() 
-}
+    if (actionOnDoorOpening == true) {
+        def child = getChildDevice(getArea())
+        def areaState = child.getAreaState()
+        if (onlyDuringCertainTimes == true) {
+            def between = timeOfDayIsBetween(fromTime, toTime, new Date(), location.timeZone)
+            if (between) {
+                if (['vacant'].contains(areaState)) {
+                      log.debug "The Light Was Turned ON To $setLevelAt % Because The Door Was Opened & $app.label Was VACANT & The Time Selection Matched!"
+                      doorOpeningAction.each {
+                      it.on()
+                      it.setLevel(setLevelAt)
+                      log.info "Re-Evaluated by A Monitored Door Opening"
+                      mainAction() 
+                }}} else { 
+                          log.info "The Time Selection Did Not Match!" 
+                          }
+                                           } else {
+                                                   if (['vacant'].contains(areaState)) {
+                                                         log.debug "The Light Was Turned ON To $setLevelAt % Because The Door Was Opened & $app.label Was VACANT"
+                                                         doorOpeningAction.each {
+                                                         it.on()
+                                                         it.setLevel(setLevelAt)
+                                                         log.info "Re-Evaluated by A Monitored Door Opening"
+                                                         mainAction() 
+                                      }}}} else {
+                                                 log.info "Re-Evaluated by A Monitored Door Opening"
+                                                 mainAction()
+}}
+
 def monitoredDoorClosedEventHandler(evt) { 
     log.info "Re-Evaluated by A Monitored Door Closing"
     mainAction() 
