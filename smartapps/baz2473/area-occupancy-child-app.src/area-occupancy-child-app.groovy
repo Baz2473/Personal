@@ -350,13 +350,17 @@ section("Time Actions") {
          input "timedControl", "bool", title: "Timed Control?", required: false, defualtValue: false, submitOnChange: true
          if (timedControl == true) {
              input "timedTurnOnControl", "bool", title: "Turn ON?", required: false, defualtValue: false, submitOnChange: true
-             if (timedTurnOnControl == true && timedControl == true) {
+             if (timedTurnOnControl == true && timedControl == true) {   
                  input "switchOnAtThisTime", "capability.switch", title: "Which Switch(s)?", required: true, multiple: true, submitOnChange: true
+                 input "onAtSunriseChosen", "bool", title: "At Sunset?", required: false, multiple: false, submitOnChange: true
+                 input "onAtSunsetChosen", "bool", title: "At Sunset?", required: false, multiple: false, submitOnChange: true 
                  input "onAtThisTime", "time", title: "At What Time?", required: true, submitOnChange: true
                  }
              input "timedTurnOffControl", "bool", title: "Turn OFF?", required: false, defualtValue: false, submitOnChange: true
              if (timedTurnOffControl == true && timedControl == true) {
                  input "switchOffAtThisTime", "capability.switch", title: "Which Switch(s)?", required: true, multiple: true, submitOnChange: true
+                 input "offAtSunsetChosen", "bool", title: "At Sunset?", required: false, multiple: false, submitOnChange: true
+                 input "offAtSunriseChosen", "bool", title: "At Sunset?", required: false, multiple: false, submitOnChange: true
                  input "offAtThisTime", "time", title: "At What Time?", required: true, submitOnChange: true 
          }}}
 section("Which Light(s) Are In $app.label?") {
@@ -484,6 +488,12 @@ if (onAtThisTime && timedTurnOnControl == true && timedControl == true) {
     }
 if (offAtThisTime && timedTurnOffControl == true && timedControl == true) {
     schedule(offAtThisTime, turnOffAtThisTime) 
+    }
+if (onAtSunriseChosen == true || offAtSunriseChosen == true) {
+    subscribe(location, "sunrise", sunriseHandler)
+    }
+if (onAtSunsetChosen == true || offAtSunsetChosen == true) {
+    subscribe(location, "sunset", sunsetHandler)
     }
 }
 def uninstalled() {
@@ -1110,6 +1120,12 @@ def spawnChildDevice(areaName) {
     app.updateLabel(app.label)
     if (!childCreated())
 	     def child = addChildDevice("Baz2473", "Area Occupancy Status", getArea(), null, [name: getArea(), label: areaName, completedSetup: true])
+}
+def sunriseHandler(evt) {
+    log.debug "Sun has risen!"
+}
+def sunsetHandler(evt) {
+    log.debug "Sun has set!"
 }
 def switchesOffCountdown() {
     def child = getChildDevice(getArea())
