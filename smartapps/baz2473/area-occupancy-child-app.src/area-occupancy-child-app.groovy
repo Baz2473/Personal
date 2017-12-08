@@ -109,8 +109,13 @@ if ((exitMotionSensors || entryMotionTimeout) && doors) {
                      if (onlyDuringCertainTimes == true) {
                          input "fromTime", "time", title: "From?", required: true
                          input "toTime", "time", title: "Until?", required: true
-    
-}}}}}
+                         input "anotherAction", "bool", title: "Another Time Schedule?", defaultValue: false, submitOnChange: true
+                         if (anotherAction == true) {
+                             input "doorOpeningAction2", "capability.switchLevel", title: "Which Light Do You Want To Turn On?", multiple: true, required: true, submitOnChange: true
+                             input "setLevelAt2", "number", title: "Set Light Level To What? %\n(Required)", required: true, multiple: false, range: "1..100", submitOnChange: true, defaultValue: null 
+                             input "fromTime2", "time", title: "From?", required: true
+                             input "toTime2", "time", title: "Until?", required: true
+}}}}}}
 if ((exitMotionSensors || entryMotionTimeout || monitoredDoor2 == true) && !switches) {
     section("Do You Want 'Any' Light(s)\nTo Automatically Turn 'ON'?") {
              input "switchOnControl", "bool", title: "Auto 'ON' Control?\n(Optional)", defaultValue: false, submitOnChange: true
@@ -150,7 +155,7 @@ if (exitMotionSensors || entryMotionTimeout || monitoredDoor2 == true) {
              input "offRequired", "bool", title: "Auto 'OFF' Control?", defaultValue: false, submitOnChange: true
 }}
 if (offRequired == true) {
-    section("Only If A Chosen Area Is 'Vacant'?") {
+    section("Only If A Different Chosen Area Is 'Vacant'?") {
              input "thisArea", "capability.estimatedTimeOfArrival", title: "What Area?", defaultValue: null, multiple: false, required: false, submitOnChange: true
              if (offRequired == true && thisArea) {
                  input "andThisArea", "capability.estimatedTimeOfArrival",  title: "What Other Area?", defaultValue: null, multiple: false, required: false, submitOnChange: true
@@ -992,6 +997,7 @@ def monitoredDoorOpenedEventHandler(evt) {
         def areaState = child.getAreaState()
         if (onlyDuringCertainTimes == true) {
             def between = timeOfDayIsBetween(fromTime, toTime, new Date(), location.timeZone)
+            def between2 = timeOfDayIsBetween(fromTime2, toTime2, new Date(), location.timeZone)
             if (between) {
                 if (['vacant'].contains(areaState)) {
                       log.debug "The Light Was Turned ON To $setLevelAt % Because The Door Was Opened & $app.label Was VACANT & The Time Selection Matched!"
@@ -1001,10 +1007,17 @@ def monitoredDoorOpenedEventHandler(evt) {
                       log.info "Re-Evaluated by A Monitored Door Opening"
                       mainAction() 
                 }}} else { 
-                          log.info "The Time Selection Did Not Match!" 
-                          }
-                                           } else {
-                                                   if (['vacant'].contains(areaState)) {
+                           if (between2) {
+                               if (['vacant'].contains(areaState)) {
+                                     log.debug "The Light Was Turned ON To $setLevelAt % Because The Door Was Opened & $app.label Was VACANT & The Time Selection Matched!"
+                                     doorOpeningAction2.each {
+                                     it.on()
+                                     it.setLevel(setLevelAt)
+                                     log.info "Re-Evaluated by A Monitored Door Opening"
+                                     mainAction() 
+                                     }}} else {}
+                                                }} else {
+                                                         if (['vacant'].contains(areaState)) {
                                                          log.debug "The Light Was Turned ON To $setLevelAt % Because The Door Was Opened & $app.label Was VACANT"
                                                          doorOpeningAction.each {
                                                          it.on()
