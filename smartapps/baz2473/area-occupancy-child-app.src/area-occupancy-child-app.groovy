@@ -232,17 +232,11 @@ if (exitMotionSensors || entryMotionTimeout || monitoredDoor2) {
 
 if (exitMotionSensors || entryMotionTimeout || monitoredDoor2) {
     section("Heavy Use Control") {
-             input "heavyuseControl", "bool", title: "Heavy Use Control?", submitOnChange: true
-}} 
-if (heavyuseControl) {
-    section("How Many Times Must $app.label Change To Occupied\nBefore Activating 'Heavy Use'?") {
              input "instantHeavyuse", "bool", title: "INSTANT Heavy Use?", required: false, defaultValue: false, submitOnChange: true
-             if (!instantHeavyuse) {
-             input "numberBeforeHeavyuseActivation", "number", title: "How Many Times?", required: true, submitOnChange: true
-             input "minutesBeforeHeavyuseActivation", "number", title: "Within How Many Minutes?", required: true, submitOnChange: true
-             input "heavyuseTimeout", "number", title: "Timeout Seconds?", required: true, submitOnChange: true
-             
-}}}       // end of Heavy Use Control Section       
+             if (instantHeavyuse) {
+                 input "heavyuseSpeed", "number", title: "How Many MilliSeconds?", required: true, submitOnChange: true
+                 
+}}} // end of Heavy Use Control Section
 
 section("Do Not Disturb Control") {
          if (entryMotionSensors && monitoredDoor && doors) {
@@ -1110,13 +1104,6 @@ def areaState = child.getAreaState()
        log.info "Re-Evaluation Caused By $app.label Changing To Heavy Use"
        mainAction() 
 }}
-def heavyuseCheck() {
-    def entryMotionState = entryMotionSensors.currentState("motion")
-    if (entryMotionState.value.contains("active")) { 
-        occupied()
-        } else {
-                vacant()
-}}
 def leftHome() {
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
@@ -1277,31 +1264,10 @@ def occupied() {
            log.info "Re-Evaluation Caused By $app.label Changing To Occupied"
            mainAction() 
            }
-        if (instantHeavyuse && heavyuseControl) {
-            if (state.occupiedTime < state.vacantTime + 2000) {
-                log.info "Heavy Use Has Been Activated By The 'NEW INSTANT' Method!"
+        if (instantHeavyuse) {
+            if (state.occupiedTime < state.vacantTime + heavyuseSpeed) {
                 heavyuse()
                 }}
-    state.occupiedCounter = state.occupiedCounter + 1
-    log.info "Occupied Counter Is At $state.occupiedCounter"
-    if (!instantHeavyuse && heavyuseControl && minutesBeforeHeavyuseActivation) {
-        log.info "The Occupied State Counter Will Reset In $minutesBeforeHeavyuseActivation Minutes"
-        runIn(minutesBeforeHeavyuseActivation * 60, resetOccupiedCounter) 
-        }
-    if (state.occupiedCounter == 1) { 
-        state.startTime = now() 
-        }
-    if (heavyuseControl && state.occupiedCounter == numberBeforeHeavyuseActivation) { 
-        def threshold = 1000 * 60 * minutesBeforeHeavyuseActivation
-        if (now() <= state.startTime + threshold) { 
-            heavyuse()
-            state.occupiedCounter = 0
-            log.debug "heavy use mode was activated" 
-            } else { 
-                    state.occupiedCounter = 0 
-                    }} else {
-                             log.debug "startTime value is $state.startTime Milliseconds" 
-                             }
     if (sendOccupiedNotification) {
         log.info "Occupied Notifications Is Active"
         String message = occupiedMessage
