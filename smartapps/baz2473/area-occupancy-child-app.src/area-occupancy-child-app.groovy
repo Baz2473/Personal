@@ -422,7 +422,7 @@ def updated() {
 	initialize()
     
     state.occupiedCounter = 0
-    state.previousState = 'vacant'
+    state.previousState = 'occupiedon'
      
 if (!childCreated()) {
      spawnChildDevice(app.label) 
