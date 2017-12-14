@@ -1276,10 +1276,8 @@ def monitoredDoorOpenedEventHandler(evt) {
                     } else {
                             monitoredDoorOpenedAction2()
                             runIn(offAfter, doorOpeningAction2Off)
-         }}
-       
-       
-       } else {
+         }}} 
+            if (!onlyDuringDaytime && !onlyDuringNighttime && !onlyDuringDaytime2 && !onlyDuringNighttime2 && !onlyDuringCertainTimes) {
                    monitoredDoorOpenedAction()
               }
  } else {                                
