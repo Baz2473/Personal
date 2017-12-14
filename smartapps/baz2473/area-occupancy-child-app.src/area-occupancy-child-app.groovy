@@ -54,7 +54,7 @@ if (entryMotionSensors && !exitMotionSensors) {
              input "noExitSensor", "bool", title: "No Exit Sensor For\n$app.label?", defaultValue: false, submitOnChange: true
 }}
 if (entryMotionSensors || entryMotionTimeout) {
-    section("Select This If There Is A\nMonitored Door In An Adjacent Area To $app.label") {
+    section("Monitored Door In An Adjacent Area To $app.label") {
              input "monitoredDoor2", "bool", title: "Adjacent Monitored Doors?", defaultValue: false, submitOnChange: true
 }}
 if (monitoredDoor2) {
@@ -63,14 +63,14 @@ if (monitoredDoor2) {
 }}
 if (entryMotionSensors && monitoredDoor2) {  
           section("Motion Sensors When The Door Is 'Open'\n'Outside' Of $app.label") {
-                   input "exitMotionSensorsWhenDoorIsOpen", "capability.motionSensor", title: "$adjacentDoors OPEN Exit Sensors?", required: true, multiple: true, submitOnChange: true     
+                   input "exitMotionSensorsWhenDoorIsOpen", "capability.motionSensor", title: "$adjacentDoors OPEN Exit Sensors?", required: true, multiple: true, submitOnChange: false     
 }}
 if (entryMotionSensors && monitoredDoor2) {  
           section("Motion Sensors When The Door Is 'Closed'\n'Outside' Of $app.label") {
-                   input "exitMotionSensorsWhenDoorIsClosed", "capability.motionSensor", title: "$adjacentDoors CLOSED Exit Sensors?", required: true, multiple: true, submitOnChange: true    
+                   input "exitMotionSensorsWhenDoorIsClosed", "capability.motionSensor", title: "$adjacentDoors CLOSED Exit Sensors?", required: true, multiple: true, submitOnChange: false   
 }}
 if (entryMotionSensors && !doors2 && !monitoredDoor2 && !noExitSensor) {  
-          section("Select The Motion Sensors In The Area's\nImmediately 'Outside' Of $app.label") {
+          section("Select The Motion Sensors 'Outside' $app.label") {
                    input "exitMotionSensors", "capability.motionSensor", title: "Exit Sensors?", required: true, multiple: true, submitOnChange: true   
 }}
 if (entryMotionSensors) {
@@ -94,45 +94,70 @@ if (noExitSensor) {
 if (exitMotionSensors || entryMotionTimeout || monitoredDoor2) {
     section("Select If $app.label Has A Door To Monitor?") {
              input "monitoredDoor", "bool", title: "Monitor Doors?", defaultValue: false, submitOnChange: true
-}}
-if (monitoredDoor) {
-    section("Select The Doors\nThat Enter / Exit '$app.label'?") {
-             input "doors", "capability.contactSensor", title: "Doors?", multiple: true, required: true, submitOnChange: true
-}}
-if ((exitMotionSensors || entryMotionTimeout) && doors) {
-    section("IMPORTANT!!!\nInput $app.label's 'ACTUAL' Motion Sensor's 'Timeout'") {
-             input "actualEntrySensorsTimeout", "number", title: "How Many Seconds?",required: true, defaultValue: null, submitOnChange: true
-             input "actionOnDoorOpening", "bool", title: "Turn ON Something When\n$doors Open?", defaultValue: false, submitOnChange: true
-             if (actionOnDoorOpening) {
-                 input "onlyIfAreaVacant", "bool", title: "Only IF $app.label Is Vacant", defaultValue: true, submitOnChnage: true
-                 input "doorOpeningAction", "capability.switchLevel", title: "Turn On?", multiple: true, required: true, submitOnChange: true
-                 input "setLevelAt", "number", title: "Set Level To? %", required: true, multiple: false, range: "1..100", submitOnChange: true, defaultValue: null 
-                 if (setLevelAt) {  
-                     input "onlyDuringCertainTimes", "bool", title: "Only During Certain Times?", defaultValus: false, submitOnChange: true
-                     if (onlyDuringCertainTimes) {
-                         input "onlyDuringSunriseAndSunsetChosen", "bool", title: "Only Between Sunrise & Sunset", defaultValue: false, submitOnChange: true
-                         if (!onlyDuringSunriseAndSunsetChosen) {
-                              input "fromTime", "time", title: "From?", required: true
-                              input "toTime", "time", title: "Until?", required: true
-                              }
+             if (monitoredDoor) {
+                 input "doors", "capability.contactSensor", title: "Doors?", multiple: true, required: true, submitOnChange: true
+                 if (doors) { 
+             	     input "actualEntrySensorsTimeout", "number", title: "$app.label's Timeout?",required: true, defaultValue: null, submitOnChange: true
+           		     input "actionOnDoorOpening", "bool", title: "Turn ON Something When\n$doors Opens?", defaultValue: false, submitOnChange: true
+                     if (actionOnDoorOpening) {
+                         input "onlyIfAreaVacant", "bool", title: "But Only IF $app.label Is Vacant", defaultValue: true, submitOnChnage: true
+                		 input "doorOpeningAction", "capability.switchLevel", title: "Turn On?", multiple: true, required: true, submitOnChange: true
+                		 input "setLevelAt", "number", title: "Set Level To? %", required: true, multiple: false, range: "1..100", submitOnChange: true, defaultValue: null 
+                 		 if (setLevelAt) {  
+                			 input "sendDoorOpeningNotification", "bool", title: "Get Notified?", required: false, submitOnChange: true
+                      		 if (sendDoorOpeningNotification) {
+                         		 input "doorOpeningMessage", "text", title: "Message?", required: true
+                          		 input("recipients", "contact", title: "To?") {
+                         		 input "phone", "phone", title: "Warn with text message (optional)",
+                         		 description: "Phone Number", required: false
+                         		 }}
+                     	 input "onlyDuringCertainTimes", "bool", title: "Only During Certain Times?", defaultValus: false, submitOnChange: true
+                         if (onlyDuringCertainTimes) {
+                             if (!onlyDuringNighttime) {
+                                  input "onlyDuringDaytime", "bool", title: "Only During The Daytime", defaultValue: false, submitOnChange: true
+                                  }
+                             if (!onlyDuringDaytime) {
+                                  input "onlyDuringNighttime", "bool", title: "Only During The Nighttime", defaultValue: false, submitOnChange: true
+                                  }
+                             if (!onlyDuringDaytime && !onlyDuringNighttime) {
+                                  input "fromTime", "time", title: "From?", required: true
+                                  input "toTime", "time", title: "Until?", required: true
+                                  }
                          input "anotherAction", "bool", title: "Another Time Schedule?", defaultValue: false, submitOnChange: true
                          if (anotherAction) {
-                             input "onlyIfAreaVacant2", "bool", title: "Only IF $app.label Is Vacant", defaultValue: false, submitOnChnage: true
-                             input "doorOpeningAction2", "capability.switchLevel", title: "Light To Turn On?", multiple: true, required: true, submitOnChange: true
-                             input "setLevelAt2", "number", title: "Set Light Level To What? %", required: true, multiple: false, range: "1..100", submitOnChange: true, defaultValue: null 
-                             input "onlyDuringSunriseAndSunsetChosen2", "bool", title: "Only Between Sunrise & Sunset", defaultValue: false, submitOnChange: true
-                             if (!onlyDuringSunriseAndSunsetChosen) {
+                             input "onlyIfAreaVacant2", "bool", title: "But Only IF $app.label Is Vacant", defaultValue: false, submitOnChnage: true
+                             input "doorOpeningAction2", "capability.switchLevel", title: "Turn On?", multiple: true, required: true, submitOnChange: true
+                             input "setLevelAt2", "number", title: "Set Level To? %", required: true, multiple: false, range: "1..100", submitOnChange: true, defaultValue: null 
+                             if (!onlyDuringNighttime2) {
+                                  input "onlyDuringDaytime2", "bool", title: "Only During The Daytime", defaultValue: false, submitOnChange: true
+                                  }
+                             if (!onlyDuringDaytime2) {
+                                  input "onlyDuringNighttime2", "bool", title: "Only During The Nighttime", defaultValue: false, submitOnChange: true
+                                  }
+                             if (!onlyDuringDaytime2 && !onlyDuringNighttime2) {
                                   input "fromTime2", "time", title: "From?", required: true
                                   input "toTime2", "time", title: "Until?", required: true
                                   }
-                             input "offAfter", "number", title: "Turn Off After?", required: true, defaultValue: 90
-                             
-}}}}
-             input "actionOnDoorClosing", "bool", title: "Turn OFF When\n$doors Closed?", defaultValue: false, submitOnChange: true
+                         input "sendDoorOpeningNotification2", "bool", title: "Get Notified?", required: false, submitOnChange: true
+                         if (sendDoorOpeningNotification2) {                               input "doorOpeningMessage2", "text", title: "Message?", required: true
+                             input("recipients", "contact", title: "To:") {
+                             input "phone", "phone", title: "Warn with text message (optional)",
+                             description: "Phone Number", required: false
+                             }}
+                         input "offAfter", "number", title: "Turn Off After?", required: true, defaultValue: null                           
+                         }}
+                   }
+             input "actionOnDoorClosing", "bool", title: "Turn OFF When\n$doors Closes?", defaultValue: false, submitOnChange: true
              if (actionOnDoorClosing) {
-                 }
+                 input "sendDoorClosingNotification", "bool", title: "Get Notified?", required: false, submitOnChange: true
+                 if (sendDoorClosingNotification) {
+                     input "doorClosingMessage", "text", title: "Message?", required: true
+                     input("recipients", "contact", title: "To:") {
+                     input "phone", "phone", title: "Warn with text message (optional)",
+                     description: "Phone Number", required: false
+                     }}} 
 
-}} // end of Monitored Door Control Section
+}}}}} // end of Monitored Door Control Section
 
 if ((exitMotionSensors || entryMotionTimeout || monitoredDoor2) && !switches) {
     section("Do You Want 'Any' Lights\nTo Automatically Turn 'ON'?") {
@@ -175,7 +200,7 @@ if (exitMotionSensors || entryMotionTimeout || monitoredDoor2) {
              input "offRequired", "bool", title: "VACANT 'OFF' Control?", defaultValue: false, submitOnChange: true
 }}
 if (offRequired) {
-    section("Only If A Different Chosen Areas Are 'Vacant'?") {
+    section("Only If Different Chosen Areas Are 'Vacant'?") {
              input "otherAreaVacancyCheck", "bool", title: "Other Area Vacancy Check", defaultValue: false, submitOnChange: true
              if (otherAreaVacancyCheck) {
                  input "thisArea", "capability.estimatedTimeOfArrival", title: "What Area?", defaultValue: null, multiple: false, required: false, submitOnChange: true
@@ -198,15 +223,15 @@ if (delayedOff) {
     section("Turn OFF Which Lights\nWith A Delay,\nAfter $app.label Changes to 'VACANT'") {
              input "switches2", "capability.switchLevel", title: "Lights?", required: true, multiple: true, submitOnChange: true
              if (switches2) {
-                 input "dimByLevel", "number", title: "Reduce Level By %\nBefore Turning Off!", required: false, multiple: false, range: "1..99", submitOnChange: true, defaultValue: null               
+                 input "dimByLevel", "number", title: "Reduce Level By %\nBefore Turning Off!", required: false, multiple: false, range: "1..99", submitOnChange: false, defaultValue: null               
 }}}
 if ((exitMotionSensors || entryMotionTimeout || monitoredDoor2) && switches2 && delayedOff) {
     section("How Many Seconds 'After' $app.label Is 'VACANT'\nUntil You Want The Lights To Dim Down?") {
-             input "dimDownTime", "number", title: "How Many Seconds?", required: true, defaultValue: null, submitOnChange: true
+             input "dimDownTime", "number", title: "How Many Seconds?\n(Doubled During Heavy Use)", required: true, defaultValue: null, submitOnChange: false
 }}
 if ((exitMotionSensors || entryMotionTimeout || monitoredDoor2) && switches2 && delayedOff) {
     section("How Many Seconds 'After'\n$app.label's Lights Have Dimmed Down,\nUntil You Want Them To Turn OFF?") {
-             input "switchesOffCountdownInSeconds", "number", title: "How Many Seconds?", required: true, defaultValue: null, submitOnChange: true
+             input "switchesOffCountdownInSeconds", "number", title: "How Many Seconds?", required: true, defaultValue: null, submitOnChange: false
              
 }} // end of Auto OFF Control Section
 
@@ -231,10 +256,10 @@ if (exitMotionSensors || entryMotionTimeout || monitoredDoor2) {
 }}} // end of Resetting Section
 
 if (exitMotionSensors || entryMotionTimeout || monitoredDoor2) {
-    section("Heavy Use Control") {
-             input "instantHeavyuse", "bool", title: "INSTANT Heavy Use?", required: false, defaultValue: false, submitOnChange: true
+    section("Double The Switch Off Time During Heavy Traffic?") {
+             input "instantHeavyuse", "bool", title: "Heavy Use Control?", required: false, defaultValue: false, submitOnChange: true
              if (instantHeavyuse) {
-                 input "heavyuseSpeed", "number", title: "How Many MilliSeconds?", required: true, submitOnChange: true
+                 input "heavyuseSpeed", "number", title: "How Many MilliSeconds\nBetween Vacant & Occupied", required: true, submitOnChange: false
                  
 }}} // end of Heavy Use Control Section
 
@@ -322,8 +347,8 @@ if (!exitContactChosen) {
 }}}}}}
 if (followedBy) {
     section("Please Select The 2 Actioins Required To Activate Occupied & Vacant!") {
-             input "firstAction", "capability.contactSensor", title: "Which Contact Sensor?", required: true, multiple: false, submitOnChange: true
-             input "secondAction", "capability.accelerationSensor", title: "Which Acceleration Sensor?", required: true, multiple: false, submitOnChange: true
+             input "firstAction", "capability.contactSensor", title: "Which Contact Sensor?", required: true, multiple: false, submitOnChange: false
+             input "secondAction", "capability.accelerationSensor", title: "Which Acceleration Sensor?", required: true, multiple: false, submitOnChange: false
 }}
 if (followedBy && !switches4) {
     section("Do You Want Any Light(s)\nTo Automatically Turn 'ON'?") {
@@ -332,8 +357,22 @@ if (followedBy && !switches4) {
 if (followedBy && switch4OnControl) {
     section("Turn ON Which Switch(s)?\nWhen '$app.label' Changes To 'OCCUPIED'") {
              input "switches4", "capability.switch", title: "Switch(s)?\n(Required)", required: true, multiple: true, submitOnChange: true            
+           /*  input "onlyDuringCertainTimes2", "bool", title: "Only During Certain Times?", defaultValus: false, submitOnChange: true
+                     if (onlyDuringCertainTimes2) {
+                         if (!onlyDuringNighttime3) {
+                              input "onlyDuringDaytime3", "bool", title: "Only During The Daytime", defaultValue: false, submitOnChange: true
+                              }
+                         if (!onlyDuringDaytime3) {
+                              input "onlyDuringNighttime3", "bool", title: "Only During The Nighttime", defaultValue: false, submitOnChange: true
+                              }
+                         if (!onlyDuringDaytime3 && !onlyDuringNighttime3) {
+                              input "fromTime3", "time", title: "From?", required: true
+                              input "toTime3", "time", title: "Until?", required: true
+                              }
+    DO NOT DELETE THIS SECTION...!!!! I JUST HAVEN'T IMPLIMENTED IT YET IN THE DEFINING SECTION!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!                          
+}*/
 }}
-if (switches4) {
+if (followedBy && !switches5) {
     section("Do You Want Any Switch(s)\nTo Turn 'OFF'!!\nWhen $app.label Changes To Vacant?") {
              input "instant4Off", "bool", title: "Instant Off!!", defaultValue: false, submitOnChange: true
 }}
@@ -342,7 +381,7 @@ if (instant4Off) {
              input "switches5", "capability.switch", title: "Which Switch(s)\n(Required)", required: true, multiple: true, submitOnChange: true
 }}
 if (motionActivated || contactOrAccelerationActivated || followedBy) {
-    section("Notifications?") {
+    section("Occupied & Vacant Notifications?") {
              input "sendNotifications", "bool", title: "Send Notifications?", defaultValue: false, submitOnChange: true
              if (sendNotifications) {
                  if (exitMotionSensors || exitContactSensors || exitAccelerationSensors || exitContactFBExitContactSensors || exitContactFBExitAccelerationSensors ||
@@ -350,7 +389,7 @@ if (motionActivated || contactOrAccelerationActivated || followedBy) {
                      input "sendVacantNotification", "bool", title: "Vacant?", required: false, submitOnChange: true
                      if (sendVacantNotification) {
                          input "vacantMessage", "text", title: "Message?", required: true
-                         input("recipients", "contact", title: "Send To:") {
+                         input("recipients", "contact", title: "To:") {
                          input "phone", "phone", title: "Warn with text message (optional)",
                          description: "Phone Number", required: false	
                          }}} else {
@@ -361,7 +400,7 @@ if (motionActivated || contactOrAccelerationActivated || followedBy) {
                      input "sendOccupiedNotification", "bool", title: "Occupied?", required: false, submitOnChange: true
                      if (sendOccupiedNotification) {
 		                 input "occupiedMessage", "text", title: "Message?", required: true
-                         input("recipients", "contact", title: "Send To:") {
+                         input("recipients", "contact", title: "To:") {
                          input "phone", "phone", title: "Warn with text message (optional)",
                          description: "Phone Number", required: false	
                          }}} else {
@@ -376,7 +415,7 @@ section("Turn Something 'ON' or 'OFF' In $app.label\nAt A Certain Time!") {
          if (timedControl) {
              input "timedTurnOnControl", "bool", title: "Turn ON?", required: false, defualtValue: false, submitOnChange: true
              if (timedTurnOnControl && timedControl) {   
-                 input "switchToTurnOnAtThisTime", "capability.switch", title: "Switchs?", required: true, multiple: true, submitOnChange: true
+                 input "switchToTurnOnAtThisTime", "capability.switch", title: "Switchs?", required: true, multiple: true
                  if (!onAtSunsetChosen && !onAtThisTime) {
                       input "onAtSunriseChosen", "bool", title: "At Sunrise?", required: false, multiple: false, submitOnChange: true
                       }
@@ -388,7 +427,7 @@ section("Turn Something 'ON' or 'OFF' In $app.label\nAt A Certain Time!") {
                       }}
              input "timedTurnOffControl", "bool", title: "Turn OFF?", required: false, defualtValue: false, submitOnChange: true
              if (timedTurnOffControl && timedControl) {
-                 input "switchToTurnOffAtThisTime", "capability.switch", title: "Switchs?", required: true, multiple: true, submitOnChange: true
+                 input "switchToTurnOffAtThisTime", "capability.switch", title: "Switchs?", required: true, multiple: true
                  if (!offAtSunriseChosen && !offAtThisTime) {
                       input "offAtSunsetChosen", "bool", title: "At Sunset?", required: false, multiple: false, submitOnChange: true
                       }
@@ -402,7 +441,7 @@ section("Turn Something 'ON' or 'OFF' In $app.label\nAt A Certain Time!") {
 } // end of Timed Control section
 
 section("Select ALL Of The Lights That Are In $app.label?") {
-             input "checkableLights", "capability.switch", title: "Lights?", required: true, multiple: true, submitOnChange: true
+             input "checkableLights", "capability.switch", title: "Lights?", required: true, multiple: true
              }
              
 }} // end of Programatic Setup Section
@@ -535,13 +574,7 @@ if (onAtSunriseChosen || offAtSunriseChosen) {
     }
 if (onAtSunsetChosen || offAtSunsetChosen) {
     subscribe(location, "sunset", sunsetHandler)
-    }
-//////////////////////////////////////////
-if (onlyDuringSunriseAndSunsetChosen || onlyDuringSunriseAndSunsetChosen2) {
-    def sunriseAndSunsetTimes = getSunriseAndSunset()
-    }
-//////////////////////////////////////////
-}
+    }}
 def uninstalled() {
 	getChildDevices().each {
     deleteChildDevice(it.deviceNetworkId) }
@@ -1082,7 +1115,7 @@ def forceVacantIf() {
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
     def entryMotionState = entryMotionSensors.currentState("motion")
-    if (['occupied','occupiedon'].contains(areaState) && !entryMotionState.value.contains("active")) { 
+    if (!['vacant','heavyuseon'].contains(areaState) && !entryMotionState.value.contains("active")) { 
           vacant()
 }}
 private getArea() {	
@@ -1125,7 +1158,43 @@ def	modeEventHandler(evt) {
     if (awayModes && awayModes.contains(evt.value) && noAwayMode) {
         log.debug "$app.label Was Set To 'VACANT' Because Your Away Mode Was 'ACTIVATED'!"
         leftHome() 
-}}    
+}}   
+def monitoredDoorOpenedAction() {
+    def lightStateForDoorAction = doorOpeningAction.currentState("switch")
+    if (lightStateForDoorAction.value.contains("off")) {
+        doorOpeningAction.each {
+        it.on()
+        it.setLevel(setLevelAt)
+        }
+        mainAction()
+        if (sendDoorOpeningNotification) {
+            log.info "Door Opening Notifications Is Active"
+            String message = doorOpeningMessage
+            if (location.contactBookEnabled && recipients) {
+                log.debug "You Have Chosen To Send Notifications & Your Contact Book Is Enabled! Sending Message '$doorOpeningMessage'"
+                sendNotificationToContacts(message, recipients) 
+                }
+          }
+     }    
+}
+def monitoredDoorOpenedAction2() {
+    def lightStateForDoorAction2 = doorOpeningAction2.currentState("switch")
+    if (lightStateForDoorAction2.value.contains("off")) {
+        doorOpeningAction2.each {
+        it.on()
+        it.setLevel(setLevelAt2)
+        }
+        mainAction()
+        if (sendDoorOpeningNotification2) {
+            log.info "Door Opening Notifications Is Active"
+            String message = doorOpeningMessage2
+            if (location.contactBookEnabled && recipients) {
+                log.debug "You Have Chosen To Send Notifications & Your Contact Book Is Enabled! Sending Message '$doorOpeningMessage'"
+                sendNotificationToContacts(message, recipients) 
+                }
+          }
+     }    
+}
 def monitoredDoorOpenedEventHandler(evt) { 
     unschedule(engaged)
     unschedule(vacant)
@@ -1138,100 +1207,86 @@ def monitoredDoorOpenedEventHandler(evt) {
     if (actionOnDoorOpening) {
         def child = getChildDevice(getArea())
         def areaState = child.getAreaState()
-        if (onlyDuringCertainTimes) {
-            def between = timeOfDayIsBetween(fromTime, toTime, new Date(), location.timeZone)
-            def between2 = timeOfDayIsBetween(fromTime2, toTime2, new Date(), location.timeZone)
-            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-              if (onlyDuringSunriseAndSunsetChosen) {
-                    def sunriseTime = {sunriseAndSunsetTimes.sunrise}
-                    log.debug "$sunriseTime"
-                    def sunsetTime = {sunriseAndSunsetTimes.sunset}
-                    log.debug "$sunsetTime"
-                    def betweenSrAndSs = timeOfDayIsBetween(sunriseTime, sunsetTime, new Date(), location.timeZone)
-                    if (betweenSrAndSs) {
-                        if (onlyIfAreaVacant) {
-                            if (['vacant'].contains(areaState)) {
-                                  log.debug "The Light Was Turned ON To $setLevelAt % Because The Door Was Opened & $app.label Was VACANT & The Time Selection Matched!"
-                                  doorOpeningAction.each {
-                                  it.on()
-                                  it.setLevel(setLevelAt)
-                                  log.info "Re-Evaluated by A Monitored Door Opening"
-                                  mainAction() 
-                                  }} else {}
-                        }} else {
-                                doorOpeningAction.each {
-                                it.on()
-                                it.setLevel(setLevelAt)
-                                log.info "Re-Evaluated by A Monitored Door Opening"
-                                mainAction() 
-                                }}}
-       
-                if (onlyDuringSunriseAndSunsetChosen2) {
-                    def sunriseTime2 = {sunriseAndSunsetTimes.sunrise}
-                    log.debug "$sunriseTime2"
-                    def sunsetTime2 = {sunriseAndSunsetTimes.sunset}
-                    log.debug "$sunsetTime2"
-                    def betweenSrAndSs2 = timeOfDayIsBetween(sunriseTime2, sunsetTime2, new Date(), location.timeZone)
-                        if (betweenSrAndSs2) {
-                            if (onlyIfAreaVacant2) {
+        if (onlyDuringCertainTimes && (onlyDuringDaytime || onlyDuringNighttime || onlyDuringDaytime2 || onlyDuringNighttime2)) {
+            def s = getSunriseAndSunset()
+            def sunrise = s.sunrise.time
+            def sunset = s.sunset.time
+            def timenow = now()
+            if (onlyDuringDaytime) {  
+                if (timenow < sunset || timenow > sunrise) {
+                    if (onlyIfAreaVacant) {
+                        if (['vacant'].contains(areaState)) {
+                              log.debug "The Light Was Turned ON To $setLevelAt % Because The Door Was Opened & $app.label Was VACANT & The Time Selection Matched!"
+                              monitoredDoorOpenedAction()
+                              } else {}
+                    } else {
+                            monitoredDoorOpenedAction()
+                }}} 
+             if (onlyDuringNighttime) { 
+                 if (timenow > sunset || timenow < sunrise) {
+                     if (onlyIfAreaVacant) {
+                         if (['vacant'].contains(areaState)) {
+                               log.debug "The Light Was Turned ON To $setLevelAt % Because The Door Was Opened & $app.label Was VACANT & The Time Selection Matched!"
+                               monitoredDoorOpenedAction()
+                               } else {}
+                     } else {
+                             monitoredDoorOpenedAction()
+                }}} 
+                if (onlyDuringDaytime2) { 
+                        if (timenow < sunset || timenow > sunrise) {
+                            if (onlyIfAreaVacant2) { 
                                 if (['vacant'].contains(areaState)) {
                                       log.debug "The Light Was Turned ON To $setLevelAt % Because The Door Was Opened & $app.label Was VACANT & The Time Selection Matched!"
-                                      doorOpeningAction.each {
-                                      it.on()
-                                      it.setLevel(setLevelAt2)
-                                      log.info "Re-Evaluated by A Monitored Door Opening"
-                                      mainAction() 
-                                      }} else {}
-                        } else {
-                                doorOpeningAction.each {
-                                it.on()
-                                it.setLevel(setLevelAt2)
-                                log.info "Re-Evaluated by A Monitored Door Opening"
-                                mainAction() 
-                                }}}} //*////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            if (between) {
-                if (onlyIfAreaVacant) {
-                    if (['vacant'].contains(areaState)) {
-                          log.debug "The Light Was Turned ON To $setLevelAt % Because The Door Was Opened & $app.label Was VACANT & The Time Selection Matched!"
-                          doorOpeningAction.each {
-                          it.on()
-                          it.setLevel(setLevelAt)
-                          log.info "Re-Evaluated by A Monitored Door Opening"
-                          mainAction() 
-                          }} else {}
-                } else {
-                        doorOpeningAction.each {
-                        it.on()
-                        it.setLevel(setLevelAt)
-                        log.info "Re-Evaluated by A Monitored Door Opening"
-                        mainAction() 
-                        }}}
-            if (between2) {
-                if (onlyIfAreaVacant2) {
-                    if (['vacant'].contains(areaState)) {
-                    log.debug "The Light Was Turned ON To $setLevelAt % Because The Door Was Opened & $app.label Was VACANT & The Time Selection Matched!"
-                    doorOpeningAction2.each {
-                    it.setLevel(setLevelAt2)
-                    log.info "Re-Evaluated by A Monitored Door Opening"
-                    } runIn(offAfter, doorOpeningAction2Off)
-                    } else {}
-            } else {
-                    doorOpeningAction2.each {
-                    it.setLevel(setLevelAt2)
-                    log.info "Re-Evaluated by A Monitored Door Opening"
-                    runIn(offAfter, doorOpeningAction2Off)
-                    }}}
-      } else {
-              doorOpeningAction.each {
-              it.on()
-              it.setLevel(setLevelAt)
-              log.info "Re-Evaluated by A Monitored Door Opening"
-              mainAction() 
-              }}
+                                      monitoredDoorOpenedAction2()
+                                      } else {}
+                            } else {
+                                    monitoredDoorOpenedAction2()
+                }}}
+                if (onlyDuringNighttime2) { 
+                        if (timenow > sunset || timenow < sunrise) {
+                            if (onlyIfAreaVacant2) { 
+                                if (['vacant'].contains(areaState)) {
+                                      log.debug "The Light Was Turned ON To $setLevelAt % Because The Door Was Opened & $app.label Was VACANT & The Time Selection Matched!"
+                                      monitoredDoorOpenedAction2()
+                                      } else {}
+                            } else {
+                                    monitoredDoorOpenedAction2()
+        }}}} 
+                   if (!onlyDuringDaytime && !onlyDuringNighttime && !onlyDuringDaytime2 && !onlyDuringNighttime2 && onlyDuringCertainTimes) {
+                       def between = timeOfDayIsBetween(fromTime, toTime, new Date(), location.timeZone)
+                       log.debug "Between = $between"
+                       def between2 = timeOfDayIsBetween(fromTime2, toTime2, new Date(), location.timeZone)
+                       log.debug "Between2 = $between2"
+              if (between) {
+                    if (onlyIfAreaVacant) {
+                        if (['vacant'].contains(areaState)) {
+                              log.debug "The Light Was Turned ON To $setLevelAt % Because The Door Was Opened & $app.label Was VACANT & The Time Selection Matched!"
+                              monitoredDoorOpenedAction()
+                              } else {}
+                    } else {
+                            monitoredDoorOpenedAction()
+                }}
+                if (between2) {
+                    if (onlyIfAreaVacant2) {
+                        if (['vacant'].contains(areaState)) {
+                        log.debug "The Light Was Turned ON To $setLevelAt % Because The Door Was Opened & $app.label Was VACANT & The Time Selection Matched!"
+                        monitoredDoorOpenedAction2()
+                        runIn(offAfter, doorOpeningAction2Off)
+                        } else {}
+                    } else {
+                            monitoredDoorOpenedAction2()
+                            runIn(offAfter, doorOpeningAction2Off)
+         }}
+       
+       
+       } else {
+                   monitoredDoorOpenedAction()
+              }
  } else {                                
          log.info "Re-Evaluated by A Monitored Door Opening"
          mainAction() 
-}}
+         }
+}
 def monitoredDoorClosedEventHandler(evt) { 
     log.info "Re-Evaluated by A Monitored Door Closing"
     if (actionOnDoorClosing) {
@@ -1244,8 +1299,20 @@ def monitoredDoorClosedEventHandler(evt) {
                     it.setLevel(0)
                     log.info "Re-Evaluated by A Monitored Door Closing"
                     mainAction() 
-                    }}} else {
-                              mainAction() 
+                    }
+                    if (sendDoorClosingNotification) {
+                        log.info "Door Closing Notifications Is Active"
+                        String message = doorClosingMessage
+                        if (location.contactBookEnabled && recipients) {
+                            log.debug "You Have Chosen To Send Notifications & Your Contact Book Is Enabled! Sending Message '$doorClosingMessage'"
+                            sendNotificationToContacts(message, recipients) 
+                            } else { 
+                                    if (phone) { 
+                                                log.debug "You Have Chosen To Send Notifications But Your Contact Book Is Disabled! Sending '$doorClosingMessage' SMS To Phone Number"
+                                                sendSms(phone, message) 
+                                                } 
+}}}} else {
+           mainAction()
 }}
 def occupied() {
     state.occupiedTime = now()
