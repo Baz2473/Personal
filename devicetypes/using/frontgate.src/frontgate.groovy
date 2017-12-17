@@ -76,8 +76,8 @@ metadata {
 	tiles(scale: 2) {
 		multiAttributeTile(name: "status", type: "generic", width: 6, height: 4) {
 			tileAttribute("device.status", key: "PRIMARY_CONTROL") {
-				attributeState "open", label: 'Open', icon: "st.contact.contact.open", backgroundColor: "#e86d13"
-				attributeState "closed", label: 'Closed', icon: "st.contact.contact.closed", backgroundColor: "#00a0dc"
+				attributeState "open", label: 'Open', icon: "st.contact.contact.open", backgroundColor: "#ff0000"
+				attributeState "closed", label: 'Closed', icon: "st.contact.contact.closed", backgroundColor: "#32cd32"
 				attributeState "garage-open", label: 'Open', icon: "st.doors.garage.garage-open", backgroundColor: "#e86d13"
 				attributeState "garage-closed", label: 'Closed', icon: "st.doors.garage.garage-closed", backgroundColor: "#00a0dc"
 			}
@@ -87,8 +87,8 @@ metadata {
 			state("closed", label: 'Closed', icon: "st.contact.contact.closed", backgroundColor: "#00a0dc")
 		}
 		standardTile("acceleration", "device.acceleration", width: 2, height: 2) {
-			state("active", label: 'Opened', icon: "st.motion.acceleration.active", backgroundColor: "#e86d13")
-			state("inactive", label: 'Closed', icon: "st.motion.acceleration.inactive", backgroundColor: "#00a0dc")
+			state("active", label: 'Opened', icon: "st.motion.acceleration.active", backgroundColor: "#ff0000")
+			state("inactive", label: 'Closed', icon: "st.motion.acceleration.inactive", backgroundColor: "#32cd32")
 		}
 		valueTile("temperature", "device.temperature", width: 2, height: 2) {
 			state("temperature", label: '${currentValue}°',

@@ -25,7 +25,7 @@ metadata {
 
     tiles(scale:2) {
         standardTile("switch", "device.switch", width: 6, height: 6, canChangeIcon: true) {
-            state "off", label: 'Not Alone',icon: "", backgroundColor: "#00A0DC"
+            state "off", label: 'Not Alone',icon: "", backgroundColor: "#32cd32"
             state "on", label: 'Home Alone',icon: "", backgroundColor: "#FF0000"
         }
         standardTile("off2", "device.switch", width: 5, height: 1,  decoration: "flat") {
