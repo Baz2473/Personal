@@ -1644,18 +1644,6 @@ def switches3OffEventHandler(evt) {
     log.info "Re-Evaluated by Switches3 Off"
     mainAction() 
 }
-def turnOffAllCheckables() {
-    if (checkableLights) {
-        def child = getChildDevice(getArea())
-        def areaState = child.getAreaState()
-        if (['vacanton'].contains(areaState)) {
-        checkableLights.each {
-        //it.setLevel(0)
-        it.off()
-                             }
-                                              }
-                         }
-}
 def turnOffAtThisTime() {
     log.info "the time turn OFF test worked"
     def child = getChildDevice(getArea())
@@ -1713,4 +1701,19 @@ def vacant() {
                         }
                    }
                                 }
-} // end of vacant   
+} // end of vacant  
+def turnalloff() {
+    if (checkableLights) {
+        def child = getChildDevice(getArea())
+        log.debug "You Have Told Me That $app.label Is Vacant Turning Off All Lights!"
+        checkableLights.each {
+        if (it.hasCommand("setLevel")) {
+            it.setLevel(0)
+                         } else {
+                                 it.off()
+                                 }}
+        child.generateEvent('vacant')
+        unschedule()
+        log.info "All Scheduled Jobs Have Been Cancelled!"
+                         }
+}
