@@ -148,7 +148,10 @@ if (exitMotionSensors || entryMotionTimeout || monitoredDoor2) {
                              input "phone", "phone", title: "Warn with text message (optional)",
                              description: "Phone Number", required: false
                              }}
-                         input "offAfter", "number", title: "Turn Off After?", required: true, submitOnChange: true, defaultValue: null                       
+                         input "turnOffAfter", "bool", title: "Turn Off After Set Time?", defaultValue: false, submitOnChange: true
+                         if (turnOffAfter) {
+                             input "offAfter", "number", title: "Turn Off After?", required: true, submitOnChange: true, defaultValue: null 
+                         }
                          }}
                    }
              input "actionOnDoorClosing", "bool", title: "Turn OFF When\n$doors Closes?", defaultValue: false, submitOnChange: true
@@ -1483,8 +1486,8 @@ def monitoredDoorOpenedEventHandler(evt) {
 def monitoredDoorClosedEventHandler(evt) { 
     log.info "Re-Evaluated by A Monitored Door Closing"
     if (!actionOnDoorClosing) {
-         if (offAfter) {
-             log.debug " Off After Was True SO"
+         if (turnOffAfter) {
+             log.debug "Turn Off After Was True SO "
              runIn(offAfter, doaoff, [overwrite: false]) 
              log.debug "The Lights Should Go Off In $offAfter Seconds"
                        } else {
