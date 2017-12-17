@@ -27,12 +27,15 @@ preferences	{
         remove("Remove Area Occupancy?", "Are You Sure You Want To Remove Area Occupancy Completley!", "Removing Area Occupancy Will Also Remove All Area's Created By This SmartApp")
 	}
 }
-def installed()		{	initialize()	}
-def updated()		{
+def installed()	{
+    initialize()	
+    }
+def updated() {
 	initialize()
-}
-def initialize()	{
-	log.info "Area Occupancy: there are ${childApps.size()} Areas."
-	childApps.each	{ child ->
-    log.info "Area Occupancy: Area: ${child.label}"
+    }
+def initialize() {
+	log.info "You Have Created ${childApps.size()} Areas To Monitor."
+	childApps.each {
+    child ->
+    log.info "There Is An Area Called: ${child.label}"
 }}

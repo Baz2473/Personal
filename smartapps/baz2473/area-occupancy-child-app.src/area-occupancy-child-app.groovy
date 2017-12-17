@@ -1713,4 +1713,4 @@ def vacant() {
                         }
                    }
                                 }
-} // end of vacant                         
+} // end of vacant   
