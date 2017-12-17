@@ -25,7 +25,7 @@ metadata {
 
     tiles(scale:2) {
         standardTile("switch", "device.switch", width: 6, height: 6, canChangeIcon: true) {
-            state "off", label: 'Pins Not In!',icon: "", backgroundColor: "#FF0000"
+            state "off", label: 'NO Pins!',icon: "", backgroundColor: "#FF0000"
             state "on", label: 'Pins IN',icon: "", backgroundColor: "#32CD32"
         }
         standardTile("off2", "device.switch", width: 5, height: 1,  decoration: "flat") {
