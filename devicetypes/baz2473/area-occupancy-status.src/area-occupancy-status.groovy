@@ -10,40 +10,40 @@
 */
 
 metadata {
-	definition (
-    	name: "Area Occupancy Status", 
-        namespace: "Baz2473", 
-        author: "Baz2473")	{ 
-        capability "Actuator"
-        capability "Sensor"
-        capability "estimatedTimeOfArrival"
-		attribute "occupancyStatus", "string"
-        attribute "automationStatus", "string"
-        command "turnalloff"
-		command "vacant"
-        command "vacanton"
-        command "occupied"
-        command "occupiedon"
-        command "checking"
-        command "checkingon"
-		command "engaged"
-        command "engagedon"
-		command "donotdisturb"
-        command "donotdisturbon"
-		command "heavyuse"
-        command "heavyuseon"
-        command "automationon"
-        command "automationoff"
-        command "updateOccupancyStatus", ["string"]
-        command "updateAutomationStatus", ["string"]
-	}
+	      definition (
+    	              name: "Area Occupancy Status", 
+                      namespace: "Baz2473", 
+                      author: "Baz2473") { 
+                                          capability "Actuator"
+                                          capability "Sensor"
+                                          capability "estimatedTimeOfArrival"
+		                                  attribute "occupancyStatus", "string"
+                                          attribute "automationStatus", "string"
+                                          command "turnalloff"
+		                                  command "vacant"
+                                          command "vacanton"
+                                          command "occupied"
+                                          command "occupiedon"
+                                          command "checking"
+                                          command "checkingon"
+		                                  command "engaged"
+                                          command "engagedon"
+		                                  command "donotdisturb"
+                                          command "donotdisturbon"
+		                                  command "heavyuse"
+                                          command "heavyuseon"
+                                          command "automationon"
+                                          command "automationoff"
+                                          command "updateOccupancyStatus", ["string"]
+                                          command "updateAutomationStatus", ["string"]
+	                                     }
     
 	simulator	{
-	}
+   }
     
-	tiles(scale: 2)		{
-    	multiAttributeTile(name: "occupancyStatus", width: 2, height: 2, canChangeBackground: false)		{
-			tileAttribute ("device.occupancyStatus", key: "PRIMARY_CONTROL")		{
+	tiles(scale: 2)	{
+    	multiAttributeTile(name: "occupancyStatus", width: 2, height: 2, canChangeBackground: false) {
+			tileAttribute ("device.occupancyStatus", key: "PRIMARY_CONTROL") {
 				attributeState "vacant", label: 'Lights OFF', icon:"st.Home.home18", backgroundColor:"#606060"
                 attributeState "vacanton", label: 'Lights ON', action: "turnalloff", icon:"st.Home.home18", backgroundColor:"#c1b419"
                 attributeState "occupied", label: 'Lights OFF', action: "vacant", icon:"st.Home.home4", backgroundColor:"#156700"
@@ -56,26 +56,25 @@ metadata {
                 attributeState "donotdisturbon", label: 'Lights ON', action: "vacanton", icon:"st.Office.office6", backgroundColor:"#6d00ff"
 				attributeState "heavyuse", label: 'Lights OFF', action: "vacant", icon:"st.Health & Wellness.health5", backgroundColor:"#8a5128"
                 attributeState "heavyuseon", label: 'Lights ON', action: "vacanton", icon:"st.Health & Wellness.health5", backgroundColor:"#8a5128"
-            }
-       		tileAttribute ("device.status", key: "SECONDARY_CONTROL")	{
+                }
+       		tileAttribute ("device.status", key: "SECONDARY_CONTROL") {
 				attributeState "default", label:'${currentValue}'
-			}
-        }
-       multiAttributeTile(name: "automationStatus", width: 2, height: 2, canChangeBackground: false)		{
-			tileAttribute ("device.automationStatus", key: "PRIMARY_CONTROL")		{
+			    }
+      }
+       multiAttributeTile(name: "automationStatus", width: 2, height: 2, canChangeBackground: false) {
+			tileAttribute ("device.automationStatus", key: "PRIMARY_CONTROL") {
 				attributeState "automationon", label: 'Automation ON', action: "automationoff", icon:"st.samsung.da.RC_ic_power", backgroundColor:"#32CD32"
                 attributeState "automationoff", label: 'Automation OFF', action: "automationon", icon:"st.samsung.da.RC_ic_power", backgroundColor:"#FF0000"        
-            }
+                }
        		tileAttribute ("device.automationstatus", key: "SECONDARY_CONTROL")	{
 				attributeState "default", label:'${currentValue}'
-			}
-        }
+			    }
+       }
 		main (["occupancyStatus"])
 		details (["occupancyStatus","automationStatus"])
-	}
+	                }
   preferences {}            	 
 }
-
 def parse(String description)	{
     }
 def installed() {   
@@ -138,9 +137,9 @@ private	automationStateUpdate(automationState) {
 		    updateAutomationStatus(automationState)
 	        resetTile(automationState)
             }
-private updateOccupancyStatus(occupancyStatus = null) 	{
+private updateOccupancyStatus(occupancyStatus = null) {
 	    occupancyStatus = occupancyStatus?.toLowerCase()
-	    def msgTextMap = ['vacant':'Vacant Since: ', 'vacanton':'Vacanton Since: ', 'occupied':'Occupied Since: ', 'occupiedon':'Occupiedon Since: ','checking':'Checking Status: ','checkingon':'Checkingon Status: ','engaged':'Engaged Since: ','engagedon':'Engagedon Since: ' ,'donotdisturb':'Do Not Disturb!: ','donotdisturbon':'Do Not Disturbon!: ', 'heavyuse':'Area Is In Constant Use: ','heavyuseon':'Area Is on In Constant Use: ']
+	    def msgTextMap = ['vacant':'Vacant Since: ', 'vacanton':'Vacant & On Since: ', 'occupied':'Occupied Since: ', 'occupiedon':'Occupied & On Since: ','checking':'Checking Status: ','checkingon':'Checking Status Since: ','engaged':'Engaged Since: ','engagedon':'Engaged & On Since: ' ,'donotdisturb':'DND Since: ','donotdisturbon':'DND & On Since: ', 'heavyuse':'Heavy Use Since: ','heavyuseon':'Heavy Use & On Since: ']
         if (!occupancyStatus || !(msgTextMap.containsKey(occupancyStatus))) {
     	     log.debug "${device.displayName}: Missing or invalid parameter Occupancy Status. Allowed values are: Vacant, Occupied, Checking, Engaged, Heavyuse, Donotdisturb, Vacanton, Occupiedon, Checkingon, Engagedon, Heavyuseon or Donotdisturbon."
              return
@@ -149,7 +148,7 @@ private updateOccupancyStatus(occupancyStatus = null) 	{
         def statusMsg = msgTextMap[device.currentValue('occupancyStatus')] + formatLocalTime()
         sendEvent(name: "status", value: statusMsg, isStateChange: true, displayed: false)
         }
-private updateAutomationStatus(automationStatus = null) 	{
+private updateAutomationStatus(automationStatus = null) {
 	    automationStatus = automationStatus?.toLowerCase()
 	    def msgTextMap = ['automationoff':'Off Since: ', 'automationon':'On Since: ']
 	    if (!automationStatus || !(msgTextMap.containsKey(automationStatus))) {
@@ -160,34 +159,33 @@ private updateAutomationStatus(automationStatus = null) 	{
         def statusMsg = msgTextMap[device.currentValue('automationStatus')] + formatLocalTime()
 	    sendEvent(name: "automationstatus", value: statusMsg, isStateChange: true, displayed: false)
         }
-private formatLocalTime(format = "h:mm:ss a 'on' EEE, d MMM yyyy", time = now())		{
+private formatLocalTime(format = "h:mm:ss a 'on' EEE, d MMM yyyy", time = now()) {
 	    def formatter = new java.text.SimpleDateFormat(format)
 	    formatter.setTimeZone(location.timeZone)
 	    return formatter.format(time)
         }
-private	resetTile(occupancyStatus)	{
+private	resetTile(occupancyStatus) {
         sendEvent(name: occupancyStatus, value: occupancyStatus, descriptionText: "reset tile ${occupancyStatus} to ${occupancyStatus}", isStateChange: true, displayed: false)
         }
-private	resetAutomationTile(automationStatus)	{
+private	resetAutomationTile(automationStatus) {
         sendEvent(name: automationStatus, value: automationStatus, descriptionText: "reset tile ${automationStatus} to ${automationStatus}", isStateChange: true, displayed: false)
         }
-def generateEvent(state = null)		{
+def generateEvent(state = null)	{
     if (state)
 	    stateUpdate(state)
         return null
         }
-def generateAutomationEvent(automationState = null)		{
+def generateAutomationEvent(automationState = null)	{
     if (automationState)
 		automationStateUpdate(automationState)
         return null
         }
-def getAreaState()	{
+def getAreaState() {
     return device.currentValue('occupancyStatus')
     }
-def getAutomationState()  {
+def getAutomationState() {
     return device.currentValue('automationStatus')
     }
 def turnalloff() {
-    if (parent)
-		parent.turnalloff()
+    parent.turnalloff()
 }
