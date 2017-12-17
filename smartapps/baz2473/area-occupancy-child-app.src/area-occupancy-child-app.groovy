@@ -609,14 +609,14 @@ def mainAction() {
     def areaState = child.getAreaState()
     def automationState = child.getAutomationState()
     if (entryMotionSensors) {
-    def entryMotionState = entryMotionSensors.currentState("motion")
-    if (entryMotionState.value.contains("active")) {     
-        if(dimmableSwitches1 && switchOnControl && !switchOnModeControl && ['automationon'].contains(automationState)) {
-           dimmableSwitches1.each {
-           def currentLevel = it.currentValue("level")
-           if (currentLevel < setLevelTo) { 
-               it.setLevel(setLevelTo)
-               }}}
+        def entryMotionState = entryMotionSensors.currentState("motion")
+        if (entryMotionState.value.contains("active")) {     
+            if(dimmableSwitches1 && switchOnControl && !switchOnModeControl && ['automationon'].contains(automationState)) {
+               dimmableSwitches1.each {
+               def currentLevel = it.currentValue("level")
+            if (currentLevel < setLevelTo) { 
+                it.setLevel(setLevelTo)
+                }}}
         if(dimmableSwitches2 && switchOnControl && switchOnModeControl && ['automationon'].contains(automationState)) {
            def currentMode = location.currentMode
            dimmableSwitches2.each {  
@@ -1152,14 +1152,16 @@ def exitMotionActiveEventHandler(evt) {
     if (!['vacant'].contains(areaState)) {       
            log.info "Re-Evaluation Caused By An Exit Motion Sensor Being 'ACTIVE'"
            mainAction() 
-}}
+           }
+}
 def exitMotionInactiveEventHandler(evt) { 
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
     if (!['vacant'].contains(areaState)) {
            log.info "Re-Evaluation Caused By An Exit Motion Sensor Being 'INACTIVE'"
            mainAction() 
-}}
+           }
+}
 def exitMotionSensorsWhenDoorIsOpenActiveEventHandler(evt) {
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
@@ -1169,7 +1171,10 @@ def exitMotionSensorsWhenDoorIsOpenActiveEventHandler(evt) {
         if (adjacentDoorsState.contains("open")) {
             log.info "Re-Evaluation Caused By An (OPEN) Exit Motion Sensor Being 'ACTIVE'"
             mainAction()
-}}}}
+                                                 }
+                       }
+                                         }
+}
 def exitMotionSensorsWhenDoorIsOpenInactiveEventHandler(evt) {
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
@@ -1179,7 +1184,10 @@ def exitMotionSensorsWhenDoorIsOpenInactiveEventHandler(evt) {
         if (adjacentDoorsState.contains("open")) {
             log.info "Re-Evaluation Caused By An (OPEN) Exit Motion Sensor Being 'INACTIVE'"
             mainAction()
-}}}}
+                                                 }
+                       }
+                                         }
+}
 def exitMotionSensorsWhenDoorIsClosedActiveEventHandler(evt) {
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
@@ -1189,7 +1197,10 @@ def exitMotionSensorsWhenDoorIsClosedActiveEventHandler(evt) {
         if (!adjacentDoorsState.contains("open")) {
              log.info "Re-Evaluation Caused By A (CLOSED) Exit Motion Sensor Being 'ACTIVE'"
              mainAction()
-}}}}
+                                                  }
+                       }
+                                         }
+}
 def exitMotionSensorsWhenDoorIsClosedInactiveEventHandler(evt) {
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
@@ -1199,7 +1210,10 @@ def exitMotionSensorsWhenDoorIsClosedInactiveEventHandler(evt) {
         if (!adjacentDoorsState.contains("open")) {
              log.info "Re-Evaluation Caused By A (CLOSED) Exit Motion Sensor Being 'INACTIVE'"
              mainAction()
-}}}} 
+                                                  }
+                       }
+                                         }
+} 
 def followedByAccelerationActiveEventHandler(evt) {
     if (state.backDoorHasBeenOpened == true) {
         //state.gateHasBeenOpened = true
@@ -1235,11 +1249,11 @@ def followedByAccelerationActiveEventHandler(evt) {
                     switches4.on()   
                     }
 
-            } // end of only if all during times are not selected
+           } // end of only if all during times are not selected
          
-            if (!onlyDuringDaytime3 && !onlyDuringNighttime3 && !onlyDuringCertainTimes2) {
-                 switches4.on()
-                 }                 
+           if (!onlyDuringDaytime3 && !onlyDuringNighttime3 && !onlyDuringCertainTimes2) {
+                switches4.on()
+                }                 
                  
 } // end of switch4OnControl
      
@@ -1275,7 +1289,8 @@ def forceVacantIf() {
     log.debug "The entry Motion State Is: $entryMotionState"
     if (!['vacant'].contains(areaState) && !entryMotionState.value.contains("active")) { 
           vacant()
-}}
+          }
+}
 private getArea() {	
         return "aa_${app.id}" 
 }
@@ -1308,7 +1323,8 @@ def leftHome() {
           vacant()
           log.debug "switchesOffCountdown Sent"
           switchesOffCountdown()  
-}}
+          }
+}
 def	modeEventHandler(evt) {
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
@@ -1320,7 +1336,8 @@ def	modeEventHandler(evt) {
     if (awayModes && awayModes.contains(evt.value) && noAwayMode) {
         log.debug "$app.label Was Set To 'VACANT' Because Your Away Mode Was 'ACTIVATED'!"
         leftHome() 
-}}   
+        }
+}   
 def monitoredDoorOpenedAction() {
     def lightStateForDoorAction = doorOpeningAction.currentState("switch")
     if (lightStateForDoorAction.value.contains("off")) {
@@ -1603,7 +1620,8 @@ def switchesOffCountdown() {
     if (offRequired && ['automationon'].contains(automationState)) {
         log.info "The Lights Will Be Switched Off In $switchesOffCountdownInSeconds Seconds"
         runIn(switchesOffCountdownInSeconds, switches2Off)  
-}}
+        }
+}
 def switches2OnEventHandler(evt) { 
     log.info "Re-Evaluated by Switches2 On"
     mainAction() 
@@ -1616,7 +1634,8 @@ def switches2Off() {
     def child = getChildDevice(getArea())
     switches2.each {
     it.setLevel(0)   
-}}
+    }
+}
 def switches3OnEventHandler(evt) { 
     log.info "Re-Evaluated by Switches3 On"
     mainAction() 
@@ -1633,7 +1652,10 @@ def turnOffAllCheckables() {
         checkableLights.each {
         //it.setLevel(0)
         it.off()
-}}}}
+                             }
+                                              }
+                         }
+}
 def turnOffAtThisTime() {
     log.info "the time turn OFF test worked"
     def child = getChildDevice(getArea())
@@ -1643,7 +1665,9 @@ def turnOffAtThisTime() {
     if (switchOffAtThisTimeState.value.contains("on") && ['automationon'].contains(automationState)) { 
         it.off()
         log.info "the time turn OFF test completed"
-}}} 
+        }
+                             }
+} 
 def turnOnAtThisTime() {
     log.info "the time turn ON test worked"
     def child = getChildDevice(getArea())
@@ -1653,7 +1677,9 @@ def turnOnAtThisTime() {
     if (!switchOnAtThisTimeState.value.contains("on") && ['automationon'].contains(automationState)) { 
          it.on()
          log.info "the time turn ON test completed"
-}}}
+         }
+                            }
+}
 def vacant() { 
     state.vacantTime = now()
     def child = getChildDevice(getArea())
@@ -1684,4 +1710,7 @@ def vacant() {
                     if (phone) { 
                         log.debug "You Have Chosen To Send Notifications But Your Contact Book Is Disabled! Sending '$vacantMessage' SMS To Phone Number"
                         sendSms(phone, message)                               
-}}}}                         
+                        }
+                   }
+                                }
+} // end of vacant                         
