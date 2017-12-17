@@ -13,11 +13,13 @@ metadata {
 	definition (
     	name: "Area Occupancy Status", 
         namespace: "Baz2473", 
-        author: "Baz2473")		{
-		capability "Sensor"
+        author: "Baz2473")	{ 
+        capability "Actuator"
+        capability "Sensor"
         capability "estimatedTimeOfArrival"
 		attribute "occupancyStatus", "string"
         attribute "automationStatus", "string"
+        command "turnalloff"
 		command "vacant"
         command "vacanton"
         command "occupied"
@@ -43,17 +45,17 @@ metadata {
     	multiAttributeTile(name: "occupancyStatus", width: 2, height: 2, canChangeBackground: false)		{
 			tileAttribute ("device.occupancyStatus", key: "PRIMARY_CONTROL")		{
 				attributeState "vacant", label: 'Lights OFF', icon:"st.Home.home18", backgroundColor:"#606060"
-                attributeState "vacanton", label: 'Lights ON', action: "vacant", icon:"st.Home.home18", backgroundColor:"#c1b419"
+                attributeState "vacanton", label: 'Lights ON', action: "turnalloff", icon:"st.Home.home18", backgroundColor:"#c1b419"
                 attributeState "occupied", label: 'Lights OFF', action: "vacant", icon:"st.Home.home4", backgroundColor:"#156700"
-                attributeState "occupiedon", label: 'Lights ON', action: "vacant", icon:"st.Home.home4", backgroundColor:"#32cd32"
+                attributeState "occupiedon", label: 'Lights ON', action: "vacanton", icon:"st.Home.home4", backgroundColor:"#32cd32"
                 attributeState "checking", label: 'Lights OFF', action: "vacant", icon:"st.Health & Wellness.health9", backgroundColor:"#bf6700"
-                attributeState "checkingon", label: 'Lights ON', action: "vacant", icon:"st.Health & Wellness.health9", backgroundColor:"#ff8a00"
+                attributeState "checkingon", label: 'Lights ON', action: "vacanton", icon:"st.Health & Wellness.health9", backgroundColor:"#ff8a00"
 				attributeState "engaged", label: 'Lights OFF', action: "vacant", icon:"st.locks.lock.locked", backgroundColor:"#af0000"
-                attributeState "engagedon", label: 'Lights ON', action: "vacant", icon:"st.locks.lock.locked", backgroundColor:"#ff0000"
+                attributeState "engagedon", label: 'Lights ON', action: "vacanton", icon:"st.locks.lock.locked", backgroundColor:"#ff0000"
                 attributeState "donotdisturb", label: 'Lights OFF', action: "vacant", icon:"st.Office.office6", backgroundColor:"#410099"
-                attributeState "donotdisturbon", label: 'Lights ON', action: "vacant", icon:"st.Office.office6", backgroundColor:"#6d00ff"
+                attributeState "donotdisturbon", label: 'Lights ON', action: "vacanton", icon:"st.Office.office6", backgroundColor:"#6d00ff"
 				attributeState "heavyuse", label: 'Lights OFF', action: "vacant", icon:"st.Health & Wellness.health5", backgroundColor:"#8a5128"
-                attributeState "heavyuseon", label: 'Lights ON', action: "vacant", icon:"st.Health & Wellness.health5", backgroundColor:"#8a5128"
+                attributeState "heavyuseon", label: 'Lights ON', action: "vacanton", icon:"st.Health & Wellness.health5", backgroundColor:"#8a5128"
             }
        		tileAttribute ("device.status", key: "SECONDARY_CONTROL")	{
 				attributeState "default", label:'${currentValue}'
@@ -126,26 +128,26 @@ def automationon() {
 def automationoff() {
     automationStateUpdate('automationoff')
     }
-private	stateUpdate(state)	{
+private	stateUpdate(state) {
 	    if (device.currentValue('occupancyStatus') != state)
 		    updateOccupancyStatus(state)
 	        resetTile(state)
             }
-private	automationStateUpdate(automationState)	{
+private	automationStateUpdate(automationState) {
 	    if (device.currentValue('automationStatus') != automationState)
 		    updateAutomationStatus(automationState)
-	        resetAutomationTile(automationState)
+	        resetTile(automationState)
             }
 private updateOccupancyStatus(occupancyStatus = null) 	{
 	    occupancyStatus = occupancyStatus?.toLowerCase()
 	    def msgTextMap = ['vacant':'Vacant Since: ', 'vacanton':'Vacanton Since: ', 'occupied':'Occupied Since: ', 'occupiedon':'Occupiedon Since: ','checking':'Checking Status: ','checkingon':'Checkingon Status: ','engaged':'Engaged Since: ','engagedon':'Engagedon Since: ' ,'donotdisturb':'Do Not Disturb!: ','donotdisturbon':'Do Not Disturbon!: ', 'heavyuse':'Area Is In Constant Use: ','heavyuseon':'Area Is on In Constant Use: ']
-	    if (!occupancyStatus || !(msgTextMap.containsKey(occupancyStatus))) {
+        if (!occupancyStatus || !(msgTextMap.containsKey(occupancyStatus))) {
     	     log.debug "${device.displayName}: Missing or invalid parameter Occupancy Status. Allowed values are: Vacant, Occupied, Checking, Engaged, Heavyuse, Donotdisturb, Vacanton, Occupiedon, Checkingon, Engagedon, Heavyuseon or Donotdisturbon."
              return
              }
 	    sendEvent(name: "occupancyStatus", value: occupancyStatus, descriptionText: "${device.displayName} changed to ${occupancyStatus}", isStateChange: true, displayed: true)
         def statusMsg = msgTextMap[device.currentValue('occupancyStatus')] + formatLocalTime()
-	    sendEvent(name: "status", value: statusMsg, isStateChange: true, displayed: false)
+        sendEvent(name: "status", value: statusMsg, isStateChange: true, displayed: false)
         }
 private updateAutomationStatus(automationStatus = null) 	{
 	    automationStatus = automationStatus?.toLowerCase()
@@ -185,3 +187,7 @@ def getAreaState()	{
 def getAutomationState()  {
     return device.currentValue('automationStatus')
     }
+def turnalloff() {
+    if (parent)
+		parent.turnalloff()
+}
