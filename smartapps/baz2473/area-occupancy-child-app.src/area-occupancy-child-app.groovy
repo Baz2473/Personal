@@ -6,6 +6,8 @@
  Version: 1.0.0
 */
 
+private isDebug()   {  return true  }
+
 definition	(
     name: "Area Occupancy Child App",
     namespace: "Baz2473",
@@ -98,6 +100,10 @@ if (exitMotionSensors || entryMotionTimeout || monitoredDoor2) {
                  input "doors", "capability.contactSensor", title: "Doors?", multiple: true, required: true, submitOnChange: true
                  if (doors) { 
              	     input "actualEntrySensorsTimeout", "number", title: "$app.label's Timeout?",required: true, defaultValue: null, submitOnChange: true
+                     input "autoEngagedFunction", "bool", title: "Automatically Engage $app.label When A Switch Turns On?",defaultValue: false, submitOnChange: true
+                     if (autoEngagedFunction) {
+                         input "autoEngagedSwitches", "capability.switch", title: "Which Switches?", multiple: true, required: false, defaultValue: null, submitOnChange: true
+                         }
            		     input "actionOnDoorOpening", "bool", title: "Turn ON Something When\n$doors Opens?", defaultValue: false, submitOnChange: true
                      if (actionOnDoorOpening) {
                          input "onlyIfAreaVacant", "bool", title: "But Only IF $app.label Is Vacant", defaultValue: true, submitOnChnage: true
@@ -472,6 +478,9 @@ if (!childCreated()) {
     if (adjacentDoors && monitoredDoor2 && adjacentMonitoredDoorClosingSubscribed) { 
         subscribe(adjacentDoors, "contact.closed", adjacentMonitoredDoorClosingEventHandler) 
         }
+    if (autoEngagedFunction && autoEngagedSwitches && doors) {
+        subscribe(autoEngagedSwitches, "switch.on", autoEngagedSwitchesEventHandler)
+        }
     if (awayModes && noAwayMode || resetAutomationMode && resetAutomation) { 
         subscribe(location, modeEventHandler) 
         }
@@ -746,7 +755,7 @@ def mainAction() {
                                      if (thisAreaState.value.contains("vacant")) {
                                          switches3.off()
                                          } else { 
-                                                 log.info "Doing Nothing Because Your Other Area Is Still Occupied"                                                                                    
+                                                 ifDebug("Doing Nothing Because Your Other Area Is Still Occupied")                                                                                   
                                                  }} else {
                                                           if (thisArea && andThisArea) { 
                                                               def thisAreaState = thisArea.currentState("occupancyStatus")
@@ -754,7 +763,7 @@ def mainAction() {
                                                               if (thisAreaState.value.contains("vacant") && andThisAreaState.value.contains("vacant")) {
                                                                   switches3.off()     
                                                                   } else {
-                                                                          log.info "Doing Nothing Because 1 Of Your Other Areas Are Still Occupied"                                             
+                                                                          ifDebug("Doing Nothing Because 1 Of Your Other Areas Are Still Occupied")                                             
                                                                           }} else {
                                                                                    switches3.off()
                                                                                    }}}}
@@ -764,7 +773,7 @@ def mainAction() {
                                 if (thisArea && !andThisArea) { 
                                     def thisAreaState = thisArea.currentState("occupancyStatus")
                                     if (thisAreaState.value.contains("vacant")) {
-                                        log.debug "The Previous State Was $state.previousState"
+                                        ifDebug("The Previous State Was $state.previousState")
                                         if (state.previousState == 'occupiedon') {
                                           //  /*
                                             if (onlyDuringDaytime9) {
@@ -773,12 +782,12 @@ def mainAction() {
                                                 def sunset = s.sunset.time
                                                 def timenow = now()
                                                 if (timenow < sunset || timenow > sunrise) {
-                                                    log.debug "The Lights Will Dim Down In $dimDownTime Seconds"
+                                                    ifDebug("The Lights Will Dim Down In $dimDownTime Seconds")
                                                     runIn(dimDownTime, dimLights)
                                                                                            } else {}
                                                                     } else {
                                                                             // */
-                                                                            log.debug "The Lights Will Dim Down In $dimDownTime Seconds"
+                                                                            ifDebug("The Lights Will Dim Down In $dimDownTime Seconds")
                                                                             runIn(dimDownTime, dimLights)
                                                                             } /*// */ }
                                         if (state.previousState == 'heavyuseon') {
@@ -789,22 +798,22 @@ def mainAction() {
                                                 def sunset = s.sunset.time
                                                 def timenow = now()
                                                 if (timenow < sunset || timenow > sunrise) {
-                                                    log.debug "The Lights Will Dim Down In Double $dimDownTime Seconds Because Heavy Use Was Active"
+                                                    ifDebug("The Lights Will Dim Down In Double $dimDownTime Seconds Because Heavy Use Was Active")
                                                     runIn(dimDownTime * 2, dimLights)
                                                                                            } else {}
                                                                     } else {
                                                                             // */
-                                                                            log.debug "The Lights Will Dim Down In Double $dimDownTime Seconds Because Heavy Use Was Active"
+                                                                            ifDebug("The Lights Will Dim Down In Double $dimDownTime Seconds Because Heavy Use Was Active")
                                                                             runIn(dimDownTime * 2, dimLights)
                                                                             }  /*// */ }
                                         } else {
-                                                log.info "Doing Nothing Because Your Other Area Is Still Occupied"                           
+                                                ifDebug("Doing Nothing Because Your Other Area Is Still Occupied")                          
                                                 }} else {
                                                          if (thisArea && andThisArea) { 
                                                              def thisAreaState = thisArea.currentState("occupancyStatus")
                                                              def andThisAreaState = andThisArea.currentState("occupancyStatus")
                                                              if (thisAreaState.value.contains("vacant") && andThisAreaState.value.contains("vacant")) {
-                                                                 log.debug "The Previous State Was $state.previousState"
+                                                                 ifDebug("The Previous State Was $state.previousState")
                                                                  if (state.previousState == 'occupiedon') { 
                                                                      //  /*
                                                                      if (onlyDuringDaytime9) {
@@ -813,12 +822,12 @@ def mainAction() {
                                                                          def sunset = s.sunset.time
                                                                          def timenow = now()
                                                                          if (timenow < sunset || timenow > sunrise) {
-                                                                             log.debug "The Lights Will Dim Down In $dimDownTime Seconds"
+                                                                             ifDebug("The Lights Will Dim Down In $dimDownTime Seconds")
                                                                              runIn(dimDownTime, dimLights)
                                                                                                                     } else {}
                                                                                              } else {
                                                                                                      // */
-                                                                                                     log.debug "The Lights Will Dim Down In $dimDownTime Seconds"
+                                                                                                     ifDebug("The Lights Will Dim Down In $dimDownTime Seconds")
                                                                                                      runIn(dimDownTime, dimLights)
                                                                                                      } /*// */ }
                                                                  if (state.previousState == 'heavyuseon') {
@@ -829,18 +838,18 @@ def mainAction() {
                                                                            def sunset = s.sunset.time
                                                                            def timenow = now()
                                                                            if (timenow < sunset || timenow > sunrise) {
-                                                                               log.debug "The Lights Will Dim Down In Double $dimDownTime Seconds Because Heavy Use Was Active"
+                                                                               ifDebug("The Lights Will Dim Down In Double $dimDownTime Seconds Because Heavy Use Was Active")
                                                                                runIn(dimDownTime * 2, dimLights)
                                                                                                                       } else {}
                                                                                              } else {
                                                                                                      // */
-                                                                                                     log.debug "The Lights Will Dim Down In Double $dimDownTime Seconds Because Heavy Use Was Active"
+                                                                                                     ifDebug("The Lights Will Dim Down In Double $dimDownTime Seconds Because Heavy Use Was Active")
                                                                                                      runIn(dimDownTime * 2, dimLights)
                                                                                                      }  /*// */ }
                                                              } else {
-                                                                     log.info "Doing Nothing Because 1 Of Your Other Areas Are Still Occupied"                                                                                                                
+                                                                     ifDebug("Doing Nothing Because 1 Of Your Other Areas Are Still Occupied")                                                                                                                
                                                                      }} else {
-                                                                              log.debug "The Previous State Was $state.previousState"
+                                                                              ifDebug("The Previous State Was $state.previousState")
                                                                               if (state.previousState == 'occupiedon') {
                                                                                   //  /*
                                                                                   if (onlyDuringDaytime9) {
@@ -849,12 +858,12 @@ def mainAction() {
                                                                                       def sunset = s.sunset.time
                                                                                       def timenow = now()
                                                                                       if (timenow < sunset || timenow > sunrise) {
-                                                                                          log.debug "The Lights Will Dim Down In $dimDownTime Seconds"
+                                                                                          ifDebug("The Lights Will Dim Down In $dimDownTime Seconds")
                                                                                           runIn(dimDownTime, dimLights)
                                                                                                                                  } else {}
                                                                                                           } else {
                                                                                                                   // */
-                                                                                                                  log.debug "The Lights Will Dim Down In $dimDownTime Seconds"
+                                                                                                                  ifDebug("The Lights Will Dim Down In $dimDownTime Seconds")
                                                                                                                   runIn(dimDownTime, dimLights)
                                                                                                                   } /*// */ }
                                                                               if (state.previousState == 'heavyuseon') {
@@ -865,24 +874,32 @@ def mainAction() {
                                                                                       def sunset = s.sunset.time
                                                                                       def timenow = now()
                                                                                       if (timenow < sunset || timenow > sunrise) {
-                                                                                          log.debug "The Lights Will Dim Down In Double $dimDownTime Seconds Because Heavy Use Was Active"
+                                                                                          ifDebug("The Lights Will Dim Down In Double $dimDownTime Seconds Because Heavy Use Was Active")
                                                                                           runIn(dimDownTime * 2, dimLights)
                                                                                                                                  } else {}
                                                                                                            } else {
                                                                                                                    // */
-                                                                                                                   log.debug "The Lights Will Dim Down In Double $dimDownTime Seconds Because Heavy Use Was Active"
+                                                                                                                   ifDebug("The Lights Will Dim Down In Double $dimDownTime Seconds Because Heavy Use Was Active")
                                                                                                                    runIn(dimDownTime * 2, dimLights)
                                                                                                                    }  /*// */ }
                                                                                   }}}}                      
 }}}}                    
 //888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
 def adjacentMonitoredDoorClosingEventHandler(evt) {
-    log.info "Re-Evaluation Caused By An Ajacent Monitored Door Closing"
+    ifDebug("Re-Evaluation Caused By An Ajacent Monitored Door Closing")
     mainAction()
 } 
 def adjacentMonitoredDoorOpeningEventHandler(evt) {
-    log.info "Re-Evaluation Caused By An Ajacent Monitored Door Opening"
+    ifDebug("Re-Evaluation Caused By An Ajacent Monitored Door Opening")
     mainAction()
+}
+def autoEngagedSwitchesEventHandler(evt) {
+    def child = getChildDevice(getArea())
+    def areaState = child.getAreaState()             
+    def doorsState = doors.currentState("contact") 
+    if (!doorsState.value.contains("open") && ['vacant','vacanton'].contains(areaState)) {
+         engaged() 
+         }
 }
 def checkableLightsSwitchedOnEventHandler(evt) {
     def child = getChildDevice(getArea())
@@ -890,40 +907,41 @@ def checkableLightsSwitchedOnEventHandler(evt) {
     if (['vacant'].contains(areaState)) { 
           child.generateEvent('vacanton')
           if(occupancyStatusChangesSubscribed) { 
-             log.info "Re-Evaluation Caused By $app.label Changing To VacantOn"
+             ifDebug("Re-Evaluation Caused By $app.label Changing To VacantOn")
              mainAction() 
           }} else {
                   if (['occupied'].contains(areaState)) { 
                         child.generateEvent('occupiedon')
                         if(occupancyStatusChangesSubscribed) { 
-                           log.info "Re-Evaluation Caused By $app.label Changing To OccupiedOn"
+                           ifDebug("Re-Evaluation Caused By $app.label Changing To OccupiedOn")
                            mainAction() 
                         }} else {
                                 if (['engaged'].contains(areaState)) { 
                                       child.generateEvent('engagedon')
                                       if(occupancyStatusChangesSubscribed) { 
-      									 log.info "Re-Evaluation Caused By $app.label Changing To EngagedOn"
+      									 ifDebug("Re-Evaluation Caused By $app.label Changing To EngagedOn")
       									 mainAction() 
                                       }} else {
                                               if (['checking'].contains(areaState)) { 
                                                     child.generateEvent('checkingon')
                                                     if(occupancyStatusChangesSubscribed) { 
-                                                       log.info "Re-Evaluation Caused By $app.label Changing To CheckingOn"
+                                                       ifDebug("Re-Evaluation Caused By $app.label Changing To CheckingOn")
      												   mainAction() 
                                                     }} else {
                                                             if (['heavyuse'].contains(areaState)) {   
                                                                   child.generateEvent('heavyuseon')
                                                                   if(occupancyStatusChangesSubscribed) { 
-                                                                     log.info "Re-Evaluation Caused By $app.label Changing To HeavyuseOn"
+                                                                     ifDebug("Re-Evaluation Caused By $app.label Changing To HeavyuseOn")
                                                                      mainAction() 
                                                                   }} else {
                                                                           if (['donotdisturb'].contains(areaState)) { 
                                                                                 child.generateEvent('donotdisturbon')
                                                                                 if(occupancyStatusChangesSubscribed) { 
-                                                                                   log.info "Re-Evaluation Caused By $app.label Changing To DonotdisturbON"
+                                                                                   ifDebug("Re-Evaluation Caused By $app.label Changing To DonotdisturbON")
                                                                                    mainAction() 
 }}}}}}}}
 def checkableLightsSwitchedOffEventHandler(evt) {
+    ifDebug("checkableLightsSwitchedOffEventHandler")
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
     if (['vacanton'].contains(areaState)) { 
@@ -945,6 +963,7 @@ def checkableLightsSwitchedOffEventHandler(evt) {
                                                                                 child.generateEvent('donotdisturb')
 }}}}}}} 
 def checking() {
+ifDebug("checking")
 def child = getChildDevice(getArea())
 def areaState = child.getAreaState()
     if (checkableLights) {
@@ -1738,3 +1757,5 @@ def turnalloff() {
                                                                 }
 }
 } // end of turnalloff
+
+private ifDebug(msg = null)     {  if (msg && isDebug()) log.debug msg  }
