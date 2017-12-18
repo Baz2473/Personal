@@ -6,7 +6,13 @@
  Version: 1.0.0
 */
 
-private isDebug()   {  return true  }
+private isDebug() {  //return true  }
+        if (debugging) { 
+            return true 
+            } else {
+                    return false
+                    }
+}
 
 definition	(
     name: "Area Occupancy Child App",
@@ -34,6 +40,10 @@ def areaName() {
           section {
 	      paragraph "Area Name:\n${app.label}"
 }}  
+     section("debugLogging") {
+     input "debugging", "bool", title: "Enable Logging?", defaultValue: false, submitOnChange: true
+     }
+     
      section("Select Your Method For Detecting Occupancy\nFor $app.label!") {
      if(!contactOrAccelerationActivated && !followedBy) {
      input "motionActivated", "bool", title: "Motion?", defaultValue: false, submitOnChange: true
@@ -941,7 +951,6 @@ def checkableLightsSwitchedOnEventHandler(evt) {
                                                                                    mainAction() 
 }}}}}}}}
 def checkableLightsSwitchedOffEventHandler(evt) {
-    ifDebug("checkableLightsSwitchedOffEventHandler")
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
     if (['vacanton'].contains(areaState)) { 
@@ -963,7 +972,6 @@ def checkableLightsSwitchedOffEventHandler(evt) {
                                                                                 child.generateEvent('donotdisturb')
 }}}}}}} 
 def checking() {
-ifDebug("checking")
 def child = getChildDevice(getArea())
 def areaState = child.getAreaState()
     if (checkableLights) {
@@ -977,7 +985,7 @@ def areaState = child.getAreaState()
                                  child.generateEvent('checking')
                                  }
     if(occupancyStatusChangesSubscribed) { 
-       log.info "Re-Evaluation Caused By $app.label Changing To Checking"
+       ifDebug("Re-Evaluation Caused By $app.label Changing To Checking")
        mainAction() 
        }
        
@@ -1000,7 +1008,7 @@ private childCreated() {
             return false
 }
 def childUninstalled() {
-    log.debug "${app.label} Area Has Been Uninstalled!"
+    ifDebug("${app.label} Area Has Been Uninstalled!")
 }
 def dimLights() {
     def child = getChildDevice(getArea())
@@ -1015,19 +1023,19 @@ def dimLights() {
                 switchesOffCountdown()        
 }}}} 
 def dimmableSwitches1OnEventHandler(evt) { 
-    log.info "Re-Evaluated by Dimmable Switches1 On"
+    ifDebug("Re-Evaluated by Dimmable Switches1 On")
     mainAction() 
 }
 def dimmableSwitches1OffEventHandler(evt) {
-    log.info "Re-Evaluated by Dimmable Switches1 Off"
+    ifDebug("Re-Evaluated by Dimmable Switches1 Off")
     mainAction() 
 }
 def dimmableSwitches2OnEventHandler(evt) {
-    log.info "Re-Evaluated by Dimmable Switches2 On"
+    ifDebug("Re-Evaluated by Dimmable Switches2 On")
     mainAction() 
 }
 def dimmableSwitches2OffEventHandler(evt) {
-    log.info "Re-Evaluated by Dimmable Switches2 Off"
+    ifDebug("Re-Evaluated by Dimmable Switches2 Off")
     mainAction() 
 }
 private dimmableSwitches1On() {
@@ -1035,7 +1043,7 @@ private dimmableSwitches1On() {
         def automationState = child.getAutomationState()
         if (!switchOnModeControl) {
             if (dimmableSwitches1 && switchOnControl && ['automationon'].contains(automationState)) {      
-                log.debug "The Selected Switch(es) Have Either Been Turned 'ON' Or Had Their Respective Level(s) & Color(s) Set"
+                ifDebug("The Selected Switch(es) Have Either Been Turned 'ON' Or Had Their Respective Level(s) & Color(s) Set")
                 dimmableSwitches1.each {
                 def currentLevel = it.currentValue("level")
                 if (currentLevel < setLevelTo) {  
@@ -1047,7 +1055,7 @@ private dimmableSwitches2On() {
         if (switchOnModeControl) {
            def currentMode = location.currentMode
            if (dimmableSwitches2 && switchOnControl && ['automationon'].contains(automationState)) {      
-               log.debug "The Selected Switch(es) Have Either Been Turned 'ON' Or Had Their Respective Level(s) & Color(s) Set"
+               ifDebug("The Selected Switch(es) Have Either Been Turned 'ON' Or Had Their Respective Level(s) & Color(s) Set")
                dimmableSwitches2.each {    
                def currentLevel = it.currentValue("level")
                if (currentMode.name == duringMode1 && currentLevel < setLevelTo1) {
@@ -1077,7 +1085,7 @@ def areaState = child.getAreaState()
                                  child.generateEvent('donotdisturb')
                                  }
     if(occupancyStatusChangesSubscribed) {
-       log.info "Re-Evaluation Caused By $app.label Changing To Do Not Disturb"
+       ifDebug("Re-Evaluation Caused By $app.label Changing To Do Not Disturb")
        mainAction() 
        }
        
@@ -1087,7 +1095,7 @@ def doaoff() {
     doorOpeningAction2.each {
     if (it.currentValue("switch") == 'on') {
         it.setLevel(0)
-        } else { log.debug "the light was not on so I can't turn it off"
+        } else { ifDebug("the light was not on so I can't turn it off")
                             }
 }} // end of doa2Off
 
@@ -1105,18 +1113,18 @@ def engaged() {
                                      child.generateEvent('engaged')
                                      }
         if(occupancyStatusChangesSubscribed) { 
-           log.info "Re-Evaluation Caused By $app.label Changing To Engaged"
+           ifDebug("Re-Evaluation Caused By $app.label Changing To Engaged")
            mainAction() 
            }
 
 } // end of engaged
 
 def entryContactOpenedEventHandler(evt) {
-    log.debug "An Entry Contact Was Opened In $app.label"
+    ifDebug("An Entry Contact Was Opened In $app.label")
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
     if (['vacant'].contains(areaState)) {
-          log.debug "An Entry Contact Was Opened, $app.label Was 'VACANT', So 'OCCUPIED' Has Been Set!"
+          ifDebug("An Entry Contact Was Opened, $app.label Was 'VACANT', So 'OCCUPIED' Has Been Set!")
           occupied()                                                                    
           }
 
@@ -1126,21 +1134,21 @@ def exitContactOpenedEventHandler(evt) {
      if (onlyIfThisSensor2 && onlyIfInactive2) {
          def cMotionState = onlyIfThisSensor2.currentState("motion")
          if (!cMotionState.value.contains("active")) {
-              log.debug "An Exit Contact Was Opened & The Motion Requirement Was Met"
+              ifDebug("An Exit Contact Was Opened & The Motion Requirement Was Met")
               def child = getChildDevice(getArea())
               def areaState = child.getAreaState()
               if (['occupied','occupiedon'].contains(areaState)) {
-                    log.debug "$app.label Was 'OCCUPIED', So 'VACANT' State Has Been Set!"
+                    ifDebug("$app.label Was 'OCCUPIED', So 'VACANT' State Has Been Set!")
                     vacant()                                                                    
                     }
                                                      }
                                                } else {
                                                        if (!onlyIfInactive2) {
-                                                            log.debug "An Exit Contact Was Opened & There Was No Motion Restriction Set"
+                                                            ifDebug("An Exit Contact Was Opened & There Was No Motion Restriction Set")
                                                             def child = getChildDevice(getArea())
                                                             def areaState = child.getAreaState()
                                                             if (['occupied','occupiedon'].contains(areaState)) {
-                                                                  log.debug "$app.label Was 'OCCUPIED', So 'vacant' State Has Been Set!"
+                                                                  ifDebug("$app.label Was 'OCCUPIED', So 'vacant' State Has Been Set!")
                                                                   vacant()                                                                     
                                                                   }
                                                                              }
@@ -1149,7 +1157,7 @@ def exitContactOpenedEventHandler(evt) {
 } // end of exitContactOpenedEventHandler
 
 def	entryMotionActiveEventHandler(evt) {
-    log.info "Re-Evaluation Caused By An Entry Motion Sensor Being 'ACTIVE'"
+    ifDebug("Re-Evaluation Caused By An Entry Motion Sensor Being 'ACTIVE'")
     unschedule(engaged)
     unschedule(vacant)
     unschedule(switches2Off)
@@ -1161,7 +1169,7 @@ def	entryMotionActiveEventHandler(evt) {
     mainAction() 
 }
 def	entryMotionInactiveEventHandler(evt) {
-    log.info "Re-Evaluation Caused By An Entry Motion Sensor Being 'INACTIVE'"
+    ifDebug("Re-Evaluation Caused By An Entry Motion Sensor Being 'INACTIVE'")
     unschedule(engaged)
     mainAction() 
 }
@@ -1169,7 +1177,7 @@ def exitMotionActiveEventHandler(evt) {
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
     if (!['vacant'].contains(areaState)) {       
-           log.info "Re-Evaluation Caused By An Exit Motion Sensor Being 'ACTIVE'"
+           ifDebug("Re-Evaluation Caused By An Exit Motion Sensor Being 'ACTIVE'")
            mainAction() 
            }
 }
@@ -1177,7 +1185,7 @@ def exitMotionInactiveEventHandler(evt) {
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
     if (!['vacant'].contains(areaState)) {
-           log.info "Re-Evaluation Caused By An Exit Motion Sensor Being 'INACTIVE'"
+           ifDebug("Re-Evaluation Caused By An Exit Motion Sensor Being 'INACTIVE'")
            mainAction() 
            }
 }
@@ -1188,7 +1196,7 @@ def exitMotionSensorsWhenDoorIsOpenActiveEventHandler(evt) {
     if (adjacentDoors) {
         def adjacentDoorsState = adjacentDoors.currentValue("contact")
         if (adjacentDoorsState.contains("open")) {
-            log.info "Re-Evaluation Caused By An (OPEN) Exit Motion Sensor Being 'ACTIVE'"
+            ifDebug("Re-Evaluation Caused By An (OPEN) Exit Motion Sensor Being 'ACTIVE'")
             mainAction()
                                                  }
                        }
@@ -1201,7 +1209,7 @@ def exitMotionSensorsWhenDoorIsOpenInactiveEventHandler(evt) {
     if (adjacentDoors) {
         def adjacentDoorsState = adjacentDoors.currentValue("contact")
         if (adjacentDoorsState.contains("open")) {
-            log.info "Re-Evaluation Caused By An (OPEN) Exit Motion Sensor Being 'INACTIVE'"
+            ifDebug("Re-Evaluation Caused By An (OPEN) Exit Motion Sensor Being 'INACTIVE'")
             mainAction()
                                                  }
                        }
@@ -1214,7 +1222,7 @@ def exitMotionSensorsWhenDoorIsClosedActiveEventHandler(evt) {
     if (adjacentDoors) {
         def adjacentDoorsState = adjacentDoors.currentValue("contact")
         if (!adjacentDoorsState.contains("open")) {
-             log.info "Re-Evaluation Caused By A (CLOSED) Exit Motion Sensor Being 'ACTIVE'"
+             ifDebug("Re-Evaluation Caused By A (CLOSED) Exit Motion Sensor Being 'ACTIVE'")
              mainAction()
                                                   }
                        }
@@ -1227,7 +1235,7 @@ def exitMotionSensorsWhenDoorIsClosedInactiveEventHandler(evt) {
     if (adjacentDoors) {
         def adjacentDoorsState = adjacentDoors.currentValue("contact")
         if (!adjacentDoorsState.contains("open")) {
-             log.info "Re-Evaluation Caused By A (CLOSED) Exit Motion Sensor Being 'INACTIVE'"
+             ifDebug("Re-Evaluation Caused By A (CLOSED) Exit Motion Sensor Being 'INACTIVE'")
              mainAction()
                                                   }
                        }
@@ -1263,7 +1271,7 @@ def followedByAccelerationActiveEventHandler(evt) {
         
            if (!onlyDuringDaytime3 && !onlyDuringNighttime3 && onlyDuringCertainTimes2) {
                 def between3 = timeOfDayIsBetween(fromTime3, toTime3, new Date(), location.timeZone)
-                log.debug "Between3 = $between3"
+                ifDebug("Between3 = $between3")
                 if (between3) {
                     switches4.on()   
                     }
@@ -1301,11 +1309,11 @@ def followedByContactOpenedEventHandler(evt) {
 } // end of followedByContactOpenedEventHandler
 
 def forceVacantIf() {
-    log.debug "forcing Vacant Check"
+    ifDebug("forcing Vacant Check")
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
     def entryMotionState = entryMotionSensors.currentState("motion")
-    log.debug "The entry Motion State Is: $entryMotionState"
+    ifDebug("The entry Motion State Is: $entryMotionState")
     if (!['vacant'].contains(areaState) && !entryMotionState.value.contains("active")) { 
           vacant()
           }
@@ -1327,7 +1335,7 @@ def areaState = child.getAreaState()
                                  child.generateEvent('heavyuse')
                                  }
     if(occupancyStatusChangesSubscribed) { 
-       log.info "Re-Evaluation Caused By $app.label Changing To Heavy Use"
+       ifDebug("Re-Evaluation Caused By $app.label Changing To Heavy Use")
        mainAction() 
        }
 
@@ -1338,9 +1346,9 @@ def leftHome() {
     def areaState = child.getAreaState()
     def automationState = child.getAutomationState()
     if (['automationon'].contains(automationState)) {
-          log.debug "$app.label was set to 'VACANT' because the mode changed to away or Heavy Use Was Disabled!"
+          ifDebug("$app.label was set to 'VACANT' because the mode changed to away or Heavy Use Was Disabled!")
           vacant()
-          log.debug "switchesOffCountdown Sent"
+          ifDebug("switchesOffCountdown Sent")
           switchesOffCountdown()  
           }
 }
@@ -1349,11 +1357,11 @@ def	modeEventHandler(evt) {
     def areaState = child.getAreaState()
     def automationState = child.getAutomationState()
     if (resetAutomation && resetAutomationMode && resetAutomationMode.contains(evt.value) && ['automationoff'].contains(automationState)) {
-       log.info "$app.label's Automation Has Been Enabled Because Your Reset Mode Was ACTIVATED!"
+       ifDebug("$app.label's Automation Has Been Enabled Because Your Reset Mode Was ACTIVATED!")
        child.generateAutomationEvent('automationon') 
        }       
     if (awayModes && awayModes.contains(evt.value) && noAwayMode) {
-        log.debug "$app.label Was Set To 'VACANT' Because Your Away Mode Was 'ACTIVATED'!"
+        ifDebug("$app.label Was Set To 'VACANT' Because Your Away Mode Was 'ACTIVATED'!")
         leftHome() 
         }
 }   
@@ -1366,10 +1374,10 @@ def monitoredDoorOpenedAction() {
         }
         mainAction()
         if (sendDoorOpeningNotification) {
-            log.info "Door Opening Notifications Is Active"
+            ifDebug("Door Opening Notifications Is Active")
             String message = doorOpeningMessage
             if (location.contactBookEnabled && recipients) {
-                log.debug "You Have Chosen To Send Notifications & Your Contact Book Is Enabled! Sending Message '$doorOpeningMessage'"
+                ifDebug("You Have Chosen To Send Notifications & Your Contact Book Is Enabled! Sending Message '$doorOpeningMessage'")
                 sendNotificationToContacts(message, recipients) 
                 }
                                          }
@@ -1386,10 +1394,10 @@ def monitoredDoorOpenedAction2() {
         }
         mainAction()
         if (sendDoorOpeningNotification2) {
-            log.debug "Door Opening Notifications Is Active"
+            ifDebug("Door Opening Notifications Is Active")
             String message = doorOpeningMessage2
             if (location.contactBookEnabled && recipients) {
-                log.debug "You Have Chosen To Send Notifications & Your Contact Book Is Enabled! Sending Message '$doorOpeningMessage2'"
+                ifDebug("You Have Chosen To Send Notifications & Your Contact Book Is Enabled! Sending Message '$doorOpeningMessage2'")
                 sendNotificationToContacts(message, recipients) 
                 }
                                           }
@@ -1407,7 +1415,7 @@ def monitoredDoorOpenedEventHandler(evt) {
     unschedule(heavyuseCheck)
     unschedule(checkOtherAreaAgain)
     if (!actionOnDoorOpening) {                      
-        log.info "Re-Evaluated by A Monitored Door Opening"
+        ifDebug("Re-Evaluated by A Monitored Door Opening")
         mainAction() 
         }
     if (actionOnDoorOpening) {
@@ -1426,7 +1434,7 @@ def monitoredDoorOpenedEventHandler(evt) {
                 if (timenow < sunset || timenow > sunrise) {
                     if (onlyIfAreaVacant) {
                         if (['vacant'].contains(areaState)) {
-                              log.debug "The Light Was Turned ON To $setLevelAt % Because The Door Was Opened & $app.label Was VACANT & The Time Selection Matched!"
+                              ifDebug("The Light Was Turned ON To $setLevelAt % Because The Door Was Opened & $app.label Was VACANT & The Time Selection Matched!")
                               monitoredDoorOpenedAction()
                                                             } else {}
                                           } else {
@@ -1438,7 +1446,7 @@ def monitoredDoorOpenedEventHandler(evt) {
                 if (timenow > sunset || timenow < sunrise) {
                     if (onlyIfAreaVacant) {
                         if (['vacant'].contains(areaState)) {
-                              log.debug "The Light Was Turned ON To $setLevelAt % Because The Door Was Opened & $app.label Was VACANT & The Time Selection Matched!"
+                              ifDebug("The Light Was Turned ON To $setLevelAt % Because The Door Was Opened & $app.label Was VACANT & The Time Selection Matched!")
                               monitoredDoorOpenedAction()
                                                             } else {}
                                           } else {
@@ -1450,7 +1458,7 @@ def monitoredDoorOpenedEventHandler(evt) {
                 if (timenow < sunset || timenow > sunrise) {
                     if (onlyIfAreaVacant2) { 
                         if (['vacant'].contains(areaState)) {
-                              log.debug "The Light Was Turned ON To $setLevelAt % Because The Door Was Opened & $app.label Was VACANT & The Time Selection Matched!"
+                              ifDebug("The Light Was Turned ON To $setLevelAt % Because The Door Was Opened & $app.label Was VACANT & The Time Selection Matched!")
                               monitoredDoorOpenedAction2()
                                                             } else {}
                                            } else {
@@ -1462,7 +1470,7 @@ def monitoredDoorOpenedEventHandler(evt) {
                 if (timenow > sunset || timenow < sunrise) {
                     if (onlyIfAreaVacant2) { 
                         if (['vacant'].contains(areaState)) {
-                              log.debug "The Light Was Turned ON To $setLevelAt % Because The Door Was Opened & $app.label Was VACANT & The Time Selection Matched!"
+                              ifDebug("The Light Was Turned ON To $setLevelAt % Because The Door Was Opened & $app.label Was VACANT & The Time Selection Matched!")
                               monitoredDoorOpenedAction2()
                                                             } else {}
                                            } else {
@@ -1474,13 +1482,13 @@ def monitoredDoorOpenedEventHandler(evt) {
         
            if (!onlyDuringDaytime && !onlyDuringNighttime && !onlyDuringDaytime2 && !onlyDuringNighttime2 && onlyDuringCertainTimes) {
                 def between = timeOfDayIsBetween(fromTime, toTime, new Date(), location.timeZone)
-                log.debug "Between = $between"
+                ifDebug("Between = $between")
                 def between2 = timeOfDayIsBetween(fromTime2, toTime2, new Date(), location.timeZone)
-                log.debug "Between2 = $between2"
+                ifDebug("Between2 = $between2")
                 if (between) {
                     if (onlyIfAreaVacant) {
                         if (['vacant'].contains(areaState)) {
-                              log.debug "The Light Was Turned ON To $setLevelAt % Because The Door Was Opened & $app.label Was VACANT & The Time Selection Matched!"
+                              ifDebug("The Light Was Turned ON To $setLevelAt % Because The Door Was Opened & $app.label Was VACANT & The Time Selection Matched!")
                               monitoredDoorOpenedAction()
                                                             } else {}
                                           } else {
@@ -1494,19 +1502,19 @@ def monitoredDoorOpenedEventHandler(evt) {
                    if (theMotionState.value.contains("active")) { 
                        if (onlyIfAreaVacant2) {
                            if (['vacant'].contains(areaState)) {
-                                 log.debug "The Light Was Turned ON To $setLevelAt % Because The Door Was Opened & $app.label Was VACANT & The Time Selection Matched!"
+                                 ifDebug("The Light Was Turned ON To $setLevelAt % Because The Door Was Opened & $app.label Was VACANT & The Time Selection Matched!")
                                  monitoredDoorOpenedAction2()
-                                                               } else {log.debug "Doing NOTHING because $onlyIfAreaVacant2 was not vacant"}
+                                                               } else {ifDebug("Doing NOTHING because $onlyIfAreaVacant2 was not vacant")}
                                               } else {
                                                       monitoredDoorOpenedAction2()
                                                       }
-                                                                } else {log.debug "Doing NOTHING because $onlyIfThisSensorIsActive was not active"}
+                                                                } else {ifDebug("Doing NOTHING because $onlyIfThisSensorIsActive was not active")}
                                           } else {
                                                   if (onlyIfAreaVacant2) {
                                                       if (['vacant'].contains(areaState)) {
-                                                            log.debug "The Light Was Turned ON To $setLevelAt % Because The Door Was Opened & $app.label Was VACANT & The Time Selection Matched!"
+                                                            ifDebug("The Light Was Turned ON To $setLevelAt % Because The Door Was Opened & $app.label Was VACANT & The Time Selection Matched!")
                                                             monitoredDoorOpenedAction2()
-                                                                                          } else {log.debug "Doing NOTHING because $onlyIfAreaVacant2 was not vacant"}
+                                                                                          } else {ifDebug("Doing NOTHING because $onlyIfAreaVacant2 was not vacant")}
                                                                          } else {
                                                                                  monitoredDoorOpenedAction2()
                                                                                  }
@@ -1520,12 +1528,12 @@ def monitoredDoorOpenedEventHandler(evt) {
 } // end of monitoredDoorOpenedEventHandler
 
 def monitoredDoorClosedEventHandler(evt) { 
-    log.info "Re-Evaluated by A Monitored Door Closing"
+    ifDebug("Re-Evaluated by A Monitored Door Closing")
     if (!actionOnDoorClosing) {
          if (turnOffAfter) {
-             log.debug "Turn Off After Was True SO "
+             ifDebug("Turn Off After Was True SO ")
              runIn(offAfter, doaoff, [overwrite: false]) 
-             log.debug "The Lights Should Go Off In $offAfter Seconds"
+             ifDebug("The Lights Should Go Off In $offAfter Seconds")
                        } else {
                                mainAction()
                                }
@@ -1535,16 +1543,16 @@ def monitoredDoorClosedEventHandler(evt) {
     if (actionOnDoorClosing) {
         def doorsState = doors.currentState("contact")
         if (doorsState.value.contains("open")) {
-            log.info "doing NOTHING because A Door Is Still Open"
+            ifDebug("doing NOTHING because A Door Is Still Open")
                                                } else {
-                                                       log.debug "The Light Was Turned OFF Because The Door Was Closed"
+                                                       ifDebug("The Light Was Turned OFF Because The Door Was Closed")
                                                        doorOpeningAction.each {
                                                        it.setLevel(0)
-                                                       log.info "Re-Evaluated by A Monitored Door Closing"
+                                                       ifDebug("Re-Evaluated by A Monitored Door Closing")
                                                        mainAction() 
                                                        }
                                                        if (sendDoorClosingNotification) {
-                                                           log.info "Door Closing Notifications Is Active"
+                                                           ifDebug("Door Closing Notifications Is Active")
                                                            String message = doorClosingMessage
                                                            if (location.contactBookEnabled && recipients) {
                                                                sendNotificationToContacts(message, recipients) 
@@ -1569,7 +1577,7 @@ def occupied() {
                                  child.generateEvent('occupied')
                                  }
         if(occupancyStatusChangesSubscribed) { 
-           log.info "Re-Evaluation Caused By $app.label Changing To Occupied"
+           ifDebug("Re-Evaluation Caused By $app.label Changing To Occupied")
            mainAction() 
            }
         if (instantHeavyuse) {
@@ -1577,14 +1585,14 @@ def occupied() {
                 heavyuse()
                 }}
     if (sendOccupiedNotification) {
-        log.info "Occupied Notifications Is Active"
+        ifDebug("Occupied Notifications Is Active")
         String message = occupiedMessage
         if (location.contactBookEnabled && recipients) {
-            log.debug "You Have Chosen To Send Notifications & Your Contact Book Is Enabled! Sending Message '$occupiedMessage'"
+            ifDebug("You Have Chosen To Send Notifications & Your Contact Book Is Enabled! Sending Message '$occupiedMessage'")
             sendNotificationToContacts(message, recipients) 
             } else { 
                     if (phone) { 
-                        log.debug "You Have Chosen To Send Notifications But Your Contact Book Is Disabled! Sending '$occupiedMessage' SMS To Phone Number"
+                        ifDebug("You Have Chosen To Send Notifications But Your Contact Book Is Disabled! Sending '$occupiedMessage' SMS To Phone Number")
                         sendSms(phone, message) 
                         }                                                                                                        
 }}}
@@ -1592,7 +1600,7 @@ def otherAreaOccupancyStatusEventHandler(evt) {
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
     if (!['vacant'].contains(areaState)) {
-           log.info "Vacant Force Check Performed by $otherArea Occupancy Changing To Your Required State"
+           ifDebug("Vacant Force Check Performed by $otherArea Occupancy Changing To Your Required State")
            forceVacantIf()
 }}
 def presenceAwayEventHandler(evt) { 
@@ -1606,7 +1614,7 @@ def resetGate() {
     state.gateHasBeenOpened = false
 }
 def resetOccupiedCounter() {
-    log.info "The Occupied Counter Has Been Reset Dut To Inactivity For Your Entire Time Count"
+    ifDebug("The Occupied Counter Has Been Reset Dut To Inactivity For Your Entire Time Count")
     state.occupiedCounter = 0
 }
 def spawnChildDevice(areaName) {
@@ -1615,7 +1623,7 @@ def spawnChildDevice(areaName) {
 	     def child = addChildDevice("Baz2473", "Area Occupancy Status", getArea(), null, [name: getArea(), label: areaName, completedSetup: true])
 }
 def sunriseHandler(evt) {
-    log.debug "Sun has risen!"
+    ifDebug("The Sun has risen! Performing Any Sunrise Actions")
     if (onAtSunriseChosen) {
         switchToTurnOnAtThisTime.on()
         }
@@ -1624,7 +1632,7 @@ def sunriseHandler(evt) {
         }
 }
 def sunsetHandler(evt) {
-    log.debug "Sun has set!"
+    ifDebug("The Sun has set! Performing Any Sunset Actions")
     if (onAtSunsetChosen) {
         switchToTurnOnAtThisTime.on()
         }
@@ -1637,16 +1645,16 @@ def switchesOffCountdown() {
     def areaState = child.getAreaState()
     def automationState = child.getAutomationState()
     if (offRequired && ['automationon'].contains(automationState)) {
-        log.info "The Lights Will Be Switched Off In $switchesOffCountdownInSeconds Seconds"
+        ifDebug("The Lights Will Be Switched Off In $switchesOffCountdownInSeconds Seconds")
         runIn(switchesOffCountdownInSeconds, switches2Off)  
         }
 }
 def switches2OnEventHandler(evt) { 
-    log.info "Re-Evaluated by Switches2 On"
+    ifDebug("Re-Evaluated by Switches2 On")
     mainAction() 
 }
 def switches2OffEventHandler(evt) { 
-    log.info "Re-Evaluated by Switches2 Off"
+    ifDebug("Re-Evaluated by Switches2 Off")
     mainAction() 
 }
 def switches2Off() {
@@ -1656,34 +1664,34 @@ def switches2Off() {
     }
 }
 def switches3OnEventHandler(evt) { 
-    log.info "Re-Evaluated by Switches3 On"
+    ifDebug("Re-Evaluated by Switches3 On")
     mainAction() 
 }
 def switches3OffEventHandler(evt) { 
-    log.info "Re-Evaluated by Switches3 Off"
+    ifDebug("Re-Evaluated by Switches3 Off")
     mainAction() 
 }
 def turnOffAtThisTime() {
-    log.info "the time turn OFF test worked"
+    ifDebug("the time turn OFF test worked")
     def child = getChildDevice(getArea())
     def automationState = child.getAutomationState()
     switchOffAtThisTime.each {
     def switchOffAtThisTimeState = switchOffAtThisTime.currentState("switch")  
     if (switchOffAtThisTimeState.value.contains("on") && ['automationon'].contains(automationState)) { 
         it.off()
-        log.info "the time turn OFF test completed"
+        ifDebug("the time turn OFF test completed")
         }
                              }
 } 
 def turnOnAtThisTime() {
-    log.info "the time turn ON test worked"
+    ifDebug("the time turn ON test worked")
     def child = getChildDevice(getArea())
     def automationState = child.getAutomationState()
     switchOnAtThisTime.each {
     def switchOnAtThisTimeState = switchOnAtThisTime.currentState("switch")  
     if (!switchOnAtThisTimeState.value.contains("on") && ['automationon'].contains(automationState)) { 
          it.on()
-         log.info "the time turn ON test completed"
+         ifDebug("the time turn ON test completed")
          }
                             }
 }
@@ -1704,18 +1712,18 @@ def vacant() {
                              mainAction()
                              }
     if(occupancyStatusChangesSubscribed) {
-       log.info "Re-Evaluation Caused By $app.label Changing To Vacant"
+       ifDebug("Re-Evaluation Caused By $app.label Changing To Vacant")
        mainAction() 
        }
     if (sendVacantNotification) {
-        log.info "Vacant Notifications Is Active"
+        ifDebug("Vacant Notifications Is Active")
         String message = vacantMessage
         if (location.contactBookEnabled && recipients) {
-            log.debug "You Have Chosen To Send Notifications & Your Contact Book Is Enabled! Sending Message '$vacantMessage'"
+            ifDebug("You Have Chosen To Send Notifications & Your Contact Book Is Enabled! Sending Message '$vacantMessage'")
             sendNotificationToContacts(message, recipients) 
             } else { 
                     if (phone) { 
-                        log.debug "You Have Chosen To Send Notifications But Your Contact Book Is Disabled! Sending '$vacantMessage' SMS To Phone Number"
+                        ifDebug("You Have Chosen To Send Notifications But Your Contact Book Is Disabled! Sending '$vacantMessage' SMS To Phone Number")
                         sendSms(phone, message)                               
                         }
                    }
@@ -1725,7 +1733,7 @@ def vacant() {
 def turnalloff() {
     if (!entryMotionSensors && checkableLights) {
         def child = getChildDevice(getArea())
-        log.debug "You Have Told Me That $app.label Is Vacant Turning Off All Lights!"
+        ifDebug("You Have Told Me That $app.label Is Vacant Turning Off All Lights!")
         checkableLights.each {
         if (it.hasCommand("setLevel")) {
             it.setLevel(0)
@@ -1735,13 +1743,13 @@ def turnalloff() {
                              }
         child.generateEvent('vacant')
         unschedule()
-        log.info "All Scheduled Jobs Have Been Cancelled!"                                                         
+        ifDebug("All Scheduled Jobs Have Been Cancelled!")                                                     
                                                 }
     if (entryMotionSensors && checkableLights) {
         def entryMotionState = entryMotionSensors.currentState("motion")
-        log.debug "The entry Motion State Is: $entryMotionState"
+        ifDebug("The entry Motion State Is: $entryMotionState")
         if (!entryMotionState.value.contains("active")) { 
-             log.debug "You Have Told Me That $app.label Is Vacant Turning Off All Lights!"
+             ifDebug("You Have Told Me That $app.label Is Vacant Turning Off All Lights!")
              checkableLights.each {
              if (it.hasCommand("setLevel")) {
                  it.setLevel(0)
@@ -1751,9 +1759,9 @@ def turnalloff() {
                                   }
              child.generateEvent('vacant')
              unschedule()
-             log.info "All Scheduled Jobs Have Been Cancelled!"
+             ifDebug("All Scheduled Jobs Have Been Cancelled!")
                                                         } else {
-                                                                log.debug "Not Performing All Off Because $app.label Was Not Vacant!"
+                                                                ifDebug("Not Performing All Off Because $app.label Was Not Vacant!")
                                                                 }
 }
 } // end of turnalloff
