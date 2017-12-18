@@ -1578,7 +1578,7 @@ def otherAreaOccupancyStatusEventHandler(evt) {
 }}
 def presenceAwayEventHandler(evt) { 
     forceVacantIf()
-    runIn(15, turnOffAllCheckables)
+    runIn(15, turnalloff)
 } 
 def resetBackDoor() {
     state.backDoorHasBeenOpened = false
@@ -1702,18 +1702,39 @@ def vacant() {
                    }
                                 }
 } // end of vacant  
+
 def turnalloff() {
-    if (checkableLights) {
+    if (!entryMotionSensors && checkableLights) {
         def child = getChildDevice(getArea())
         log.debug "You Have Told Me That $app.label Is Vacant Turning Off All Lights!"
         checkableLights.each {
         if (it.hasCommand("setLevel")) {
             it.setLevel(0)
-                         } else {
+                         } else {                                    
                                  it.off()
-                                 }}
+                                 }
+                             }
         child.generateEvent('vacant')
         unschedule()
-        log.info "All Scheduled Jobs Have Been Cancelled!"
-                         }
+        log.info "All Scheduled Jobs Have Been Cancelled!"                                                         
+                                                }
+    if (entryMotionSensors && checkableLights) {
+        def entryMotionState = entryMotionSensors.currentState("motion")
+        log.debug "The entry Motion State Is: $entryMotionState"
+        if (!entryMotionState.value.contains("active")) { 
+             log.debug "You Have Told Me That $app.label Is Vacant Turning Off All Lights!"
+             checkableLights.each {
+             if (it.hasCommand("setLevel")) {
+                 it.setLevel(0)
+                                            } else {
+                                                    it.off()
+                                                    }
+                                  }
+             child.generateEvent('vacant')
+             unschedule()
+             log.info "All Scheduled Jobs Have Been Cancelled!"
+                                                        } else {
+                                                                log.debug "Not Performing All Off Because $app.label Was Not Vacant!"
+                                                                }
 }
+} // end of turnalloff
