@@ -1,11 +1,8 @@
 /*
   Copyright (C) 2017 Baz2473
-  
   Name: Area Occupancy
-
-  Version: 1.0.0
-
 */
+public static String areaOccupancyVersion() { return "v1.0.0.0" }
 
 definition (
     name: "Area Occupancy",
