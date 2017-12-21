@@ -1,13 +1,8 @@
 /*
-  A SmartThings device handler for handling Areas as devices which have states.
-  
   Copyright (C) 2017 Baz2473
-  
-  Name: Area Occupancy Status
-
-  Version: 1.0.0  
-
+  Name: Area Occupancy Status 
 */
+public static String DTHVersion() { return "v1.0.1.0" }
 
 metadata {
 	      definition (
