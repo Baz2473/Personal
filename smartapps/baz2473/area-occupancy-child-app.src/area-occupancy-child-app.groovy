@@ -1,10 +1,12 @@
 /*
  Copyright (C) 2017 Baz2473
- 
  Name: Area Occupancy Child App
+*/   
+public static String areaOccupancyChildAppVersion() { return "v1.0.0.2" }
 
- Version: 1.0.0
-*/
+//def areaOccupancyVersion = parent.getVersion()
+//def child = getChildDevice()
+//def areaOccupancyDTHVersion = child.getVersion()
 
 private isDebug() {  //return true  }
         if (debugging) { 
@@ -28,6 +30,7 @@ definition	(
 
 preferences {
 	page(name: "areaName")
+    page(name: "setup")
 }
 
 def areaName() {
@@ -39,11 +42,18 @@ def areaName() {
     else {
           section {
 	      paragraph "Area Name:\n${app.label}"
-}}  
+}}
+
+     section("This Is Where You Can View All The Settings For $app.label") {
+     href(name: "href", title: "View All Your Settings", required: false, page: "setup")
+     }
+
      section("debugLogging") {
      input "debugging", "bool", title: "Enable Logging?", defaultValue: false, submitOnChange: true
      }
-     
+     section("Only Perform 'ON' Actions If DISARMED") {
+     input "onlyIfDisarmed", "bool", title: "Only If Alarm Is Disarmed", defaultValue: false
+     }
      section("Select Your Method For Detecting Occupancy\nFor $app.label!") {
      if(!contactOrAccelerationActivated && !followedBy) {
      input "motionActivated", "bool", title: "Motion?", defaultValue: false, submitOnChange: true
@@ -221,6 +231,17 @@ if (switchOnModeControl) {
 if (exitMotionSensors || entryMotionTimeout || monitoredDoor2) {
     section("Do You Want Any Lights\nTo Automatically Turn 'OFF'?") {
              input "offRequired", "bool", title: "VACANT 'OFF' Control?", defaultValue: false, submitOnChange: true
+}}
+if (offRequired) {
+    section("Send A Notification When Auto Off Switches Off The Lights In $app.label") {
+    input "sendAutoOffNotification", "bool", title: "Get Notified?", defaultValue: false, submitOnChange: true
+                         if (sendAutoOffNotification) {                               
+                             input "autoOffMessage", "text", title: "Message?", required: true
+                             input("recipients", "contact", title: "To:") {
+                             input "phone", "phone", title: "Warn with text message (optional)",
+                             description: "Phone Number", required: false
+                                                                          }
+                                                      } 
 }}
 if (offRequired) {
     section("Only If Different Chosen Areas Are 'Vacant'?") {
@@ -467,7 +488,18 @@ section("Select ALL Of The Lights That Are In $app.label?") {
              input "checkableLights", "capability.switch", title: "Lights?", required: true, multiple: true
              }
              
-}} // end of Programatic Setup Section
+}} // end of areaName page
+
+def setup() {
+    dynamicPage(name: "setup", title: "Setup Settings") {
+    section("Here Are All Your Current Settings For $app.label") {             
+          paragraph "Current Versions:\nArea Occupancy Version:\t${areaOccupancyVersion()}\nArea Occupancy Child App Version:\t${areaOccupancyChildAppVersion()}\nArea Occupancy DTH Version:\t${areaOccupancyDTHVersion()}"
+          paragraph "Debugging:\t${(debugging ? 'Enabled' : 'Disabled')}\nOnly If Disarmed:\t${(onlyIfDisarmed ? 'Enabled' : 'Disabled')}\nMethod Of Occupancy Detection:\t${(motionActivated ? 'Motion' : '')} ${(contactOrAccelerationActivated ? 'Contact Or Acceleration' : '' )} ${(followedBy ? 'Followed By' : '' )}\n\t\t\tEntry Motion Sensors:\n${(entryMotionSensors)}\nForce Vacant With Timer:\t${(noExitSensor ? 'Yes' : 'No')}\nMonitoredAdjacent Doors:\t${(monitoredDoor2 ? 'Yes' : 'No')}\n\t\t\tAdjacent Doors:\n${(adjacentDoors)}"
+          paragraph ""
+           
+} // end of section
+                                                        }
+} // end of setup page "
 
 //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -555,12 +587,15 @@ if (!childCreated()) {
     if (followedBy && secondAction) {
         subscribe(secondAction, "acceleration.active", followedByAccelerationActiveEventHandler)
         state.gateHasBeenOpened = false
-        }        
+        }       
     if (otherArea && otherAreaCheck && otherAreaSubscribedVacant) {
         subscribe(otherArea, "occupancyStatus.vacant", otherAreaOccupancyStatusEventHandler)
         }
     if (otherArea && otherAreaCheck && otherAreaSubscribedVacant) {
         subscribe(otherArea, "occupancyStatus.vacanton", otherAreaOccupancyStatusEventHandler)
+        }
+    if (onlyIfDisarmed) {
+        subscribe(location, "alarmSystemStatus", shmStatusEventHandler)
         }
     if (otherArea && otherAreaCheck && otherAreaSubscribedOccupied) {
         subscribe(otherArea, "occupancyStatus.occupied", otherAreaOccupancyStatusEventHandler)
@@ -622,6 +657,14 @@ def uninstalled() {
 	getChildDevices().each {
     deleteChildDevice(it.deviceNetworkId) }
     }
+def areaOccupancyVersion() {
+    parent.areaOccupancyVersion()
+    }
+def areaOccupancyDTHVersion() {
+    def child = getChildDevice(getArea())
+    child.DTHVersion()
+    }
+    //     
 //88888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
 def mainAction() {
     def child = getChildDevice(getArea())
@@ -791,7 +834,8 @@ def mainAction() {
                                                 def sunrise = s.sunrise.time
                                                 def sunset = s.sunset.time
                                                 def timenow = now()
-                                                if (timenow < sunset || timenow > sunrise) {
+                                             
+                                                if (timenow > sunrise && timenow < sunset) {
                                                     ifDebug("The Lights Will Dim Down In $dimDownTime Seconds")
                                                     runIn(dimDownTime, dimLights)
                                                                                            } else {}
@@ -807,7 +851,8 @@ def mainAction() {
                                                 def sunrise = s.sunrise.time
                                                 def sunset = s.sunset.time
                                                 def timenow = now()
-                                                if (timenow < sunset || timenow > sunrise) {
+                                              
+                                                if (timenow > sunrise && timenow < sunset) {
                                                     ifDebug("The Lights Will Dim Down In Double $dimDownTime Seconds Because Heavy Use Was Active")
                                                     runIn(dimDownTime * 2, dimLights)
                                                                                            } else {}
@@ -831,7 +876,8 @@ def mainAction() {
                                                                          def sunrise = s.sunrise.time
                                                                          def sunset = s.sunset.time
                                                                          def timenow = now()
-                                                                         if (timenow < sunset || timenow > sunrise) {
+                                                                        
+                                                                         if (timenow > sunrise && timenow < sunset) {
                                                                              ifDebug("The Lights Will Dim Down In $dimDownTime Seconds")
                                                                              runIn(dimDownTime, dimLights)
                                                                                                                     } else {}
@@ -847,7 +893,8 @@ def mainAction() {
                                                                            def sunrise = s.sunrise.time
                                                                            def sunset = s.sunset.time
                                                                            def timenow = now()
-                                                                           if (timenow < sunset || timenow > sunrise) {
+                                                                         
+                                                                           if (timenow > sunrise && timenow < sunset) {
                                                                                ifDebug("The Lights Will Dim Down In Double $dimDownTime Seconds Because Heavy Use Was Active")
                                                                                runIn(dimDownTime * 2, dimLights)
                                                                                                                       } else {}
@@ -867,10 +914,11 @@ def mainAction() {
                                                                                       def sunrise = s.sunrise.time
                                                                                       def sunset = s.sunset.time
                                                                                       def timenow = now()
-                                                                                      if (timenow < sunset || timenow > sunrise) {
-                                                                                          ifDebug("The Lights Will Dim Down In $dimDownTime Seconds")
+                                                                                 
+                                                                                      if (timenow > sunrise && timenow < sunset) {
+                                                                                          ifDebug("The Time Is Before Sunset So The Lights Will Dim Down In $dimDownTime Seconds")
                                                                                           runIn(dimDownTime, dimLights)
-                                                                                                                                 } else {}
+                                                                                                                                 } else { ifDebug("The Time Is After Sunset, Doing Nothing")}
                                                                                                           } else {
                                                                                                                   // */
                                                                                                                   ifDebug("The Lights Will Dim Down In $dimDownTime Seconds")
@@ -883,7 +931,8 @@ def mainAction() {
                                                                                       def sunrise = s.sunrise.time
                                                                                       def sunset = s.sunset.time
                                                                                       def timenow = now()
-                                                                                      if (timenow < sunset || timenow > sunrise) {
+                                                                                    
+                                                                                      if (timenow > sunrise && timenow < sunset) {
                                                                                           ifDebug("The Lights Will Dim Down In Double $dimDownTime Seconds Because Heavy Use Was Active")
                                                                                           runIn(dimDownTime * 2, dimLights)
                                                                                                                                  } else {}
@@ -1257,12 +1306,14 @@ def followedByAccelerationActiveEventHandler(evt) {
                 def sunset = s.sunset.time
                 def timenow = now()
                 if (onlyDuringDaytime3) {  
-                    if (timenow < sunset || timenow > sunrise) { 
+                
+                    if (timenow > sunrise && timenow < sunset) {
                         switches4.on()
                         }
                                         }     
                 if (onlyDuringNighttime3) { 
-                    if (timenow > sunset || timenow < sunrise) { 
+                
+                    if (timenow > sunset || timenow < sunrise) {
                         switches4.on()
                         }
                                           }
@@ -1431,7 +1482,8 @@ def monitoredDoorOpenedEventHandler(evt) {
             def sunset = s.sunset.time
             def timenow = now()
             if (onlyDuringDaytime) {  
-                if (timenow < sunset || timenow > sunrise) {
+                
+                if (timenow > sunrise && timenow < sunset) {
                     if (onlyIfAreaVacant) {
                         if (['vacant'].contains(areaState)) {
                               ifDebug("The Light Was Turned ON To $setLevelAt % Because The Door Was Opened & $app.label Was VACANT & The Time Selection Matched!")
@@ -1443,7 +1495,8 @@ def monitoredDoorOpenedEventHandler(evt) {
                                                            } 
                                    } 
             if (onlyDuringNighttime) { 
-                if (timenow > sunset || timenow < sunrise) {
+             
+               if (timenow > sunset || timenow < sunrise) {
                     if (onlyIfAreaVacant) {
                         if (['vacant'].contains(areaState)) {
                               ifDebug("The Light Was Turned ON To $setLevelAt % Because The Door Was Opened & $app.label Was VACANT & The Time Selection Matched!")
@@ -1455,7 +1508,8 @@ def monitoredDoorOpenedEventHandler(evt) {
                                                            }
                                     } 
             if (onlyDuringDaytime2) { 
-                if (timenow < sunset || timenow > sunrise) {
+               
+               if (timenow > sunrise && timenow < sunset) {
                     if (onlyIfAreaVacant2) { 
                         if (['vacant'].contains(areaState)) {
                               ifDebug("The Light Was Turned ON To $setLevelAt % Because The Door Was Opened & $app.label Was VACANT & The Time Selection Matched!")
@@ -1467,7 +1521,8 @@ def monitoredDoorOpenedEventHandler(evt) {
                                                            }
                                     }
             if (onlyDuringNighttime2) { 
-                if (timenow > sunset || timenow < sunrise) {
+            
+               if (timenow > sunset || timenow < sunrise) {
                     if (onlyIfAreaVacant2) { 
                         if (['vacant'].contains(areaState)) {
                               ifDebug("The Light Was Turned ON To $setLevelAt % Because The Door Was Opened & $app.label Was VACANT & The Time Selection Matched!")
@@ -1617,6 +1672,15 @@ def resetOccupiedCounter() {
     ifDebug("The Occupied Counter Has Been Reset Dut To Inactivity For Your Entire Time Count")
     state.occupiedCounter = 0
 }
+def shmStatusEventHandler(evt) {
+    def shmStatus = location.currentState("alarmSystemStatus")?.value
+    if (shmStatus == "away")
+        log.info "Alarm Is ARMED AWAY"
+        else if (shmStatus == "stay")
+                 log.info "Alarm Is ARMED STAY"
+                 else if (shmStatus == "off")
+                          log.info "Alarm Is OFF"
+}
 def spawnChildDevice(areaName) {
     app.updateLabel(app.label)
     if (!childCreated())
@@ -1662,6 +1726,14 @@ def switches2Off() {
     switches2.each {
     it.setLevel(0)   
     }
+    if (sendAutoOffNotification) {
+        ifDebug("Auto Off Notifications Is Active")
+        String message = autoOffMessage
+        if (location.contactBookEnabled && recipients) {
+            ifDebug("You Have Chosen To Send Notifications & Your Contact Book Is Enabled! Sending Message '$autoOffMessage'")
+            sendNotificationToContacts(message, recipients) 
+            }                                                                                                               
+                                }
 }
 def switches3OnEventHandler(evt) { 
     ifDebug("Re-Evaluated by Switches3 On")
