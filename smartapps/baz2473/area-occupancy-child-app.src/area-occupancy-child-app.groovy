@@ -2,7 +2,7 @@
  Copyright (C) 2017 Baz2473
  Name: Area Occupancy Child App
 */   
-public static String areaOccupancyChildAppVersion() { return "v1.0.0.2" }
+public static String areaOccupancyChildAppVersion() { return "v1.0.0.6" }
 
 //def areaOccupancyVersion = parent.getVersion()
 //def child = getChildDevice()
@@ -493,8 +493,8 @@ section("Select ALL Of The Lights That Are In $app.label?") {
 def setup() {
     dynamicPage(name: "setup", title: "Setup Settings") {
     section("Here Are All Your Current Settings For $app.label") {             
-          paragraph "Current Versions:\nArea Occupancy Version:\t${areaOccupancyVersion()}\nArea Occupancy Child App Version:\t${areaOccupancyChildAppVersion()}\nArea Occupancy DTH Version:\t${areaOccupancyDTHVersion()}"
-          paragraph "Debugging:\t${(debugging ? 'Enabled' : 'Disabled')}\nOnly If Disarmed:\t${(onlyIfDisarmed ? 'Enabled' : 'Disabled')}\nMethod Of Occupancy Detection:\t${(motionActivated ? 'Motion' : '')} ${(contactOrAccelerationActivated ? 'Contact Or Acceleration' : '' )} ${(followedBy ? 'Followed By' : '' )}\n\t\t\tEntry Motion Sensors:\n${(entryMotionSensors)}\nForce Vacant With Timer:\t${(noExitSensor ? 'Yes' : 'No')}\nMonitoredAdjacent Doors:\t${(monitoredDoor2 ? 'Yes' : 'No')}\n\t\t\tAdjacent Doors:\n${(adjacentDoors)}"
+          paragraph "\t\t\tCurrent Versions:\nArea Occupancy:\t${areaOccupancyVersion()}\nArea Occupancy Child App:\t${areaOccupancyChildAppVersion()}\nArea Occupancy DTH:\t${areaOccupancyDTHVersion()}"
+          paragraph "Debugging:\t${(debugging ? 'Enabled' : 'Disabled')}\nOnly If Disarmed:\t${(onlyIfDisarmed ? 'Enabled' : 'Disabled')}\nMethod Of Occupancy Detection:\t${(motionActivated ? 'Motion' : '')} ${(contactOrAccelerationActivated ? 'Contact Or Acceleration' : '' )} ${(followedBy ? 'Followed By' : '' )}\nEntry Motion Sensors:\n${(entryMotionSensors)}\nForce Vacant With Timer:\t${(noExitSensor ? 'Yes' : 'No')}\nMonitoredAdjacent Doors:\t${(monitoredDoor2 ? 'Yes' : 'No')}\nAdjacent Doors:\n${(adjacentDoors)}"
           paragraph ""
            
 } // end of section
