@@ -2,13 +2,9 @@
  Copyright (C) 2017 Baz2473
  Name: Area Occupancy Child App
 */   
-public static String areaOccupancyChildAppVersion() { return "v1.0.0.6" }
+public static String areaOccupancyChildAppVersion() { return "v1.1.0.0" }
 
-//def areaOccupancyVersion = parent.getVersion()
-//def child = getChildDevice()
-//def areaOccupancyDTHVersion = child.getVersion()
-
-private isDebug() {  //return true  }
+private isDebug() {
         if (debugging) { 
             return true 
             } else {
@@ -491,12 +487,15 @@ section("Select ALL Of The Lights That Are In $app.label?") {
 }} // end of areaName page
 
 def setup() {
-    dynamicPage(name: "setup", title: "Setup Settings") {
-    section("Here Are All Your Current Settings For $app.label") {             
-          paragraph "\t\t\tCurrent Versions:\nArea Occupancy:\t${areaOccupancyVersion()}\nArea Occupancy Child App:\t${areaOccupancyChildAppVersion()}\nArea Occupancy DTH:\t${areaOccupancyDTHVersion()}"
-          paragraph "Debugging:\t${(debugging ? 'Enabled' : 'Disabled')}\nOnly If Disarmed:\t${(onlyIfDisarmed ? 'Enabled' : 'Disabled')}\nMethod Of Occupancy Detection:\t${(motionActivated ? 'Motion' : '')} ${(contactOrAccelerationActivated ? 'Contact Or Acceleration' : '' )} ${(followedBy ? 'Followed By' : '' )}\nEntry Motion Sensors:\n${(entryMotionSensors)}\nForce Vacant With Timer:\t${(noExitSensor ? 'Yes' : 'No')}\nMonitoredAdjacent Doors:\t${(monitoredDoor2 ? 'Yes' : 'No')}\nAdjacent Doors:\n${(adjacentDoors)}"
-          paragraph ""
-           
+    dynamicPage(name: "setup", title: "\t\t\t\t\t   Reference") {
+    section("\t\t\tCurrent Settings For $app.label") {             
+          paragraph "\t\t\t  Current App Versions:\n\nArea Occupancy:\t\t\t\t\t${areaOccupancyVersion()}\nArea Occupancy Child App:\t\t${areaOccupancyChildAppVersion()}\nArea Occupancy DTH:\t\t\t${areaOccupancyDTHVersion()}"
+          paragraph "Debugging:\t\t\t\t${(debugging ? 'Enabled' : 'Disabled')}\nOnly If Disarmed:\t\t\t${(onlyIfDisarmed ? 'Enabled' : 'Disabled')}\nMethod Of Detection:\t${(motionActivated ? 'Motion' : '')} ${(contactOrAccelerationActivated ? 'Contact Or Acceleration' : '' )} ${(followedBy ? 'Followed By' : '' )}\nForce Vacant With Timer:\t\t${(noExitSensor ? 'Yes' : 'No')}\nMonitored Adjacent Doors:\t\t${(monitoredDoor2 ? 'Yes' : 'No')}\nEntry Motion Sensors:\t${(entryMotionSensors ? (entryMotionSensors) : '')}\nExit Motion Sensors:\t\t${(exitMotionSensors ? (exitMotionSensors) : '')}\nAuto Set Vacant After:\t${(entryMotionTimeout ? (entryMotionTimeout) : 'N/A')}\t Seconds\nCheck Another Areas State:\t${(otherAreaCheck ? 'Yes' : '')}\t${(otherAreaCheck ? (otherArea) : 'No')}\n2nd Vacancy Check In:\t${(anotherVacancyCheck ? (anotherCheckIn) : 'N/A')}\t\tSeconds\nMonitored Doors:\t\t\t${(monitoredDoor ? (doors) : 'No')}\nEntry Sensor Timeout:\t${(actualEntrySensorsTimeout ? (actualEntrySensorsTimeout) : 'N/A')}\t\tSeconds\nAuto Engage:\t${(autoEngagedFunction ? 'Yes, With' : 'No')}\t${(autoEngagedFunction ? (autoEngagedSwitches) : '')}\nAction On Door Opening:\t\t${(actionOnDoorOpening ? 'Yes' : 'No')}\nOnly If Area Vacant:\t\t\t\t${(onlyIfAreaVacant ? 'Yes' : 'No')}\nTurn On These Lights:\t${(doorOpeningAction ? (doorOpeningAction) : '')}\nSet The Level To:\t\t\t\t\t${(setLevelAt ? (setLevelAt) : 'N/A')}%\nSend Notification:\t${(sendDoorOpeningNotification ? (doorOpeningMessage) : 'No')}"
+                       
+          if (monitoredDoor2) {
+              paragraph "\nAdjacent Doors:\n${(adjacentDoors)}\nSensors To Use When Door Open:\n${(exitMotionSensorsWhenDoorIsOpen)}\nSensors To Use When Door Closed:\n${(exitMotionSensorsWhenDoorIsClosed)}"
+              }              
+  
 } // end of section
                                                         }
 } // end of setup page "
@@ -667,6 +666,9 @@ def areaOccupancyDTHVersion() {
     //     
 //88888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
 def mainAction() {
+  //if (onlyIfDisarmed) {
+  //def shmStatus = location.currentState("alarmSystemStatus")?.value
+  //if (shmStatus == "off") {
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
     def automationState = child.getAutomationState()
@@ -1088,38 +1090,93 @@ def dimmableSwitches2OffEventHandler(evt) {
     mainAction() 
 }
 private dimmableSwitches1On() {
-        def child = getChildDevice(getArea())
-        def automationState = child.getAutomationState()
-        if (!switchOnModeControl) {
-            if (dimmableSwitches1 && switchOnControl && ['automationon'].contains(automationState)) {      
-                ifDebug("The Selected Switch(es) Have Either Been Turned 'ON' Or Had Their Respective Level(s) & Color(s) Set")
-                dimmableSwitches1.each {
-                def currentLevel = it.currentValue("level")
-                if (currentLevel < setLevelTo) {  
-                    it.setLevel(setLevelTo)
-}}}}}
+        if (onlyIfDisarmed) {
+            def shmStatus = location.currentState("alarmSystemStatus")?.value
+            if (shmStatus == "off") {
+                def child = getChildDevice(getArea())
+                def automationState = child.getAutomationState()
+                if (!switchOnModeControl) {
+                     if (dimmableSwitches1 && switchOnControl && ['automationon'].contains(automationState)) {      
+                         ifDebug("The Selected Switch(es) Have Either Been Turned 'ON' Or Had Their Respective Level(s) & Color(s) Set")
+                         dimmableSwitches1.each {
+                         def currentLevel = it.currentValue("level")
+                         if (currentLevel < setLevelTo) {  
+                             it.setLevel(setLevelTo)
+                             }
+                                                }
+                                                                                                             }
+                                          }
+                                    }
+                           } else {
+                                   def child = getChildDevice(getArea())
+                                   def automationState = child.getAutomationState()
+                                   if (!switchOnModeControl) {
+                                        if (dimmableSwitches1 && switchOnControl && ['automationon'].contains(automationState)) {      
+                                            ifDebug("The Selected Switch(es) Have Either Been Turned 'ON' Or Had Their Respective Level(s) & Color(s) Set")
+                                            dimmableSwitches1.each {
+                                            def currentLevel = it.currentValue("level")
+                                            if (currentLevel < setLevelTo) {  
+                                                it.setLevel(setLevelTo)
+                                                }
+                                                                   }
+                                                                                                                                }
+                                                             }
+                                  }
+}
 private dimmableSwitches2On() {
-        def child = getChildDevice(getArea())
-        def automationState = child.getAutomationState()
-        if (switchOnModeControl) {
-           def currentMode = location.currentMode
-           if (dimmableSwitches2 && switchOnControl && ['automationon'].contains(automationState)) {      
-               ifDebug("The Selected Switch(es) Have Either Been Turned 'ON' Or Had Their Respective Level(s) & Color(s) Set")
-               dimmableSwitches2.each {    
-               def currentLevel = it.currentValue("level")
-               if (currentMode.name == duringMode1 && currentLevel < setLevelTo1) {
-                   it.setLevel(setLevelTo1)
-                   }
-               if (currentMode.name == duringMode2 && currentLevel < setLevelTo2) {
-                   it.setLevel(setLevelTo2)
-                   }
-               if (currentMode.name == duringMode3 && currentLevel < setLevelTo3) {
-                   it.setLevel(setLevelTo3)
-                   } 
-               if (currentMode.name == duringMode4 && currentLevel < setLevelTo4) {
-                   it.setLevel(setLevelTo4)
-                   }      
-}}}} 
+        if (onlyIfDisarmed) {
+            def shmStatus = location.currentState("alarmSystemStatus")?.value
+            if (shmStatus == "off") {
+                def child = getChildDevice(getArea())
+                def automationState = child.getAutomationState()
+                if (switchOnModeControl) {
+                    def currentMode = location.currentMode
+                    if (dimmableSwitches2 && switchOnControl && ['automationon'].contains(automationState)) {      
+                        ifDebug("The Selected Switch(es) Have Either Been Turned 'ON' Or Had Their Respective Level(s) & Color(s) Set")
+                        dimmableSwitches2.each {    
+                        def currentLevel = it.currentValue("level")
+                        if (currentMode.name == duringMode1 && currentLevel < setLevelTo1) {
+                            it.setLevel(setLevelTo1)
+                            }
+                        if (currentMode.name == duringMode2 && currentLevel < setLevelTo2) {
+                            it.setLevel(setLevelTo2)
+                            }
+                        if (currentMode.name == duringMode3 && currentLevel < setLevelTo3) {
+                            it.setLevel(setLevelTo3)
+                            } 
+                        if (currentMode.name == duringMode4 && currentLevel < setLevelTo4) {
+                            it.setLevel(setLevelTo4)
+                            }      
+                                               }
+                                                                                                            }
+                                          }
+                                      }
+                             } else { 
+                                     def child = getChildDevice(getArea())
+                                     def automationState = child.getAutomationState()
+                                     if (switchOnModeControl) {
+                                         def currentMode = location.currentMode
+                                         if (dimmableSwitches2 && switchOnControl && ['automationon'].contains(automationState)) {      
+                                             ifDebug("The Selected Switch(es) Have Either Been Turned 'ON' Or Had Their Respective Level(s) & Color(s) Set")
+                                             dimmableSwitches2.each {    
+                                             def currentLevel = it.currentValue("level")
+                                             if (currentMode.name == duringMode1 && currentLevel < setLevelTo1) {
+                                                 it.setLevel(setLevelTo1)
+                                                 }
+                                             if (currentMode.name == duringMode2 && currentLevel < setLevelTo2) {
+                                                 it.setLevel(setLevelTo2)
+                                                 }
+                                             if (currentMode.name == duringMode3 && currentLevel < setLevelTo3) {
+                                                 it.setLevel(setLevelTo3)
+                                                 } 
+                                             if (currentMode.name == duringMode4 && currentLevel < setLevelTo4) {
+                                                 it.setLevel(setLevelTo4)
+                                                 }      
+                                                                    }
+                                                                                                                                 }
+                                                              }
+                                     }
+} 
 def donotdisturb() {      
 def child = getChildDevice(getArea())
 def areaState = child.getAreaState()
@@ -1673,7 +1730,7 @@ def resetOccupiedCounter() {
     state.occupiedCounter = 0
 }
 def shmStatusEventHandler(evt) {
-    def shmStatus = location.currentState("alarmSystemStatus")?.value
+    def shmStatus = location.currentState("alarmSystemStatus")?.value 
     if (shmStatus == "away")
         log.info "Alarm Is ARMED AWAY"
         else if (shmStatus == "stay")
