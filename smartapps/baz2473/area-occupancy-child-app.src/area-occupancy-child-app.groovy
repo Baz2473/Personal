@@ -2,7 +2,7 @@
  Copyright (C) 2017 Baz2473
  Name: Area Occupancy Child App
 */   
-public static String areaOccupancyChildAppVersion() { return "v1.1.0.0" }
+public static String areaOccupancyChildAppVersion() { return "v1.1.0.4" }
 
 private isDebug() {
         if (debugging) { 
@@ -26,8 +26,19 @@ definition	(
 
 preferences {
 	page(name: "areaName")
-    page(name: "setup")
+    page(name: "versions")
 }
+
+def versions() {
+    dynamicPage(name: "versions", title: "\t\t\t\t      Reference") {
+    section("") { 
+          paragraph image : "https://raw.githubusercontent.com/Baz2473/Personal/master/Ao3.png",
+          title: "\t  Current App Versions:\n\nArea Occupancy:\t\t\t\t\t${areaOccupancyVersion()}\n\nArea Occupancy Child App:\t\t${areaOccupancyChildAppVersion()}\n\nArea Occupancy DTH:\t\t\t${areaOccupancyDTHVersion()}",
+		  end
+
+   } // end of versions section
+                                                                   }
+}  // end of versions page "
 
 def areaName() {
 	dynamicPage(name: "areaName", title: "A New Device Will Be Created With This Name!", install: true, uninstall: childCreated()) {
@@ -40,8 +51,8 @@ def areaName() {
 	      paragraph "Area Name:\n${app.label}"
 }}
 
-     section("This Is Where You Can View All The Settings For $app.label") {
-     href(name: "href", title: "View All Your Settings", required: false, page: "setup")
+     section("") {
+     href(name: "href", title: "View App Versions", required: false, page: "versions")
      }
 
      section("debugLogging") {
@@ -486,20 +497,6 @@ section("Select ALL Of The Lights That Are In $app.label?") {
              
 }} // end of areaName page
 
-def setup() {
-    dynamicPage(name: "setup", title: "\t\t\t\t\t   Reference") {
-    section("\t\t\tCurrent Settings For $app.label") {             
-          paragraph "\t\t\t  Current App Versions:\n\nArea Occupancy:\t\t\t\t\t${areaOccupancyVersion()}\nArea Occupancy Child App:\t\t${areaOccupancyChildAppVersion()}\nArea Occupancy DTH:\t\t\t${areaOccupancyDTHVersion()}"
-          paragraph "Debugging:\t\t\t\t${(debugging ? 'Enabled' : 'Disabled')}\nOnly If Disarmed:\t\t\t${(onlyIfDisarmed ? 'Enabled' : 'Disabled')}\nMethod Of Detection:\t${(motionActivated ? 'Motion' : '')} ${(contactOrAccelerationActivated ? 'Contact Or Acceleration' : '' )} ${(followedBy ? 'Followed By' : '' )}\nForce Vacant With Timer:\t\t${(noExitSensor ? 'Yes' : 'No')}\nMonitored Adjacent Doors:\t\t${(monitoredDoor2 ? 'Yes' : 'No')}\nEntry Motion Sensors:\t${(entryMotionSensors ? (entryMotionSensors) : '')}\nExit Motion Sensors:\t\t${(exitMotionSensors ? (exitMotionSensors) : '')}\nAuto Set Vacant After:\t${(entryMotionTimeout ? (entryMotionTimeout) : 'N/A')}\t Seconds\nCheck Another Areas State:\t${(otherAreaCheck ? 'Yes' : '')}\t${(otherAreaCheck ? (otherArea) : 'No')}\n2nd Vacancy Check In:\t${(anotherVacancyCheck ? (anotherCheckIn) : 'N/A')}\t\tSeconds\nMonitored Doors:\t\t\t${(monitoredDoor ? (doors) : 'No')}\nEntry Sensor Timeout:\t${(actualEntrySensorsTimeout ? (actualEntrySensorsTimeout) : 'N/A')}\t\tSeconds\nAuto Engage:\t${(autoEngagedFunction ? 'Yes, With' : 'No')}\t${(autoEngagedFunction ? (autoEngagedSwitches) : '')}\nAction On Door Opening:\t\t${(actionOnDoorOpening ? 'Yes' : 'No')}\nOnly If Area Vacant:\t\t\t\t${(onlyIfAreaVacant ? 'Yes' : 'No')}\nTurn On These Lights:\t${(doorOpeningAction ? (doorOpeningAction) : '')}\nSet The Level To:\t\t\t\t\t${(setLevelAt ? (setLevelAt) : 'N/A')}%\nSend Notification:\t${(sendDoorOpeningNotification ? (doorOpeningMessage) : 'No')}"
-                       
-          if (monitoredDoor2) {
-              paragraph "\nAdjacent Doors:\n${(adjacentDoors)}\nSensors To Use When Door Open:\n${(exitMotionSensorsWhenDoorIsOpen)}\nSensors To Use When Door Closed:\n${(exitMotionSensorsWhenDoorIsClosed)}"
-              }              
-  
-} // end of section
-                                                        }
-} // end of setup page "
-
 //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
 def installed() {}
@@ -666,9 +663,6 @@ def areaOccupancyDTHVersion() {
     //     
 //88888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
 def mainAction() {
-  //if (onlyIfDisarmed) {
-  //def shmStatus = location.currentState("alarmSystemStatus")?.value
-  //if (shmStatus == "off") {
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
     def automationState = child.getAutomationState()
@@ -1201,20 +1195,22 @@ def doaoff() {
     doorOpeningAction2.each {
     if (it.currentValue("switch") == 'on') {
         it.setLevel(0)
+        it.off()
         } else { ifDebug("the light was not on so I can't turn it off")
-                            }
+                 }
+                 
 }} // end of doa2Off
 
 def engaged() {
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
         if (checkableLights) {
-        def lightsState = checkableLights.currentState("switch")
-        if (lightsState.value.contains("on")) {
-            child.generateEvent('engagedon')
-                                              } else {                
-                                                      child.generateEvent('engaged')
-                                                      }
+            def lightsState = checkableLights.currentState("switch")
+            if (lightsState.value.contains("on")) {
+                child.generateEvent('engagedon')
+                                                  } else {                
+                                                          child.generateEvent('engaged')
+                                                          }
                              } else {
                                      child.generateEvent('engaged')
                                      }
@@ -1422,7 +1418,8 @@ def forceVacantIf() {
     def areaState = child.getAreaState()
     def entryMotionState = entryMotionSensors.currentState("motion")
     ifDebug("The entry Motion State Is: $entryMotionState")
-    if (!['vacant'].contains(areaState) && !entryMotionState.value.contains("active")) { 
+  //if (!['vacant'].contains(areaState) && !entryMotionState.value.contains("active")) {  /////////////////// LEAVE THESE HERE INCASE I NEED TO REACTIVATE IN THE FUTURE!!!!
+    if (['vacanton'].contains(areaState) && !entryMotionState.value.contains("active")) { 
           vacant()
           }
 }
@@ -1644,8 +1641,9 @@ def monitoredDoorClosedEventHandler(evt) {
     if (!actionOnDoorClosing) {
          if (turnOffAfter) {
              ifDebug("Turn Off After Was True SO ")
-             runIn(offAfter, doaoff, [overwrite: false]) 
              ifDebug("The Lights Should Go Off In $offAfter Seconds")
+             runIn(offAfter, doaoff, [overwrite: false]) 
+             
                        } else {
                                mainAction()
                                }
@@ -1711,7 +1709,8 @@ def occupied() {
 def otherAreaOccupancyStatusEventHandler(evt) {
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
-    if (!['vacant'].contains(areaState)) {
+  //if (!['vacant'].contains(areaState)) {   /////////////////// LEAVE THESE HERE INCASE I NEED TO REACTIVATE IN THE FUTURE!!!!
+    if (['vacanton'].contains(areaState)) {
            ifDebug("Vacant Force Check Performed by $otherArea Occupancy Changing To Your Required State")
            forceVacantIf()
 }}
