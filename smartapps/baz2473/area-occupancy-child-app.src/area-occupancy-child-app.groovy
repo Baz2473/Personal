@@ -2,7 +2,7 @@
  Copyright (C) 2017 Baz2473
  Name: Area Occupancy Child App
 */   
-public static String areaOccupancyChildAppVersion() { return "v1.1.0.4" }
+public static String areaOccupancyChildAppVersion() { return "v1.2.0.2" }
 
 private isDebug() {
         if (debugging) { 
@@ -326,6 +326,18 @@ section("Do Not Disturb Control") {
 
 }} // end of Do Not Disturb Control Section
 
+section("Action On Engaged") {
+         input "actionOnEngaged", "bool", title: "Turn ON Something When\n$app.label Changes To Engaged?", defaultValue: false, submitOnChange: true
+                     if (actionOnEngaged) {
+                		 input "engagedAction", "capability.switch", title: "Turn On?", multiple: true, required: true, submitOnChange: true
+                         }
+}
+section("Action On Vacant") {
+         input "actionOnVacant", "bool", title: "Turn OFF Something When\n$app.label Changes To Vacant?", defaultValue: false, submitOnChange: true
+                     if (actionOnVacant) {
+                		 input "vacantAction", "capability.switch", title: "Turn Off?", multiple: true, required: true, submitOnChange: true
+                         }
+}
 section("Subscriptions!") {
          input "subscriptionsSelected", "bool", title: "Override Subscriptions?", required: false, submitOnChange: true
          if (subscriptionsSelected) {
@@ -1204,6 +1216,7 @@ def doaoff() {
 def engaged() {
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
+    if (actionOnEngaged) engagedAction.on()
         if (checkableLights) {
             def lightsState = checkableLights.currentState("switch")
             if (lightsState.value.contains("on")) {
@@ -1418,8 +1431,8 @@ def forceVacantIf() {
     def areaState = child.getAreaState()
     def entryMotionState = entryMotionSensors.currentState("motion")
     ifDebug("The entry Motion State Is: $entryMotionState")
-  //if (!['vacant'].contains(areaState) && !entryMotionState.value.contains("active")) {  /////////////////// LEAVE THESE HERE INCASE I NEED TO REACTIVATE IN THE FUTURE!!!!
-    if (['vacanton'].contains(areaState) && !entryMotionState.value.contains("active")) { 
+  if (!['vacant'].contains(areaState) && !entryMotionState.value.contains("active")) {  /////////////////// LEAVE THESE HERE INCASE I NEED TO REACTIVATE IN THE FUTURE!!!!
+    //if (['vacanton'].contains(areaState) && !entryMotionState.value.contains("active")) { 
           vacant()
           }
 }
@@ -1709,8 +1722,8 @@ def occupied() {
 def otherAreaOccupancyStatusEventHandler(evt) {
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
-  //if (!['vacant'].contains(areaState)) {   /////////////////// LEAVE THESE HERE INCASE I NEED TO REACTIVATE IN THE FUTURE!!!!
-    if (['vacanton'].contains(areaState)) {
+  if (!['vacant'].contains(areaState)) {   /////////////////// LEAVE THESE HERE INCASE I NEED TO REACTIVATE IN THE FUTURE!!!!
+    //if (['vacanton'].contains(areaState)) {
            ifDebug("Vacant Force Check Performed by $otherArea Occupancy Changing To Your Required State")
            forceVacantIf()
 }}
@@ -1827,6 +1840,7 @@ def vacant() {
     state.vacantTime = now()
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
+    if (actionOnVacant) vacantAction.off()
     if (checkableLights) {
         def lightsState = checkableLights.currentState("switch")
         if (lightsState.value.contains("on")) {
