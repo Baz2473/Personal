@@ -2,7 +2,7 @@
  Copyright (C) 2017 Baz2473
  Name: Area Occupancy Child App
 */   
-public static String areaOccupancyChildAppVersion() { return "v1.2.0.2" }
+public static String areaOccupancyChildAppVersion() { return "v1.2.1.0" }
 
 private isDebug() {
         if (debugging) { 
@@ -1010,22 +1010,23 @@ def checkableLightsSwitchedOnEventHandler(evt) {
 def checkableLightsSwitchedOffEventHandler(evt) {
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
-    if (['vacanton'].contains(areaState)) { 
+    def checkableLightsState = checkableLights.currentState("switch")
+    if (['vacanton'].contains(areaState) && !checkableLightsState.value.contains("on")) { 
           child.generateEvent('vacant')
           } else {
-                  if (['occupiedon'].contains(areaState)) { 
+                  if (['occupiedon'].contains(areaState) && !checkableLightsState.value.contains("on")) { 
                         child.generateEvent('occupied')
                         } else {
-                                if (['engagedon'].contains(areaState)) { 
+                                if (['engagedon'].contains(areaState) && !checkableLightsState.value.contains("on")) { 
                                       child.generateEvent('engaged')
                                       } else {
-                                              if (['checkingon'].contains(areaState)) { 
+                                              if (['checkingon'].contains(areaState) && !checkableLightsState.value.contains("on")) { 
                                                     child.generateEvent('checking')
                                                     } else {
-                                                            if (['heavyuseon'].contains(areaState)) { 
+                                                            if (['heavyuseon'].contains(areaState) && !checkableLightsState.value.contains("on")) { 
                                                                   child.generateEvent('heavyuse')
                                                                   } else {
-                                                                          if (['donotdisturbon'].contains(areaState)) { 
+                                                                          if (['donotdisturbon'].contains(areaState) && !checkableLightsState.value.contains("on")) { 
                                                                                 child.generateEvent('donotdisturb')
 }}}}}}} 
 def checking() {
@@ -1216,7 +1217,9 @@ def doaoff() {
 def engaged() {
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
-    if (actionOnEngaged) engagedAction.on()
+    if (actionOnEngaged) {
+        engagedAction.on()
+        }
         if (checkableLights) {
             def lightsState = checkableLights.currentState("switch")
             if (lightsState.value.contains("on")) {
@@ -1840,7 +1843,9 @@ def vacant() {
     state.vacantTime = now()
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
-    if (actionOnVacant) vacantAction.off()
+    if (actionOnVacant) {
+        vacantAction.off()
+        }
     if (checkableLights) {
         def lightsState = checkableLights.currentState("switch")
         if (lightsState.value.contains("on")) {
