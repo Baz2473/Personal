@@ -2,7 +2,7 @@
  Copyright (C) 2017 Baz2473
  Name: Area Occupancy Child App
 */   
-public static String areaOccupancyChildAppVersion() { return "v1.2.1.0" }
+public static String areaOccupancyChildAppVersion() { return "v1.2.1.1" }
 
 private isDebug() {
         if (debugging) { 
@@ -1693,6 +1693,11 @@ def occupied() {
     state.occupiedTime = now()
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
+     if (actionOnVacant) {
+        if (['engaged','engagedon'].contains(areaState)) {
+              vacantAction.off()
+              }
+                        }
         if (checkableLights) {
             def lightsState = checkableLights.currentState("switch")
             if (lightsState.value.contains("on")) {
@@ -1843,9 +1848,6 @@ def vacant() {
     state.vacantTime = now()
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
-    if (actionOnVacant) {
-        vacantAction.off()
-        }
     if (checkableLights) {
         def lightsState = checkableLights.currentState("switch")
         if (lightsState.value.contains("on")) {
