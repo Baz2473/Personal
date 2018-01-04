@@ -2,7 +2,7 @@
  Copyright (C) 2017 Baz2473
  Name: Area Occupancy Child App
 */   
-public static String areaOccupancyChildAppVersion() { return "v1.2.1.1" }
+public static String areaOccupancyChildAppVersion() { return "v1.2.2.0" }
 
 private isDebug() {
         if (debugging) { 
@@ -304,6 +304,14 @@ if (exitMotionSensors || entryMotionTimeout || monitoredDoor2) {
              input "presence", "bool", title: "Auto Vacate On\nAny Presence Change?", defaultValue: false, submitOnChange: true
              if (presence) {
                  input "presenceSensors", "capability.presenceSensor", title: "Select Who? Leaving\nWill Activate 'VACANT'", required: true, multiple: true, submitOnChange: true
+                 input "sendPresenceAwayNotification", "bool", title: "Get Notified?", required: false, submitOnChange: true
+                 if (sendPresenceAwayNotification) {
+                         		 input "awayOffMessage", "text", title: "Message?", required: true
+                          		 input("recipients", "contact", title: "To?") {
+                         		 input "phone", "phone", title: "Warn with text message (optional)",
+                         		 description: "Phone Number", required: false
+                         		 }}
+
 
 }}} // end of Resetting Section
 
@@ -1737,6 +1745,14 @@ def otherAreaOccupancyStatusEventHandler(evt) {
 }}
 def presenceAwayEventHandler(evt) { 
     forceVacantIf()
+    if (sendPresenceAwayNotification) {
+        ifDebug("Auto Off From Presence Leaving Notifications Is Active")
+        String message = awayOffMessage
+        if (location.contactBookEnabled && recipients) {
+            ifDebug("You Have Chosen To Send Notifications & Your Contact Book Is Enabled! Sending Message '$awayOffMessage'")
+            sendNotificationToContacts(message, recipients) 
+            }                                                                                                               
+                                      }
     runIn(15, turnalloff)
 } 
 def resetBackDoor() {
