@@ -2,7 +2,7 @@
  Copyright (C) 2017 Baz2473
  Name: Area Occupancy Child App
 */   
-public static String areaOccupancyChildAppVersion() { return "v1.2.2.0" }
+public static String areaOccupancyChildAppVersion() { return "v1.2.2.5" }
 
 private isDebug() {
         if (debugging) { 
@@ -692,26 +692,52 @@ def mainAction() {
             if(dimmableSwitches1 && switchOnControl && !switchOnModeControl && ['automationon'].contains(automationState)) {
                dimmableSwitches1.each {
                def currentLevel = it.currentValue("level")
-            if (currentLevel < setLevelTo) { 
-                it.setLevel(setLevelTo)
-                }}}
+               if (currentLevel < setLevelTo) { 
+                   if (onlyIfDisarmed) {
+                       def shmStatus = location.currentState("alarmSystemStatus")?.value
+                       if (shmStatus == "off") {
+                           it.setLevel(setLevelTo)
+                                               } else {ifDebug("SHM is ARMED! No Lights Will Turn On!")}
+                                       } else {
+                                               it.setLevel(setLevelTo)
+                                               }
+                                              }
+                                      }
+            }
         if(dimmableSwitches2 && switchOnControl && switchOnModeControl && ['automationon'].contains(automationState)) {
            def currentMode = location.currentMode
            dimmableSwitches2.each {  
            def currentLevel = it.currentValue("level")
-           if (currentMode.name == duringMode1 && currentLevel < setLevelTo1) {
-               it.setLevel(setLevelTo1)
-               }
-           if (currentMode.name == duringMode2 && currentLevel < setLevelTo2) {
-               it.setLevel(setLevelTo2)
-               }
-           if (currentMode.name == duringMode3 && currentLevel < setLevelTo3) {
-               it.setLevel(setLevelTo3)
-               } 
-           if (currentMode.name == duringMode4 && currentLevel < setLevelTo4) {
-               it.setLevel(setLevelTo4)
-               }    
-           }} 
+           if (onlyIfDisarmed) {
+               def shmStatus = location.currentState("alarmSystemStatus")?.value
+               if (shmStatus == "off") {
+                   if (currentMode.name == duringMode1 && currentLevel < setLevelTo1) {
+                       it.setLevel(setLevelTo1)
+                       }
+                   if (currentMode.name == duringMode2 && currentLevel < setLevelTo2) {
+                       it.setLevel(setLevelTo2)
+                       }
+                   if (currentMode.name == duringMode3 && currentLevel < setLevelTo3) {
+                       it.setLevel(setLevelTo3)
+                       } 
+                   if (currentMode.name == duringMode4 && currentLevel < setLevelTo4) {
+                       it.setLevel(setLevelTo4)
+                       }    
+                                       } else {ifDebug("SHM is ARMED! No Lights Will Turn On!")}
+                               } else {
+                                       if (currentMode.name == duringMode1 && currentLevel < setLevelTo1) {
+                                           it.setLevel(setLevelTo1)
+                                           }
+                                       if (currentMode.name == duringMode2 && currentLevel < setLevelTo2) {
+                                           it.setLevel(setLevelTo2)
+                                           }
+                                       if (currentMode.name == duringMode3 && currentLevel < setLevelTo3) {
+                                           it.setLevel(setLevelTo3)
+                                           } 
+                                       if (currentMode.name == duringMode4 && currentLevel < setLevelTo4) {
+                                           it.setLevel(setLevelTo4)
+                                           } 
+                                           }}}
                if (doors) {                      
                    def doorsState = doors.currentState("contact") 
                    if (!doorsState.value.contains("open") && ['donotdisturb','donotdisturbon'].contains(areaState)) {
@@ -1121,7 +1147,7 @@ private dimmableSwitches1On() {
                                                 }
                                                                                                              }
                                           }
-                                    }
+                                    } else {ifDebug("SHM is ARMED! No Lights Will Turn On!")}
                            } else {
                                    def child = getChildDevice(getArea())
                                    def automationState = child.getAutomationState()
@@ -1165,7 +1191,7 @@ private dimmableSwitches2On() {
                                                }
                                                                                                             }
                                           }
-                                      }
+                                      } else {ifDebug("SHM is ARMED! No Lights Will Turn On!")}
                              } else { 
                                      def child = getChildDevice(getArea())
                                      def automationState = child.getAutomationState()
