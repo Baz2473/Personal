@@ -2,7 +2,7 @@
  Copyright (C) 2017 Baz2473
  Name: Area Occupancy Child App
 */   
-public static String areaOccupancyChildAppVersion() { return "v1.2.2.5" }
+public static String areaOccupancyChildAppVersion() { return "v1.2.3.5" }
 
 private isDebug() {
         if (debugging) { 
@@ -345,6 +345,9 @@ section("Action On Vacant") {
                      if (actionOnVacant) {
                 		 input "vacantAction", "capability.switch", title: "Turn Off?", multiple: true, required: true, submitOnChange: true
                          }
+}
+section("Reset Entire Room On SHM Setting To Away?") {
+         input "resetOnSHMChangingToAway", "bool", title: "Reset Entire Area When SHM Sets To AWAY?", required: false, submitOnChange: false
 }
 section("Subscriptions!") {
          input "subscriptionsSelected", "bool", title: "Override Subscriptions?", required: false, submitOnChange: true
@@ -1462,6 +1465,23 @@ def followedByContactOpenedEventHandler(evt) {
 
 } // end of followedByContactOpenedEventHandler
 
+def forceTurnAllOff() {
+    def child = getChildDevice(getArea())
+    ifDebug("The Alarm Is Now Set So Performing All Full Reset Of $app.label!")
+    checkableLights.each {
+        if (it.hasCommand("setLevel")) {
+            it.setLevel(0)
+                                       } else {                                    
+                                               it.off()
+                                               }
+                         }
+    ifDebug("Generating VACANT Event!")                    
+    child.generateEvent('vacant')
+    unschedule()
+    ifDebug("All Scheduled Jobs Have Been Cancelled!")
+    ifDebug("Generating AUTOMATION ON Event!") 
+    child.generateAutomationEvent('automationon')
+}
 def forceVacantIf() {
     ifDebug("forcing Vacant Check")
     def child = getChildDevice(getArea())
@@ -1792,13 +1812,25 @@ def resetOccupiedCounter() {
     state.occupiedCounter = 0
 }
 def shmStatusEventHandler(evt) {
+    def child = getChildDevice(getArea())
     def shmStatus = location.currentState("alarmSystemStatus")?.value 
-    if (shmStatus == "away")
-        log.info "Alarm Is ARMED AWAY"
-        else if (shmStatus == "stay")
-                 log.info "Alarm Is ARMED STAY"
-                 else if (shmStatus == "off")
-                          log.info "Alarm Is OFF"
+    if (shmStatus == "away") {
+        ifDebug("The Alarm Is Now ARMED AWAY!")
+        if (resetOnSHMChangingToAway) {
+            ifDebug("The Alarm Is Now ARMED AWAY! & You Requested A Full Reset...")
+            forceTurnAllOff()
+            
+            }}
+              else {
+                    if (shmStatus == "stay") {
+                        ifDebug("The Alarm Is Now ARMED STAY!")
+                        }
+                         else {
+                               if (shmStatus == "off") {
+                                   ifDebug("The Alarm Is Now OFF!")
+                                   }
+                              }
+                   }
 }
 def spawnChildDevice(areaName) {
     app.updateLabel(app.label)
