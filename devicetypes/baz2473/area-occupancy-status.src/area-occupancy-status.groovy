@@ -37,7 +37,7 @@ metadata {
    }
     
 	tiles(scale: 2)	{
-    	multiAttributeTile(name: "occupancyStatus", width: 2, height: 2, canChangeBackground: false) {
+    	multiAttributeTile(name: "occupancyStatus", type: "generic", width: 2, height: 2, canChangeBackground: false) {
 			tileAttribute ("device.occupancyStatus", key: "PRIMARY_CONTROL") {
 				attributeState "vacant", label: 'Lights OFF', icon:"st.Home.home18", backgroundColor:"#606060"
                 attributeState "vacanton", label: 'Lights ON', action: "turnalloff", icon:"st.Home.home18", backgroundColor:"#c1b419"
@@ -56,7 +56,7 @@ metadata {
 				attributeState "default", label:'${currentValue}'
 			    }
       }
-       multiAttributeTile(name: "automationStatus", width: 2, height: 2, canChangeBackground: false) {
+       multiAttributeTile(name: "automationStatus", type: "generic", width: 2, height: 2, canChangeBackground: false) {
 			tileAttribute ("device.automationStatus", key: "PRIMARY_CONTROL") {
 				attributeState "automationon", label: 'Automation ON', action: "automationoff", icon:"st.samsung.da.RC_ic_power", backgroundColor:"#32CD32"
                 attributeState "automationoff", label: 'Automation OFF', action: "automationon", icon:"st.samsung.da.RC_ic_power", backgroundColor:"#FF0000"        
