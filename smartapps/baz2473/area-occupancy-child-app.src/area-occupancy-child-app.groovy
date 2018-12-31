@@ -771,10 +771,10 @@ def mainAction() {
                }
            if (noExitSensor && ['occupiedon',].contains(areaState)) { 
                state.previousState = 'occupiedon'
-               runIn(entryMotionTimeout, vacant, [overwrite: false])
+               runIn(entryMotionTimeout, vacant/*, [overwrite: false]*/)
                }     
            if (noExitSensor && ['occupied','heavyuse'].contains(areaState)) {                         
-               runIn(entryMotionTimeout, vacant, [overwrite: false])
+               runIn(entryMotionTimeout, vacant/*, [overwrite: false]*/)
                }                           
            if (donotdisturbControl && ['engaged','engagedon'].contains(areaState)) {                             
                runIn(dndCountdown * 60, donotdisturb, [overwrite: false])
