@@ -691,11 +691,12 @@ def mainAction() {
     def automationState = child.getAutomationState()
     if (entryMotionSensors) {
         def entryMotionState = entryMotionSensors.currentState("motion")
-        if (entryMotionState.value.contains("active")) {     
+        if (entryMotionState.value.contains("active")) {
+        	unschedule(switches2Off) // NEW FUNCTION
             if(dimmableSwitches1 && switchOnControl && !switchOnModeControl && ['automationon'].contains(automationState)) {
                dimmableSwitches1.each {
-               def currentLevel = it.currentValue("level")
-               if (currentLevel < setLevelTo) { 
+              // def currentLevel = it.currentValue("level")
+             //  if (currentLevel < setLevelTo) { 
                    if (onlyIfDisarmed) {
                        def shmStatus = location.currentState("alarmSystemStatus")?.value
                        if (shmStatus == "off") {
@@ -704,7 +705,7 @@ def mainAction() {
                                        } else {
                                                it.setLevel(setLevelTo)
                                                }
-                                              }
+                                             // }
                                       }
             }
         if(dimmableSwitches2 && switchOnControl && switchOnModeControl && ['automationon'].contains(automationState)) {
