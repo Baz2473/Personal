@@ -691,11 +691,13 @@ def mainAction() {
     def automationState = child.getAutomationState()
     if (entryMotionSensors) {
         def entryMotionState = entryMotionSensors.currentState("motion")
-        if (entryMotionState.value.contains("active")) {     
+        if (entryMotionState.value.contains("active")) {
+        ifDebug("Unscheduling all events as motion was detected")
+        	unschedule() //////////////////////////////////////////////////////// THIS IS NEW AS OF 31/12/2018 /////////////////////////////////////////////////////////
             if(dimmableSwitches1 && switchOnControl && !switchOnModeControl && ['automationon'].contains(automationState)) {
                dimmableSwitches1.each {
                def currentLevel = it.currentValue("level")
-               if (currentLevel < setLevelTo) { 
+               //if (currentLevel < setLevelTo) { 
                    if (onlyIfDisarmed) {
                        def shmStatus = location.currentState("alarmSystemStatus")?.value
                        if (shmStatus == "off") {
@@ -704,7 +706,7 @@ def mainAction() {
                                        } else {
                                                it.setLevel(setLevelTo)
                                                }
-                                              }
+                                             // }
                                       }
             }
         if(dimmableSwitches2 && switchOnControl && switchOnModeControl && ['automationon'].contains(automationState)) {
@@ -873,7 +875,6 @@ def mainAction() {
                                     if (thisAreaState.value.contains("vacant")) {
                                         ifDebug("The Previous State Was $state.previousState")
                                         if (state.previousState == 'occupiedon') {
-                                          //  /*
                                             if (onlyDuringDaytime9) {
                                                 def s = getSunriseAndSunset()
                                                 def sunrise = s.sunrise.time
@@ -885,12 +886,10 @@ def mainAction() {
                                                     runIn(dimDownTime, dimLights)
                                                                                            } else {}
                                                                     } else {
-                                                                            // */
                                                                             ifDebug("The Lights Will Dim Down In $dimDownTime Seconds")
                                                                             runIn(dimDownTime, dimLights)
-                                                                            } /*// */ }
+                                                                            } }
                                         if (state.previousState == 'heavyuseon') {
-                                            //  /*
                                             if (onlyDuringDaytime9) {
                                                 def s = getSunriseAndSunset()
                                                 def sunrise = s.sunrise.time
@@ -902,10 +901,9 @@ def mainAction() {
                                                     runIn(dimDownTime * 2, dimLights)
                                                                                            } else {}
                                                                     } else {
-                                                                            // */
                                                                             ifDebug("The Lights Will Dim Down In Double $dimDownTime Seconds Because Heavy Use Was Active")
                                                                             runIn(dimDownTime * 2, dimLights)
-                                                                            }  /*// */ }
+                                                                            } }
                                         } else {
                                                 ifDebug("Doing Nothing Because Your Other Area Is Still Occupied")                          
                                                 }} else {
@@ -915,7 +913,6 @@ def mainAction() {
                                                              if (thisAreaState.value.contains("vacant") && andThisAreaState.value.contains("vacant")) {
                                                                  ifDebug("The Previous State Was $state.previousState")
                                                                  if (state.previousState == 'occupiedon') { 
-                                                                     //  /*
                                                                      if (onlyDuringDaytime9) {
                                                                          def s = getSunriseAndSunset()
                                                                          def sunrise = s.sunrise.time
@@ -927,12 +924,10 @@ def mainAction() {
                                                                              runIn(dimDownTime, dimLights)
                                                                                                                     } else {}
                                                                                              } else {
-                                                                                                     // */
                                                                                                      ifDebug("The Lights Will Dim Down In $dimDownTime Seconds")
                                                                                                      runIn(dimDownTime, dimLights)
-                                                                                                     } /*// */ }
+                                                                                                     } }
                                                                  if (state.previousState == 'heavyuseon') {
-                                                                     //  /*
                                                                      if (onlyDuringDaytime9) {
                                                                            def s = getSunriseAndSunset()
                                                                            def sunrise = s.sunrise.time
@@ -944,16 +939,14 @@ def mainAction() {
                                                                                runIn(dimDownTime * 2, dimLights)
                                                                                                                       } else {}
                                                                                              } else {
-                                                                                                     // */
                                                                                                      ifDebug("The Lights Will Dim Down In Double $dimDownTime Seconds Because Heavy Use Was Active")
                                                                                                      runIn(dimDownTime * 2, dimLights)
-                                                                                                     }  /*// */ }
+                                                                                                     } }
                                                              } else {
                                                                      ifDebug("Doing Nothing Because 1 Of Your Other Areas Are Still Occupied")                                                                                                                
                                                                      }} else {
                                                                               ifDebug("The Previous State Was $state.previousState")
                                                                               if (state.previousState == 'occupiedon') {
-                                                                                  //  /*
                                                                                   if (onlyDuringDaytime9) {
                                                                                       def s = getSunriseAndSunset()
                                                                                       def sunrise = s.sunrise.time
@@ -965,12 +958,10 @@ def mainAction() {
                                                                                           runIn(dimDownTime, dimLights)
                                                                                                                                  } else { ifDebug("The Time Is After Sunset, Doing Nothing")}
                                                                                                           } else {
-                                                                                                                  // */
                                                                                                                   ifDebug("The Lights Will Dim Down In $dimDownTime Seconds")
                                                                                                                   runIn(dimDownTime, dimLights)
-                                                                                                                  } /*// */ }
+                                                                                                                  } }
                                                                               if (state.previousState == 'heavyuseon') {
-                                                                                  //  /*
                                                                                   if (onlyDuringDaytime9) {
                                                                                       def s = getSunriseAndSunset()
                                                                                       def sunrise = s.sunrise.time
@@ -982,10 +973,9 @@ def mainAction() {
                                                                                           runIn(dimDownTime * 2, dimLights)
                                                                                                                                  } else {}
                                                                                                            } else {
-                                                                                                                   // */
                                                                                                                    ifDebug("The Lights Will Dim Down In Double $dimDownTime Seconds Because Heavy Use Was Active")
                                                                                                                    runIn(dimDownTime * 2, dimLights)
-                                                                                                                   }  /*// */ }
+                                                                                                                   } }
                                                                                   }}}}                      
 }}}}                    
 //888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
