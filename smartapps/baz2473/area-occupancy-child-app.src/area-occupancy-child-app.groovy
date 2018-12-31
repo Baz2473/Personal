@@ -692,8 +692,10 @@ def mainAction() {
     if (entryMotionSensors) {
         def entryMotionState = entryMotionSensors.currentState("motion")
         if (entryMotionState.value.contains("active")) {
-        ifDebug("Unscheduling all events as motion was detected")
+        if (!doors) {
+                ifDebug("Unscheduling all events for thisd room as motion was detected and doors are not monitored")
         	unschedule() //////////////////////////////////////////////////////// THIS IS NEW AS OF 31/12/2018 /////////////////////////////////////////////////////////
+            }
             if(dimmableSwitches1 && switchOnControl && !switchOnModeControl && ['automationon'].contains(automationState)) {
                dimmableSwitches1.each {
                def currentLevel = it.currentValue("level")
