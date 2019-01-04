@@ -2,7 +2,7 @@
   Copyright (C) 2017 Baz2473
   Name: Area Occupancy Status 
 */
-public static String DTHVersion() { return "v1.0.1.0" }
+public static String DTHVersion() { return "v3.0.0.0" }
 
 metadata {
 	      definition (
@@ -25,8 +25,6 @@ metadata {
                                           command "engagedon"
 		                                  command "donotdisturb"
                                           command "donotdisturbon"
-		                                  command "heavyuse"
-                                          command "heavyuseon"
                                           command "automationon"
                                           command "automationoff"
                                           command "updateOccupancyStatus", ["string"]
@@ -49,8 +47,6 @@ metadata {
                 attributeState "engagedon", label: 'Lights ON', action: "vacanton", icon:"st.locks.lock.locked", backgroundColor:"#ff0000"
                 attributeState "donotdisturb", label: 'Lights OFF', action: "vacant", icon:"st.Office.office6", backgroundColor:"#410099"
                 attributeState "donotdisturbon", label: 'Lights ON', action: "vacanton", icon:"st.Office.office6", backgroundColor:"#6d00ff"
-				attributeState "heavyuse", label: 'Lights OFF', action: "vacant", icon:"st.Health & Wellness.health5", backgroundColor:"#8a5128"
-                attributeState "heavyuseon", label: 'Lights ON', action: "vacanton", icon:"st.Health & Wellness.health5", backgroundColor:"#8a5128"
                 }
        		tileAttribute ("device.status", key: "SECONDARY_CONTROL") {
 				attributeState "default", label:'${currentValue}'
@@ -110,12 +106,6 @@ def donotdisturb() {
 def donotdisturbon() {
     stateUpdate('donotdisturbon')
     }
-def heavyuse() {
-    stateUpdate('heavyuse')
-    }
-def heavyuseon() {
-    stateUpdate('heavyuseon')
-    }
 def automationon() {
     automationStateUpdate('automationon')
     }
@@ -134,9 +124,9 @@ private	automationStateUpdate(automationState) {
             }
 private updateOccupancyStatus(occupancyStatus = null) {
 	    occupancyStatus = occupancyStatus?.toLowerCase()
-	    def msgTextMap = ['vacant':'Vacant Since: ', 'vacanton':'Vacant & On Since: ', 'occupied':'Occupied Since: ', 'occupiedon':'Occupied & On Since: ','checking':'Checking Status: ','checkingon':'Checking Status Since: ','engaged':'Engaged Since: ','engagedon':'Engaged & On Since: ' ,'donotdisturb':'DND Since: ','donotdisturbon':'DND & On Since: ', 'heavyuse':'Heavy Use Since: ','heavyuseon':'Heavy Use & On Since: ']
+	    def msgTextMap = ['vacant':'Vacant Since: ', 'vacanton':'Vacant & On Since: ', 'occupied':'Occupied Since: ', 'occupiedon':'Occupied & On Since: ','checking':'Checking Status: ','checkingon':'Checking Status Since: ','engaged':'Engaged Since: ','engagedon':'Engaged & On Since: ' ,'donotdisturb':'DND Since: ','donotdisturbon':'DND & On Since: ']
         if (!occupancyStatus || !(msgTextMap.containsKey(occupancyStatus))) {
-    	     log.debug "${device.displayName}: Missing or invalid parameter Occupancy Status. Allowed values are: Vacant, Occupied, Checking, Engaged, Heavyuse, Donotdisturb, Vacanton, Occupiedon, Checkingon, Engagedon, Heavyuseon or Donotdisturbon."
+    	     log.debug "${device.displayName}: Missing or invalid parameter Occupancy Status. Allowed values are: Vacant, Occupied, Checking, Engaged, Donotdisturb, Vacanton, Occupiedon, Checkingon, Engagedon or Donotdisturbon."
              return
              }
 	    sendEvent(name: "occupancyStatus", value: occupancyStatus, descriptionText: "${device.displayName} changed to ${occupancyStatus}", isStateChange: true, displayed: true)
