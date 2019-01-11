@@ -2,7 +2,7 @@
  Copyright (C) 2017 Baz2473
  Name: Area Occupancy Child App
 */   
-public static String areaOccupancyChildAppVersion() { return "v3.0.0.1" }
+public static String areaOccupancyChildAppVersion() { return "v3.0.0.2" }
 
 private isDebug() {
         if (debugging) { 
@@ -576,8 +576,8 @@ def mainAction() {
         if (entryMotionState.value.contains("active")) {
             if (dimmableSwitches1 && switchOnControl && ['automationon'].contains(automationState)) {
                 dimmableSwitches1.each {
-              // def currentLevel = it.currentValue("level")
-             //  if (currentLevel < setLevelTo) { 
+               def currentLevel = it.currentValue("level")
+               if (currentLevel < setLevelTo) { 
                    if (onlyIfDisarmed) {
                        def shmStatus = location.currentState("alarmSystemStatus")?.value
                        if (shmStatus == "off") {
@@ -586,7 +586,7 @@ def mainAction() {
                                        } else {
                                                it.setLevel(setLevelTo)
                                                }
-                                             // }
+                                              }
                                       }
             }
                if (doors) {                      
