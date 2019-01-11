@@ -2,7 +2,7 @@
  Copyright (C) 2017 Baz2473
  Name: Area Occupancy Child App
 */   
-public static String areaOccupancyChildAppVersion() { return "v3.0.0.0" }
+public static String areaOccupancyChildAppVersion() { return "v3.0.0.1" }
 
 private isDebug() {
         if (debugging) { 
@@ -875,15 +875,21 @@ def dimLights() {
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
     def automationState = child.getAutomationState()
+    def entryMotionState = entryMotionSensors.currentState("motion")
+    ifDebug("The entry Motion State Is: $entryMotionState")
     if (offRequired && ['automationon'].contains(automationState)) {
-        switches2.each {
-        if (it.currentValue("switch") == 'on') {
-            def currentLevel = it.currentValue("level")
-            def newLevel = (currentLevel > dimByLevel ? currentLevel - dimByLevel : 1)
+        if (!entryMotionState.value.contains("active")) { 
+        	switches2.each {
+        	if (it.currentValue("switch") == 'on') {
+            	def currentLevel = it.currentValue("level")
+           	    def newLevel = (currentLevel > dimByLevel ? currentLevel - dimByLevel : 1)
                 it.setLevel(newLevel)
                 }
-     	}
-      runIn(switchesOffCountdownInSeconds, switches2Off)  
+     		}
+        runIn(switchesOffCountdownInSeconds, switches2Off)  
+    	} else {
+        		mainAction()
+        	}
     }
 } 
 
@@ -1494,9 +1500,15 @@ def switches2OffEventHandler(evt) {
 
 def switches2Off() {
     def child = getChildDevice(getArea())
-    switches2.each {
-    it.setLevel(0)   
-    }
+    def entryMotionState = entryMotionSensors.currentState("motion")
+    ifDebug("The entry Motion State Is: $entryMotionState")
+    if (!entryMotionState.value.contains("active")) { 
+    	switches2.each {
+    	it.setLevel(0)   
+    	}
+    } else {
+        	mainAction()
+          }
 }
 
 def switches3OnEventHandler(evt) { 
@@ -1580,6 +1592,7 @@ def turnalloff() {
                      }
              }
              child.generateEvent('vacant')
+             //mainAction()
              unschedule()
              ifDebug("All Scheduled Jobs Have Been Cancelled!")
         } else {
