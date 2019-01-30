@@ -2,7 +2,7 @@
  Copyright (C) 2017 Baz2473
  Name: Area Occupancy Child App
 */   
-public static String areaOccupancyChildAppVersion() { return "v3.0.0.3" }
+public static String areaOccupancyChildAppVersion() { return "v3.0.0.4" }
 
 private isDebug() {
         if (debugging) { 
@@ -582,12 +582,14 @@ def mainAction() {
                        def shmStatus = location.currentState("alarmSystemStatus")?.value
                        if (shmStatus == "off") {
                            it.setLevel(setLevelTo)
-                                               } else {ifDebug("SHM is ARMED! No Lights Will Turn On!")}
-                                       } else {
-                                               it.setLevel(setLevelTo)
-                                               }
-                                              }
-                                      }
+                       } else {
+                       		ifDebug("SHM is ARMED! No Lights Will Turn On!")
+                       }
+                   } else {
+                        it.setLevel(setLevelTo)
+                   }
+               }
+             }
             }
                if (doors) {                      
                    def doorsState = doors.currentState("contact") 
@@ -889,11 +891,13 @@ def dimLights() {
      			}
         	runIn(switchesOffCountdownInSeconds, switches2Off)  
     		} else {
-               		 mainAction() 
-            		}
+                ifDebug("Re-Evaluated because the lights were told to dim but your room is not vacant")
+                mainAction() 
+            }
         } else {
-        		mainAction()
-        	}
+            ifDebug("Re-Evaluated because the lights were told to dim but the motion in this room is not inactive")
+        	mainAction()
+        }
    	 }
 } 
 
@@ -929,7 +933,9 @@ def dimmableSwitches1On() {
                          it.setLevel(setLevelTo)
                          }
 					}
-            } else {ifDebug("SHM is ARMED! No Lights Will Turn On!")}
+            } else {
+            	ifDebug("SHM is ARMED! No Lights Will Turn On!")
+            }
          } else {
                  def child = getChildDevice(getArea())
                  def automationState = child.getAutomationState()
@@ -941,6 +947,31 @@ def dimmableSwitches1On() {
 				 }
          }
 }
+
+/*
+def dimmableSwitches1On() {
+    if (onlyIfDisarmed) {
+    	def shmStatus = location.currentState("alarmSystemStatus")?.value
+        if (shmStatus == "off") {
+    		turnOnTheDimmableSwitches()
+    	} else {
+            ifDebug("SHM is ARMED! No Lights Will Turn On!")
+    		}
+	} else {
+		turnOnTheDimmableSwitches()
+		}
+}
+def turnOnTheDimmableSwitches() {
+	def child = getChildDevice(getArea())
+    def automationState = child.getAutomationState()
+    if (dimmableSwitches1 && switchOnControl && ['automationon'].contains(automationState)) {       
+    	ifDebug("The Selected Switch(es) Have Either Been Turned 'ON' Or Had Their Respective Level(s) Set")
+        dimmableSwitches1.each {
+        it.setLevel(setLevelTo)
+        }
+    }
+}
+*/
 
 def donotdisturb() {      
 def child = getChildDevice(getArea())
@@ -1513,9 +1544,11 @@ def switches2Off() {
     		it.setLevel(0)   
     		}
         } else {
+            ifDebug("Re-Evaluated because the lights were told to switch off but the room was not vacant!")
                 mainAction() 
               }   
     } else {
+        ifDebug("Re-Evaluated because the lights were told to switch off but the motion in the room was not inactive!")
         	mainAction()
           }
 }
