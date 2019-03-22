@@ -2,7 +2,7 @@
  Copyright (C) 2017 Baz2473
  Name: Area Occupancy Child App
 */   
-public static String areaOccupancyChildAppVersion() { return "v3.0.0.7" }
+public static String areaOccupancyChildAppVersion() { return "v3.0.0.8" }
 
 private isDebug() {
         if (debugging) { 
@@ -487,15 +487,7 @@ if (!childCreated()) {
         }
     if (exitMotionSensorsWhenDoorIsClosed && monitoredDoor2 && exitMotionWhenDoorIsClosedInactiveSubscribed) {
         subscribe(exitMotionSensorsWhenDoorIsClosed, "motion.inactive", exitMotionSensorsWhenDoorIsClosedInactiveEventHandler)
-        }
-   /* if (followedBy && firstAction) {
-        subscribe(firstAction, "contact.open", followedByContactOpenedEventHandler)
-        state.backDoorHasBeenOpened = false
-        }    
-    if (followedBy && secondAction) {
-        subscribe(secondAction, "acceleration.active", followedByAccelerationActiveEventHandler)
-        state.gateHasBeenOpened = false
-        } */      
+        }   
     if (otherArea && otherAreaCheck && otherAreaSubscribedVacant) {
         subscribe(otherArea, "occupancyStatus.vacant", otherAreaOccupancyStatusEventHandler)
         }
@@ -588,111 +580,23 @@ def mainAction() {
                    } else {
                         it.setLevel(setLevelTo)
                    }
+                 }
                }
              }
-            }
                if (doors) {                      
                    def doorsState = doors.currentState("contact") 
                    if (!doorsState.value.contains("open") && ['donotdisturb','donotdisturbon'].contains(areaState)) {
-                       if (actionOnEngaged) {
-                           engagedAction.on()
-                       }
-                   if (checkableLights) {
-                       def lightsState = checkableLights.currentState("switch")
-                       if (lightsState.value.contains("on")) {
-                          child.generateEvent('engagedon')
-                       } else {                
-                              child.generateEvent('engaged')
-                       }
-                   } else {
-                          child.generateEvent('engaged')
-                   }
-                   if (occupancyStatusChangesSubscribed) { 
-                      ifDebug("Re-Evaluation Caused By $app.label Changing To Engaged")
-                      mainAction() 
-                    } // end of engaged
+                        engaged()
                       } else if (!doorsState.value.contains("open") && ['occupied','occupiedon'].contains(areaState)) { 
-                                if (checkableLights) {
-                                   def lightsState = checkableLights.currentState("switch")
-                                   if (lightsState.value.contains("on")) {
-                                      child.generateEvent('checkingon')
-                                   } else {                
-                                          child.generateEvent('checking')
-                                      }
-                                } else {
-                                       child.generateEvent('checking')
-     	                           }
-                                if (occupancyStatusChangesSubscribed) { 
-                                   ifDebug("Re-Evaluation Caused By $app.label Changing To Checking")
-                                   mainAction() 
-                                } // end of checking
+                                  checking()
                                 } else if (!doorsState.value.contains("open") && ['checking','checkingon'].contains(areaState)) {                                                                                                       
                                             runIn(actualEntrySensorsTimeout, engaged, [overwrite: false])
-                                          } else if (doorsState.value.contains("open") && ['checking','checkingon','engaged','engagedon','donotdisturb','donotdisturbon'].contains(areaState) ||  ['vacant','vacanton'].contains(areaState)  ) { 
-                                                    state.occupiedTime = now()
-                                                    if (actionOnVacant) {
-                                                       if (['engaged','engagedon'].contains(areaState)) {
-                                                          vacantAction.off()
-                                                       }
-                                                    }
-                                                    if (checkableLights) {
-                                                       def lightsState = checkableLights.currentState("switch")
-                                                       if (lightsState.value.contains("on")) {
-                                                          child.generateEvent('occupiedon')
-                                                       } else {                
-                                                              child.generateEvent('occupied')
-                                                              }
-                                                    } else {
-                                                           child.generateEvent('occupied')
-                                                           }
-                                                    if (occupancyStatusChangesSubscribed) { 
-                                                       ifDebug("Re-Evaluation Caused By $app.label Changing To Occupied")
-                                                       mainAction() 
-                                                    }
-                                                   } /* else if (['vacant','vacanton'].contains(areaState)) { 
-                                                               state.occupiedTime = now()
-                                                               if (actionOnVacant) {
-                                                                  if (['engaged','engagedon'].contains(areaState)) {
-                                                                     vacantAction.off()
-                                                                  }
-                                                               }
-                                                               if (checkableLights) {
-                                                                  def lightsState = checkableLights.currentState("switch")
-                                                                  if (lightsState.value.contains("on")) {
-                                                                     child.generateEvent('occupiedon')
-                                                                  } else {                
-                                                                         child.generateEvent('occupied')
-                                                                         }
-                                                               } else {
-                                                                      child.generateEvent('occupied')
-                                                                      }
-                                                               if (occupancyStatusChangesSubscribed) { 
-                                                                  ifDebug("Re-Evaluation Caused By $app.label Changing To Occupied")
-                                                                  mainAction() 
-                                                               }
-                                                            } */
+                                          } else if (doorsState.value.contains("open") && ['checking','checkingon','engaged','engagedon','donotdisturb','donotdisturbon'].contains(areaState) || ['vacant','vacanton'].contains(areaState)) { 
+                                                     occupied()
+                                                    } 
                  		  } else if (['vacant','vacanton'].contains(areaState)) { 
-                                       state.occupiedTime = now()
-                                       if (actionOnVacant) {
-                                          if (['engaged','engagedon'].contains(areaState)) {
-                                             vacantAction.off()
-                                          }
-                                       }
-                                       if (checkableLights) {
-                                          def lightsState = checkableLights.currentState("switch")
-                                          if (lightsState.value.contains("on")) {
-                                             child.generateEvent('occupiedon')
-                                          } else {                
-                                                 child.generateEvent('occupied')
-                                                 }
-                                       } else {
-                                              child.generateEvent('occupied')
-                                              }
-                                       if (occupancyStatusChangesSubscribed) { 
-                                          ifDebug("Re-Evaluation Caused By $app.label Changing To Occupied")
-                                          mainAction() 
-                                       }
-                                   }       
+                                       occupied()
+                                     }       
 
 //------INACTIVE FROM HERE DOWN-------
 
@@ -711,47 +615,12 @@ def mainAction() {
            if (exitMotionSensors && ['occupiedon'].contains(areaState) && !adjacentDoors) {
                def exitMotionState = exitMotionSensors.currentState("motion")
                if (exitMotionState.value.contains("active")) { 
-                   state.previousState = 'occupiedon'
-    			   state.vacantTime = now()
-    			   if (checkableLights) {
-        			   def lightsState = checkableLights.currentState("switch")
-        			   if (lightsState.value.contains("on")) {
-            			   child.generateEvent('vacanton')  
-           			       mainAction()
-           			   } else { 
-                   			 child.generateEvent('vacant')
-                   			 mainAction()
-                    		}
-   				      } else {
-           				 child.generateEvent('vacant')
-           				 mainAction()
-           			 }
-    		if (occupancyStatusChangesSubscribed) {
-        		ifDebug("Re-Evaluation Caused By $app.label Changing To Vacant")
-        		mainAction() 
-			} // end of vacant  
+                   vacant()
                    }}
            if (exitMotionSensors && ['occupied'].contains(areaState) && !adjacentDoors) {
                def exitMotionState = exitMotionSensors.currentState("motion")
                if (exitMotionState.value.contains("active")) { 
-    				state.vacantTime = now()
-   					 if (checkableLights) {
-      					  def lightsState = checkableLights.currentState("switch")
-       					 if (lightsState.value.contains("on")) {
-          					  child.generateEvent('vacanton')  
-          					  mainAction()
-           				 } else { 
-                   			 child.generateEvent('vacant')
-                   			 mainAction()
-                   		 }
-    				} else {
-            			child.generateEvent('vacant')
-            			mainAction()
-            			}
-    			if (occupancyStatusChangesSubscribed) {
-       				 ifDebug("Re-Evaluation Caused By $app.label Changing To Vacant")
-       				 mainAction() 
-				} // end of vacant  
+    			   vacant()
                    }} 
            if (adjacentDoors && ['occupiedon'].contains(areaState) && !exitMotionSensors) { 
                state.previousState = 'occupiedon'
@@ -759,90 +628,22 @@ def mainAction() {
                if (adjacentDoorsState.contains("open")) {
                    def exitMotionStateWithDoorsOpen = exitMotionSensorsWhenDoorIsOpen.currentValue("motion") 
                    if (exitMotionStateWithDoorsOpen.contains("active")) {
-                      state.vacantTime = now()
-   					 if (checkableLights) {
-      					  def lightsState = checkableLights.currentState("switch")
-       					 if (lightsState.value.contains("on")) {
-          					  child.generateEvent('vacanton')  
-          					  mainAction()
-           				 } else { 
-                   			 child.generateEvent('vacant')
-                   			 mainAction()
-                   		 }
-    				} else {
-            			child.generateEvent('vacant')
-            			mainAction()
-            			}
-    			if (occupancyStatusChangesSubscribed) {
-       				 ifDebug("Re-Evaluation Caused By $app.label Changing To Vacant")
-       				 mainAction() 
-				} // end of vacant 
+                       vacant()
                        }} else {
                                 def exitMotionStateWithDoorsClosed = exitMotionSensorsWhenDoorIsClosed.currentValue("motion") 
                                 if (exitMotionStateWithDoorsClosed.contains("active")) {
-                                    state.vacantTime = now()
-   					 if (checkableLights) {
-      					  def lightsState = checkableLights.currentState("switch")
-       					 if (lightsState.value.contains("on")) {
-          					  child.generateEvent('vacanton')  
-          					  mainAction()
-           				 } else { 
-                   			 child.generateEvent('vacant')
-                   			 mainAction()
-                   		 }
-    				} else {
-            			child.generateEvent('vacant')
-            			mainAction()
-            			}
-    			if (occupancyStatusChangesSubscribed) {
-       				 ifDebug("Re-Evaluation Caused By $app.label Changing To Vacant")
-       				 mainAction() 
-				} // end of vacant 
+                                    vacant()
            }}}                               
            if (adjacentDoors && ['occupied'].contains(areaState) && !exitMotionSensors) {         
                def adjacentDoorsState = adjacentDoors.currentValue("contact")
                if (adjacentDoorsState.contains("open")) {
                    def exitMotionStateWithDoorsOpen = exitMotionSensorsWhenDoorIsOpen.currentValue("motion") 
                    if (exitMotionStateWithDoorsOpen.contains("active")) {
-                       state.vacantTime = now()
-   					 if (checkableLights) {
-      					  def lightsState = checkableLights.currentState("switch")
-       					 if (lightsState.value.contains("on")) {
-          					  child.generateEvent('vacanton')  
-          					  mainAction()
-           				 } else { 
-                   			 child.generateEvent('vacant')
-                   			 mainAction()
-                   		 }
-    				} else {
-            			child.generateEvent('vacant')
-            			mainAction()
-            			}
-    			if (occupancyStatusChangesSubscribed) {
-       				 ifDebug("Re-Evaluation Caused By $app.label Changing To Vacant")
-       				 mainAction() 
-				} // end of vacant 
+                       vacant()
                        }} else {
                                 def exitMotionStateWithDoorsClosed = exitMotionSensorsWhenDoorIsClosed.currentValue("motion") 
                                 if (exitMotionStateWithDoorsClosed.contains("active")) {
-                                    state.vacantTime = now()
-   					 if (checkableLights) {
-      					  def lightsState = checkableLights.currentState("switch")
-       					 if (lightsState.value.contains("on")) {
-          					  child.generateEvent('vacanton')  
-          					  mainAction()
-           				 } else { 
-                   			 child.generateEvent('vacant')
-                   			 mainAction()
-                   		 }
-    				} else {
-            			child.generateEvent('vacant')
-            			mainAction()
-            			}
-    			if (occupancyStatusChangesSubscribed) {
-       				 ifDebug("Re-Evaluation Caused By $app.label Changing To Vacant")
-       				 mainAction() 
-				} // end of vacant 
+                                	vacant()
             }}}                                
            if (['checking','checkingon'].contains(areaState)) { 
                  runIn(actualEntrySensorsTimeout, vacant, [overwrite: false])
@@ -1158,7 +959,7 @@ def doaoff() {
 	}
 } // end of doa2Off
 
-/*def engaged() {
+def engaged() {
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
     if (actionOnEngaged) {
@@ -1178,7 +979,7 @@ def doaoff() {
         ifDebug("Re-Evaluation Caused By $app.label Changing To Engaged")
         mainAction() 
         }
-} // end of engaged */
+} // end of engaged 
 
 def entryContactOpenedEventHandler(evt) {
     ifDebug("An Entry Contact Was Opened In $app.label")
@@ -1307,61 +1108,6 @@ def exitMotionSensorsWhenDoorIsClosedInactiveEventHandler(evt) {
   }
 } 
 
-/*def followedByAccelerationActiveEventHandler(evt) {
-    if (state.backDoorHasBeenOpened == true) {
-        occupied()
-        state.backDoorHasBeenOpened = false
-        unschedule(resetBackDoor)
-        if (switch4OnControl) {
-            def child = getChildDevice(getArea())
-            def areaState = child.getAreaState()
-            if (onlyDuringCertainTimes2 && (onlyDuringDaytime3 || onlyDuringNighttime3)) {
-                def s = getSunriseAndSunset()
-                def sunrise = s.sunrise.time
-                def sunset = s.sunset.time
-                def timenow = now()
-                if (onlyDuringDaytime3) {  
-                    if (timenow > sunrise && timenow < sunset) {
-                        switches4.on()
-                        }
-                }     
-                if (onlyDuringNighttime3) { 
-                    if (timenow > sunset || timenow < sunrise) {
-                        switches4.on()
-                        }
-                }
-            } // end of only during daytime3 or nighttime3
-            if (!onlyDuringDaytime3 && !onlyDuringNighttime3 && onlyDuringCertainTimes2) {
-                def between3 = timeOfDayIsBetween(fromTime3, toTime3, new Date(), location.timeZone)
-                ifDebug("Between3 = $between3")
-                if (between3) {
-                    switches4.on()   
-                    }
-            } // end of only if all during times are not selected
-            if (!onlyDuringDaytime3 && !onlyDuringNighttime3 && !onlyDuringCertainTimes2) {
-                switches4.on()
-                }                 
-        } // end of switch4OnControl
-    } else {
-            state.gateHasBeenOpened = true
-            runIn(30, resetGate)                                  
-            }
-} // end of followedByAccelerationActiveEventHandler */
-
-/*def followedByContactOpenedEventHandler(evt) {
-    if (state.gateHasBeenOpened == true) {
-        vacant()
-        state.gateHasBeenOpened = false
-        unschedule(resetGate)
-        if (switches5) {
-            switches5.off()
-            }
-    } else {
-            state.backDoorHasBeenOpened = true
-            runIn(30, resetBackDoor)                                       
-            }
-} // end of followedByContactOpenedEventHandler */
-
 def forceTurnAllOff() {
     def child = getChildDevice(getArea())
     ifDebug("The Alarm Is Now Set So Performing All Full Reset Of $app.label!")
@@ -1387,24 +1133,7 @@ def forceVacantIf() {
     def entryMotionState = entryMotionSensors.currentState("motion")
     ifDebug("The entry Motion State Is: $entryMotionState")
     if (!['vacant'].contains(areaState) && !entryMotionState.value.contains("active")) {
-    state.vacantTime = now()
-    if (checkableLights) {
-        def lightsState = checkableLights.currentState("switch")
-        if (lightsState.value.contains("on")) {
-            child.generateEvent('vacanton')  
-            mainAction()
-            } else { 
-                    child.generateEvent('vacant')
-                    mainAction()
-                    }
-    } else {
-            child.generateEvent('vacant')
-            mainAction()
-            }
-    if (occupancyStatusChangesSubscribed) {
-        ifDebug("Re-Evaluation Caused By $app.label Changing To Vacant")
-        mainAction() 
-        }
+         vacant()
     }
 }
 
@@ -1418,24 +1147,7 @@ def leftHome() {
     def automationState = child.getAutomationState()
     if (['automationon'].contains(automationState)) {
           ifDebug("$app.label was set to 'VACANT' because the mode changed to away or Heavy Use Was Disabled!")
-              state.vacantTime = now()
-    if (checkableLights) {
-        def lightsState = checkableLights.currentState("switch")
-        if (lightsState.value.contains("on")) {
-            child.generateEvent('vacanton')  
-            mainAction()
-            } else { 
-                    child.generateEvent('vacant')
-                    mainAction()
-                    }
-    } else {
-            child.generateEvent('vacant')
-            mainAction()
-            }
-    if (occupancyStatusChangesSubscribed) {
-        ifDebug("Re-Evaluation Caused By $app.label Changing To Vacant")
-        mainAction() 
-        }
+          vacant()
           ifDebug("switchesOffCountdown Sent")
           runIn(switchesOffCountdownInSeconds, switches2Off)  
           }
@@ -1660,14 +1372,6 @@ def presenceAwayEventHandler(evt) {
     forceVacantIf()
     runIn(15, turnalloff)
 } 
-
-def resetBackDoor() {
-    state.backDoorHasBeenOpened = false
-}
-
-def resetGate() {
-    state.gateHasBeenOpened = false
-}
 
 def resetOccupiedCounter() {
     ifDebug("The Occupied Counter Has Been Reset Dut To Inactivity For Your Entire Time Count")
