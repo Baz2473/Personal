@@ -2,7 +2,7 @@
  Copyright (C) 2017 Baz2473
  Name: Area Occupancy Child App
 */   
-public static String areaOccupancyChildAppVersion() { return "v3.0.2.0" }
+public static String areaOccupancyChildAppVersion() { return "v3.0.2.1" }
 
 private isDebug() {
         if (debugging) { 
@@ -1084,7 +1084,9 @@ def	entryMotionActiveEventHandler(evt) {
 
 def	entryMotionInactiveEventHandler(evt) {
     ifDebug("Re-Evaluation Caused By An Entry Motion Sensor Being 'INACTIVE'")
-    unschedule(engaged)
+    if (doors) {
+    	unschedule(engaged)
+    }
     mainAction() 
 }
 
