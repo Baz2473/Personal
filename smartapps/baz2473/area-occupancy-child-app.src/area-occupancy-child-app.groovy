@@ -2,7 +2,7 @@
  Copyright (C) 2017 Baz2473
  Name: Area Occupancy Child App
 */   
-public static String areaOccupancyChildAppVersion() { return "v3.0.1.9" }
+public static String areaOccupancyChildAppVersion() { return "v3.0.2.0" }
 
 private isDebug() {
         if (debugging) { 
@@ -1604,7 +1604,6 @@ def vacant() {
     if (checkableLights) {
         def lightsState = checkableLights.currentState("switch")
         if (lightsState.value.contains("on")) {
-            state.previousState = 'vacanton'
             child.generateEvent('vacanton')  
             mainAction()
             } else { 
