@@ -2,7 +2,7 @@
  Copyright (C) 2017 Baz2473
  Name: Area Occupancy Child App
 */   
-public static String areaOccupancyChildAppVersion() { return "v3.0.1.6" }
+public static String areaOccupancyChildAppVersion() { return "v3.0.1.8" }
 
 private isDebug() {
         if (debugging) { 
@@ -889,6 +889,8 @@ def dimLights() {
                 	it.setLevel(newLevel)
                 	}
      			}
+            state.previousState = 'occupied'
+            ifDebug("The lights will turn off in $switchesOffCountdownInSeconds seconds")
         	runIn(switchesOffCountdownInSeconds, switches2Off)  
     		} else {
                 ifDebug("Re-Evaluated because the lights were told to dim but your room is not vacant")
@@ -1619,8 +1621,8 @@ def vacant() {
 } // end of vacant  
 
 def turnalloff() {
+    def child = getChildDevice(getArea())
     if (!entryMotionSensors && checkableLights) {
-        def child = getChildDevice(getArea())
         ifDebug("You Have Told Me That $app.label Is Vacant Turning Off All Lights!")
         checkableLights.each {
         if (it.hasCommand("setLevel")) {
