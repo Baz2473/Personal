@@ -2,7 +2,7 @@
  Copyright (C) 2017 Baz2473
  Name: Area Occupancy Child App
 */   
-public static String areaOccupancyChildAppVersion() { return "v3.0.2.1" }
+public static String areaOccupancyChildAppVersion() { return "v3.0.2.2" }
 
 private isDebug() {
         if (debugging) { 
@@ -574,6 +574,7 @@ def mainAction() {
     if (entryMotionSensors) {
         def entryMotionState = entryMotionSensors.currentState("motion")
         if (entryMotionState.value.contains("active")) {
+        	ifDebug("Entry motion is Active")
             if (dimmableSwitches1 && switchOnControl && ['automationon'].contains(automationState)) {
                 dimmableSwitches1.each {
                def currentLevel = it.currentValue("level")
@@ -588,10 +589,12 @@ def mainAction() {
                    } else {
                         it.setLevel(setLevelTo)
                    }
-               }
-             }
+               } else if (it.currentValue("switch") == 'off') {
+                          it.on()
+                 }
+              }
             }
-               if (doors) {                      
+               if (doors) {
                    def doorsState = doors.currentState("contact") 
                    if (!doorsState.value.contains("open") && ['donotdisturb','donotdisturbon'].contains(areaState)) {
                         engaged()
@@ -614,14 +617,18 @@ def mainAction() {
 //------INACTIVE FROM HERE DOWN-------
 
 } else { 
-
+			ifDebug("Entry motion is Inactive")
 
            if (noExitSensor && ['occupiedon',].contains(areaState)) { 
                state.previousState = 'occupiedon'
+               ifDebug("622 Vacant will be activated in $entryMotionTimeout seconds")
                runIn(entryMotionTimeout, vacant, [overwrite: false])
+               return
                }     
-           if (noExitSensor && ['occupied'].contains(areaState)) {                         
+           if (noExitSensor && ['occupied'].contains(areaState)) {  
+               ifDebug("627 Vacant will be activated in $entryMotionTimeout seconds")
                runIn(entryMotionTimeout, vacant, [overwrite: false])
+               return
                }                           
            if (donotdisturbControl && ['engaged','engagedon'].contains(areaState)) {                             
                runIn(dndCountdown * 60, donotdisturb, [overwrite: false])
@@ -696,7 +703,7 @@ def mainAction() {
                                 if (thisArea && !andThisArea) { 
                                     def thisAreaState = thisArea.currentState("occupancyStatus")
                                     if (thisAreaState.value.contains("vacant")) {
-                                        ifDebug("The Previous State Was $state.previousState")
+                                        ifDebug("704 The Previous State Was $state.previousState")
                                         if (state.previousState == 'occupiedon') {
                                             if (onlyDuringDaytime9) {
                                                 def s = getSunriseAndSunset()
@@ -719,7 +726,7 @@ def mainAction() {
                                                              def thisAreaState = thisArea.currentState("occupancyStatus")
                                                              def andThisAreaState = andThisArea.currentState("occupancyStatus")
                                                              if (thisAreaState.value.contains("vacant") && andThisAreaState.value.contains("vacant")) {
-                                                                 ifDebug("The Previous State Was $state.previousState")
+                                                                 ifDebug("727 The Previous State Was $state.previousState")
                                                                  if (state.previousState == 'occupiedon') { 
                                                                      if (onlyDuringDaytime9) {
                                                                          def s = getSunriseAndSunset()
@@ -738,7 +745,7 @@ def mainAction() {
                                                              } else {
                                                                      ifDebug("Doing Nothing Because 1 Of Your Other Areas Are Still Occupied")                                                                                                                
                                                                      }} else {
-                                                                              ifDebug("The Previous State Was $state.previousState")
+                                                                              ifDebug("746 The Previous State Was $state.previousState")
                                                                               if (state.previousState == 'occupiedon') {
                                                                                   if (onlyDuringDaytime9) {
                                                                                       def s = getSunriseAndSunset()
@@ -751,7 +758,7 @@ def mainAction() {
                                                                                           runIn(dimDownTime, dimLights)
                                                                                                                                  } else { ifDebug("The Time Is After Sunset, Doing Nothing")}
                                                                                                           } else {
-                                                                                                                  ifDebug("The Lights Will Dim Down In $dimDownTime Seconds")
+                                                                                                                  ifDebug("759 The Lights Will Dim Down In $dimDownTime Seconds")
                                                                                                                   runIn(dimDownTime, dimLights)
                                                                                                                   } }
                                                                                   }}}}                      
@@ -874,6 +881,7 @@ def childUninstalled() {
 }
 
 def dimLights() {
+    ifDebug("882 Activating dimLights()")
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
     def automationState = child.getAutomationState()
@@ -950,30 +958,6 @@ def dimmableSwitches1On() {
          }
 }
 
-/*
-def dimmableSwitches1On() {
-    if (onlyIfDisarmed) {
-    	def shmStatus = location.currentState("alarmSystemStatus")?.value
-        if (shmStatus == "off") {
-    		turnOnTheDimmableSwitches()
-    	} else {
-            ifDebug("SHM is ARMED! No Lights Will Turn On!")
-    		}
-	} else {
-		turnOnTheDimmableSwitches()
-		}
-}
-def turnOnTheDimmableSwitches() {
-	def child = getChildDevice(getArea())
-    def automationState = child.getAutomationState()
-    if (dimmableSwitches1 && switchOnControl && ['automationon'].contains(automationState)) {       
-    	ifDebug("The Selected Switch(es) Have Either Been Turned 'ON' Or Had Their Respective Level(s) Set")
-        dimmableSwitches1.each {
-        it.setLevel(setLevelTo)
-        }
-    }
-}
-*/
 
 def donotdisturb() {      
 def child = getChildDevice(getArea())
@@ -1060,15 +1044,14 @@ def exitContactOpenedEventHandler(evt) {
 
 def	entryMotionActiveEventHandler(evt) {
     ifDebug("Re-Evaluation Caused By An Entry Motion Sensor Being 'ACTIVE'")
-    unschedule(engaged)
     unschedule(vacant)
     unschedule(switches2Off)
     unschedule(dimLights)
     unschedule(donotdisturb)
     unschedule(forceVacantIf)
     unschedule(checkOtherAreaAgain)
-    //mainAction() 
-    if (doors) {                      
+    if (doors) {    
+                unschedule(engaged)
                 def doorsState = doors.currentState("contact") 
                 def child = getChildDevice(getArea())
   			    def areaState = child.getAreaState()
@@ -1164,60 +1147,7 @@ def exitMotionSensorsWhenDoorIsClosedInactiveEventHandler(evt) {
   }
 } 
 
-def followedByAccelerationActiveEventHandler(evt) {
-    if (state.backDoorHasBeenOpened == true) {
-        occupied()
-        state.backDoorHasBeenOpened = false
-        unschedule(resetBackDoor)
-        if (switch4OnControl) {
-            def child = getChildDevice(getArea())
-            def areaState = child.getAreaState()
-            if (onlyDuringCertainTimes2 && (onlyDuringDaytime3 || onlyDuringNighttime3)) {
-                def s = getSunriseAndSunset()
-                def sunrise = s.sunrise.time
-                def sunset = s.sunset.time
-                def timenow = now()
-                if (onlyDuringDaytime3) {  
-                    if (timenow > sunrise && timenow < sunset) {
-                        switches4.on()
-                        }
-                }     
-                if (onlyDuringNighttime3) { 
-                    if (timenow > sunset || timenow < sunrise) {
-                        switches4.on()
-                        }
-                }
-            } // end of only during daytime3 or nighttime3
-            if (!onlyDuringDaytime3 && !onlyDuringNighttime3 && onlyDuringCertainTimes2) {
-                def between3 = timeOfDayIsBetween(fromTime3, toTime3, new Date(), location.timeZone)
-                ifDebug("Between3 = $between3")
-                if (between3) {
-                    switches4.on()   
-                    }
-            } // end of only if all during times are not selected
-            if (!onlyDuringDaytime3 && !onlyDuringNighttime3 && !onlyDuringCertainTimes2) {
-                switches4.on()
-                }                 
-        } // end of switch4OnControl
-    } else {
-            state.gateHasBeenOpened = true
-            runIn(30, resetGate)                                  
-            }
-} // end of followedByAccelerationActiveEventHandler
 
-def followedByContactOpenedEventHandler(evt) {
-    if (state.gateHasBeenOpened == true) {
-        vacant()
-        state.gateHasBeenOpened = false
-        unschedule(resetGate)
-        if (switches5) {
-            switches5.off()
-            }
-    } else {
-            state.backDoorHasBeenOpened = true
-            runIn(30, resetBackDoor)                                       
-            }
-} // end of followedByContactOpenedEventHandler
 
 def forceTurnAllOff() {
     def child = getChildDevice(getArea())
@@ -1484,13 +1414,6 @@ def presenceAwayEventHandler(evt) {
     runIn(15, turnalloff)
 } 
 
-def resetBackDoor() {
-    state.backDoorHasBeenOpened = false
-}
-
-def resetGate() {
-    state.gateHasBeenOpened = false
-}
 
 def resetOccupiedCounter() {
     ifDebug("The Occupied Counter Has Been Reset Dut To Inactivity For Your Entire Time Count")
@@ -1600,6 +1523,7 @@ def turnOnAtThisTime() {
 }
 
 def vacant() { 
+    ifDebug("Performing vacant()")
     state.vacantTime = now()
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
@@ -1607,17 +1531,20 @@ def vacant() {
         def lightsState = checkableLights.currentState("switch")
         if (lightsState.value.contains("on")) {
             child.generateEvent('vacanton')  
+            ifDebug("1532 Re-Evaluation Caused By $app.label Changing To Vacant")
             mainAction()
             } else { 
                     child.generateEvent('vacant')
+                    ifDebug("1536 Re-Evaluation Caused By $app.label Changing To Vacant")
                     mainAction()
                     }
     } else {
             child.generateEvent('vacant')
+            ifDebug("1541 Re-Evaluation Caused By $app.label Changing To Vacant")
             mainAction()
             }
     if (occupancyStatusChangesSubscribed) {
-        ifDebug("Re-Evaluation Caused By $app.label Changing To Vacant")
+        ifDebug("1545 Re-Evaluation Caused By $app.label Changing To Vacant")
         mainAction() 
         }
 } // end of vacant  
