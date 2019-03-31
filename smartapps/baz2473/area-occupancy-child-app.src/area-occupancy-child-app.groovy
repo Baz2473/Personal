@@ -2,7 +2,7 @@
  Copyright (C) 2017 Baz2473
  Name: Area Occupancy Child App
 */   
-public static String areaOccupancyChildAppVersion() { return "v3.0.2.2" }
+public static String areaOccupancyChildAppVersion() { return "v3.1.0.0" }
 
 private isDebug() {
         if (debugging) { 
@@ -60,16 +60,16 @@ def areaName() {
      section("Only Perform 'ON' Actions If DISARMED") {
      input "onlyIfDisarmed", "bool", title: "Only If Alarm Is Disarmed", defaultValue: false
      }
-     section("Select Your Method For Detecting Occupancy\nFor $app.label!") {
-     if(!contactOrAccelerationActivated && !followedBy) {
-     input "motionActivated", "bool", title: "Motion?", defaultValue: false, submitOnChange: true
-     }
-     if(!motionActivated && !followedBy) {
-     input "contactOrAccelerationActivated", "bool", title: "Seperate Contact/Acceleration?", defaultValue: false, submitOnChange: true
-     }
-     if(!motionActivated && !contactOrAccelerationActivated) {
-     input "followedBy", "bool", title: "Followed By?", defaultValue: false, submitOnChange: true
-     }
+     section("Method For Detecting Occupancy\nFor $app.label! is:") {
+     //if(!contactOrAccelerationActivated && !followedBy) {
+     input "motionActivated", "bool", title: "Motion?", defaultValue: true, submitOnChange: true
+     //}
+     //if(!motionActivated && !followedBy) {
+     //input "contactOrAccelerationActivated", "bool", title: "Seperate Contact/Acceleration?", defaultValue: false, submitOnChange: true
+    //}
+     //if(!motionActivated && !contactOrAccelerationActivated) {
+     //input "followedBy", "bool", title: "Followed By?", defaultValue: false, submitOnChange: true
+     //}
      
 } // end of Occupancy Detection Selection Method
 
@@ -313,73 +313,7 @@ section("Subscriptions!") {
 
 } // end of Section After Occupancy Selection Section
 
-if(contactOrAccelerationActivated) {
-   if (!entryAccelerationChosen) {
-    section("Do You Wish To Activate 'OCCUPIED'\nBy Contact Sensor(s) Opening?") {
-            input "entryContactChosen", "bool", title: "Contact?", defaultValue: false, submitOnChange: true
-            if (entryContactChosen) {
-                    input "entryContactSensors", "capability.contactSensor", title: "Which Contact Sensor(s)", required: true, multiple: true, submitOnChange: true               	     
-}}}
-if (!entryContactChosen) {
-    section("Do You Wish To Activate 'OCCUPIED'\nBy Acceleration Sensor(s) Being Active?") {
-             input "entryAccelerationChosen", "bool", title: "Acceleration?", defaultValue: false, submitOnChange: true
-             if (entryAccelerationChosen) {   
-                 input "entryAccelerationSensors", "capability.accelerationSensor", title: "Which Acceleration Sensor(s)", required: true, multiple: true, submitOnChange: true                 	     
-}}}
-if (!exitAccelerationChosen) {
-    section("Do You Wish To Activate 'VACANT'\nBy Contact Sensor(s) Opening?") {
-            input "exitContactChosen", "bool", title: "Contact?", defaultValue: false, submitOnChange: true
-            if (exitContactChosen) {
-                input "exitContactSensors", "capability.contactSensor", title: "Which Contact Sensor(s)", required: true, multiple: true, submitOnChange: true
-                if (exitContactSensors) {
-                    input "onlyIfInactive2", "bool", title: "Only If\nSelected Motion Sensors\nAre 'Inactive'?\n(Optional)", defaultValue: false, submitOnChange: true
-                    if (onlyIfInactive2) {
-                        input "onlyIfThisSensor2", "capability.motionSensor", title: "These Motion Sensor(s)\nMust Be Inactive!", required: true, multiple: true, submitOnChange: true                                       
-}}}}}
-if (!exitContactChosen) {
-    section("Do You Wish To Activate 'VACANT'\nBy Acceleration Sensor(s) Being Active?") {
-             input "exitAccelerationChosen", "bool", title: "Acceleration?", defaultValue: false, submitOnChange: true
-             if (exitAccelerationChosen) {
-                    input "exitAccelerationSensors", "capability.accelerationSensor", title: "Which Acceleration Sensor(s)", required: true, multiple: true, submitOnChange: true
-                 if (exitAccelerationSensors) {
-                     input "onlyIfInactive2", "bool", title: "Only If\nSelected Motion Sensors\nAre 'Inactive'?\n(Optional)", defaultValue: false, submitOnChange: true
-                     if (onlyIfInactive2) { 
-                         input "onlyIfThisSensor2", "capability.motionSensor", title: "These Motion Sensor(s)?\nMust Be Inactive!", required: true, multiple: true, submitOnChange: true                                                 
-}}}}}}
-if (followedBy) {
-    section("Please Select The 2 Actioins Required To Activate Occupied & Vacant!") {
-             input "firstAction", "capability.contactSensor", title: "Which Contact Sensor?", required: true, multiple: false, submitOnChange: false
-             input "secondAction", "capability.accelerationSensor", title: "Which Acceleration Sensor?", required: true, multiple: false, submitOnChange: false
-}}
-if (followedBy && !switches4) {
-    section("Do You Want Any Light(s)\nTo Automatically Turn 'ON'?") {
-             input "switch4OnControl", "bool", title: "Auto 'ON' Control?\n(Optional)", defaultValue: false, submitOnChange: true
-}}
-if (followedBy && switch4OnControl) {
-    section("Turn ON Which Switch(s)?\nWhen '$app.label' Changes To 'OCCUPIED'") {
-             input "switches4", "capability.switch", title: "Switch(s)?\n(Required)", required: true, multiple: true, submitOnChange: true            
-             input "onlyDuringCertainTimes2", "bool", title: "Only During Certain Times?", defaultValus: false, submitOnChange: true
-                     if (onlyDuringCertainTimes2) {
-                         if (!onlyDuringNighttime3) {
-                              input "onlyDuringDaytime3", "bool", title: "Only During The Daytime", defaultValue: false, submitOnChange: true
-                              }
-                         if (!onlyDuringDaytime3) {
-                              input "onlyDuringNighttime3", "bool", title: "Only During The Nighttime", defaultValue: false, submitOnChange: true
-                              }
-                         if (!onlyDuringDaytime3 && !onlyDuringNighttime3) {
-                              input "fromTime3", "time", title: "From?", required: true
-                              input "toTime3", "time", title: "Until?", required: true
-                              }                      
-                                                  }
-}}
-if (followedBy && !switches5) {
-    section("Do You Want Any Switch(s)\nTo Turn 'OFF'!!\nWhen $app.label Changes To Vacant?") {
-             input "instant4Off", "bool", title: "Instant Off!!", defaultValue: false, submitOnChange: true
-}}
-if (instant4Off) {
-    section("Turn OFF Which Switch(s)\nWhen $app.label Changes to 'VACANT'") {
-             input "switches5", "capability.switch", title: "Which Switch(s)\n(Required)", required: true, multiple: true, submitOnChange: true
-}}
+
  
 section("Turn Something 'ON' or 'OFF' In $app.label\nAt A Certain Time!") {
          input "timedControl", "bool", title: "Perform Timed Actions?", required: false, defualtValue: false, submitOnChange: true
@@ -451,18 +385,6 @@ if (!childCreated()) {
         }
     if (doors && monitoredDoor && monitoredDoorsClosingSubscribed) {
         subscribe(doors, "contact.closed", monitoredDoorClosedEventHandler) 
-        }  
-    if (entryContactSensors && contactOrAccelerationActivated) {
-        subscribe(entryContactSensors, "contact.open", entryContactOpenedEventHandler)
-        }
-    if (entryAccelerationSensors && contactOrAccelerationActivated) {
-        subscribe(entryAccelerationSensors, "acceleration.active", entryContactOpenedEventHandler)
-        }
-    if (exitContactSensors && contactOrAccelerationActivated) {
-        subscribe(exitContactSensors, "contact.open", exitContactOpenedEventHandler)
-        }
-    if (exitAccelerationSensors && contactOrAccelerationActivated) {
-        subscribe(exitAccelerationSensors, "acceleration.active", exitContactOpenedEventHandler)
         }
     if (entryMotionSensors && entryMotionActiveSubscribed)	{ 
         subscribe(entryMotionSensors, "motion.active", entryMotionActiveEventHandler)
@@ -487,15 +409,7 @@ if (!childCreated()) {
         }
     if (exitMotionSensorsWhenDoorIsClosed && monitoredDoor2 && exitMotionWhenDoorIsClosedInactiveSubscribed) {
         subscribe(exitMotionSensorsWhenDoorIsClosed, "motion.inactive", exitMotionSensorsWhenDoorIsClosedInactiveEventHandler)
-        }
-    if (followedBy && firstAction) {
-        subscribe(firstAction, "contact.open", followedByContactOpenedEventHandler)
-        state.backDoorHasBeenOpened = false
-        }    
-    if (followedBy && secondAction) {
-        subscribe(secondAction, "acceleration.active", followedByAccelerationActiveEventHandler)
-        state.gateHasBeenOpened = false
-        }       
+        }  
     if (otherArea && otherAreaCheck && otherAreaSubscribedVacant) {
         subscribe(otherArea, "occupancyStatus.vacant", otherAreaOccupancyStatusEventHandler)
         }
@@ -1007,40 +921,7 @@ def engaged() {
         }
 } // end of engaged
 
-def entryContactOpenedEventHandler(evt) {
-    ifDebug("An Entry Contact Was Opened In $app.label")
-    def child = getChildDevice(getArea())
-    def areaState = child.getAreaState()
-    if (['vacant'].contains(areaState)) {
-          ifDebug("An Entry Contact Was Opened, $app.label Was 'VACANT', So 'OCCUPIED' Has Been Set!")
-          occupied()                                                                    
-          }
-} // end of entryContactOpenedEventHandler
 
-def exitContactOpenedEventHandler(evt) {
-     if (onlyIfThisSensor2 && onlyIfInactive2) {
-         def cMotionState = onlyIfThisSensor2.currentState("motion")
-         if (!cMotionState.value.contains("active")) {
-              ifDebug("An Exit Contact Was Opened & The Motion Requirement Was Met")
-              def child = getChildDevice(getArea())
-              def areaState = child.getAreaState()
-              if (['occupied','occupiedon'].contains(areaState)) {
-                    ifDebug("$app.label Was 'OCCUPIED', So 'VACANT' State Has Been Set!")
-                    vacant()                                                                    
-                    }
-         }
-      } else {
-              if (!onlyIfInactive2) {
-                   ifDebug("An Exit Contact Was Opened & There Was No Motion Restriction Set")
-                   def child = getChildDevice(getArea())
-                   def areaState = child.getAreaState()
-                   if (['occupied','occupiedon'].contains(areaState)) {
-                         ifDebug("$app.label Was 'OCCUPIED', So 'vacant' State Has Been Set!")
-                         vacant()                                                                     
-                         }
-               }
-      }
-} // end of exitContactOpenedEventHandler
 
 def	entryMotionActiveEventHandler(evt) {
     ifDebug("Re-Evaluation Caused By An Entry Motion Sensor Being 'ACTIVE'")
