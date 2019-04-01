@@ -2,7 +2,7 @@
  Copyright (C) 2017 Baz2473
  Name: Area Occupancy Child App
 */   
-public static String areaOccupancyChildAppVersion() { return "v3.1.1.1" }
+public static String areaOccupancyChildAppVersion() { return "v3.1.1.3" }
 
 private isDebug() {
         if (debugging) { 
@@ -10,6 +10,10 @@ private isDebug() {
         } else {
                 return false
                 }
+}
+
+private ifDebug(msg = null)     { 
+         if (msg && isDebug()) log.debug msg 
 }
 
 definition	(
@@ -472,6 +476,7 @@ def areaOccupancyDTHVersion() {
 
 //88888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
 def mainAction() {
+  if (entryMotionSensors) {
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
     def automationState = child.getAutomationState()
@@ -549,9 +554,11 @@ def mainAction() {
                       }
             }                                
         if (['checking','checkingon'].contains(areaState)) { 
+              ifDebug("552 Vacant will be activated in $actualEntrySensorsTimeout seconds")
               runIn(actualEntrySensorsTimeout, vacant)//, [overwrite: false])
            } else {
                    if (anotherVacancyCheck && anotherCheckIn && ['occupied','occupiedon'].contains(areaState)) {
+                       ifDebug("556 forceVacantIf() will be activated in $anotherCheckIn seconds")
                        runIn(anotherCheckIn, forceVacantIf)//, [overwrite: false])
                       }
                    if (switches3 && instantOff && offRequired) { 
@@ -637,10 +644,11 @@ def mainAction() {
                                                                                 ifDebug("640 The Lights Will Dim Down In $dimDownTime Seconds")
                                                                                 runIn(dimDownTime, dimLights)
                                                                                } 
-                                                    }
-                                      	   }
-                           		  }
-                 		 }                      
+                                                		    }
+                                      			   }
+                           				  }
+                 				 }                      
+						}
 				}
 		}
 }                    
@@ -766,22 +774,10 @@ def dimLights() {
     ifDebug("Activating dimLights()")
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
-    def automationState = child.getAutomationState()
     def entryMotionState = entryMotionSensors.currentState("motion")
-    if (offRequired && ['automationon'].contains(automationState)) {
-        if (!entryMotionState.value.contains("active")) { 
-        	if (['vacanton'].contains(areaState)) {
-        		switches2.each {
-        		if (it.currentValue("switch") == 'on') {
-            		def currentLevel = it.currentValue("level")
-           	   	    def newLevel = (currentLevel > dimByLevel ? currentLevel - dimByLevel : 1)
-                	it.setLevel(newLevel)
-                    ifDebug("The $it have been dimmed to $newLevel %")
-                	}
-     			}
-            child.generateEvent('vacantdimmed')
-            ifDebug("The lights will turn off in $switchesOffCountdownInSeconds seconds")
-        	runIn(switchesOffCountdownInSeconds, switches2Off)  
+    if (!entryMotionState.value.contains("active")) { 
+         if (['vacanton'].contains(areaState)) {
+    	       dimTheLights()
     		} else {
                 ifDebug("Re-Evaluated because the lights were told to dim but your room is not in the vacanton state!")
                 mainAction() 
@@ -790,8 +786,24 @@ def dimLights() {
             ifDebug("Re-Evaluated because the lights were told to dim but the motion in this room is not inactive")
         	mainAction()
         }
-   	 }
 } 
+
+
+def dimTheLights() {
+    ifDebug("Activating dimTheLights()")
+    switches2.each {
+        	   if (it.currentValue("switch") == 'on') {
+                   def currentLevel = it.currentValue("level")
+           	   	   def newLevel = (currentLevel > dimByLevel ? currentLevel - dimByLevel : 1)
+                   it.setLevel(newLevel)
+                   ifDebug("The $it have been dimmed to $newLevel %")
+                  }
+     		   }
+            def child = getChildDevice(getArea())
+            child.generateEvent('vacantdimmed')
+            ifDebug("The lights will turn off in $switchesOffCountdownInSeconds seconds")
+        	runIn(switchesOffCountdownInSeconds, switches2Off)  
+}
 
 def dimmableSwitches1OnEventHandler(evt) { 
     ifDebug("Re-Evaluated by Dimmable Switches1 On")
@@ -1315,10 +1327,7 @@ def switches2Off() {
     def entryMotionState = entryMotionSensors.currentState("motion")
     if (!entryMotionState.value.contains("active")) { 
     	if (['vacantdimmed'].contains(areaState)) {
-    		switches2.each {
-    		it.setLevel(0)  
-            ifDebug("the $it are now off")
-    		}
+            switches2OffNow()
         } else {
             ifDebug("Re-Evaluated because the lights were told to switch off but the room was not in the vacantdimmed state!")
                 mainAction() 
@@ -1327,6 +1336,14 @@ def switches2Off() {
         ifDebug("Re-Evaluated because the lights were told to switch off but the motion in the room was not inactive!")
         	mainAction()
           }
+}
+
+def switches2OffNow() {
+    ifDebug("Activating switches2OffNow()")
+    switches2.each {
+    		        it.setLevel(0)  
+                    ifDebug("the $it are now off")
+    		       }
 }
 
 def switches3OnEventHandler(evt) { 
@@ -1439,4 +1456,3 @@ def turnon() {
 
 
 
-private ifDebug(msg = null)     {  if (msg && isDebug()) log.debug msg  }
