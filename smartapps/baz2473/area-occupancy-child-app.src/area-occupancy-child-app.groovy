@@ -2,7 +2,7 @@
  Copyright (C) 2017 Baz2473
  Name: Area Occupancy Child App
 */   
-public static String areaOccupancyChildAppVersion() { return "v3.1.0.3" }
+public static String areaOccupancyChildAppVersion() { return "v3.1.0.4" }
 
 private isDebug() {
         if (debugging) { 
@@ -347,7 +347,7 @@ def updated() {
 	unsubscribe()
 	initialize()
     
-    state.lightsState = 'occupiedon'
+   // state.lightsState = 'lightsDimmed'
      
 if (!childCreated()) {
      spawnChildDevice(app.label) 
@@ -488,16 +488,19 @@ def mainAction() {
                  						    def shmStatus = location.currentState("alarmSystemStatus")?.value
                   						    if (shmStatus == "off") {
                     						    it.setLevel(setLevelTo)
+                                                //state.lightsState = 'lightsOnBright'
                      						    ifDebug("Setting level of $it to $setLevelTo %")
                   					  		} else {
                       								ifDebug("SHM is ARMED! No Lights Will Turn On!")
                     						       }
                						    } else {
                        						    it.setLevel(setLevelTo)
+                                                //state.lightsState = 'lightsOnBright'
                        						    ifDebug("Setting level of $it to $setLevelTo %")
                						           }
             						} else if (it.currentValue("switch") == 'off') {
                       						   it.on()
+                                               //state.lightsState ='lightsOnBright'
                        						   ifDebug("Level previously set... Switching on $it")
             						          }
             }
@@ -524,48 +527,20 @@ def mainAction() {
 } else { 
         ifDebug("525 mainAction() Running ---- Entry motion is Inactive")
         if (noExitSensor && ['occupied','occupiedon'].contains(areaState)) { 
-            //state.previousState = 'occupiedon'
             ifDebug("528 Vacant will be activated in $entryMotionTimeout seconds")
             runIn(entryMotionTimeout, vacant, [overwrite: false])
             return
-            }     
-        //if (noExitSensor && ['occupied'].contains(areaState)) {  
-          //  ifDebug("533 Vacant will be activated in $entryMotionTimeout seconds")
-            //runIn(entryMotionTimeout, vacant, [overwrite: false])
-            //return
-           // }                           
+            }                            
         if (donotdisturbControl && ['engaged','engagedon'].contains(areaState)) {                             
             runIn(dndCountdown * 60, donotdisturb, [overwrite: false])
             }
-        if (exitMotionSensors && ['occupiedon'].contains(areaState) && !adjacentDoors) {
-            def exitMotionState = exitMotionSensors.currentState("motion")
-            if (exitMotionState.value.contains("active")) { 
-                state.previousState = 'occupiedon'
-                vacant()
-                }
-           }
-        if (exitMotionSensors && ['occupied'].contains(areaState) && !adjacentDoors) {
+        if (exitMotionSensors && ['occupied','occupiedon'].contains(areaState) && !adjacentDoors) {
             def exitMotionState = exitMotionSensors.currentState("motion")
             if (exitMotionState.value.contains("active")) { 
                 vacant()
                 }
-           } 
-        if (adjacentDoors && ['occupiedon'].contains(areaState) && !exitMotionSensors) { 
-            state.previousState = 'occupiedon'
-            def adjacentDoorsState = adjacentDoors.currentValue("contact")
-            if (adjacentDoorsState.contains("open")) {
-                def exitMotionStateWithDoorsOpen = exitMotionSensorsWhenDoorIsOpen.currentValue("motion") 
-                if (exitMotionStateWithDoorsOpen.contains("active")) {
-                    vacant()
-                    }
-               } else {
-                       def exitMotionStateWithDoorsClosed = exitMotionSensorsWhenDoorIsClosed.currentValue("motion") 
-                       if (exitMotionStateWithDoorsClosed.contains("active")) {
-                           vacant()
-                          }
-                      }
-            }                               
-        if (adjacentDoors && ['occupied'].contains(areaState) && !exitMotionSensors) {         
+           }                            
+        if (adjacentDoors && ['occupied','occupiedOn'].contains(areaState) && !exitMotionSensors) {         
             def adjacentDoorsState = adjacentDoors.currentValue("contact")
             if (adjacentDoorsState.contains("open")) {
                 def exitMotionStateWithDoorsOpen = exitMotionSensorsWhenDoorIsOpen.currentValue("motion") 
@@ -583,7 +558,6 @@ def mainAction() {
               runIn(actualEntrySensorsTimeout, vacant, [overwrite: false])
            } else {
                    if (anotherVacancyCheck && anotherCheckIn && ['occupiedon'].contains(areaState)) {
-                       state.previousState = 'occupiedon'
                        runIn(anotherCheckIn, forceVacantIf, [overwrite: false])
                       }
                    if (anotherVacancyCheck && anotherCheckIn && ['occupied'].contains(areaState)) {
@@ -620,8 +594,8 @@ def mainAction() {
                             if (thisArea && !andThisArea) { 
                                 def thisAreaState = thisArea.currentState("occupancyStatus")
                                 if (thisAreaState.value.contains("vacant")) {
-                                    ifDebug("623 The Previous State Was $state.lightsState")
-                                    if (state.previousState == 'occupiedon') {
+                                   // ifDebug("623 The Previous State Was $state.lightsState")
+                                    //if (state.lightsState == 'lightsOnBright') {
                                         if (onlyDuringDaytime9) {
                                             def s = getSunriseAndSunset()
                                             def sunrise = s.sunrise.time
@@ -635,7 +609,7 @@ def mainAction() {
                                                    ifDebug("635 The Lights Will Dim Down In $dimDownTime Seconds")
                                                    runIn(dimDownTime, dimLights)
                                                   } 
-                                        }
+                                        //}
                                      } else {
                                              ifDebug("640 Doing Nothing Because Your Other Area Is Still Occupied")                          
                                             }
@@ -644,8 +618,8 @@ def mainAction() {
                                               def thisAreaState = thisArea.currentState("occupancyStatus")
                                               def andThisAreaState = andThisArea.currentState("occupancyStatus")
                                               if (thisAreaState.value.contains("vacant") && andThisAreaState.value.contains("vacant")) {
-                                                  ifDebug("647 The Previous State Was $state.lightsState")
-                                                  if (state.previousState == 'occupiedon') { 
+                                                  //ifDebug("647 The Previous State Was $state.lightsState")
+                                                 // if (state.lightsState == 'lightsOnBright') { 
                                                       if (onlyDuringDaytime9) {
                                                           def s = getSunriseAndSunset()
                                                           def sunrise = s.sunrise.time
@@ -659,13 +633,13 @@ def mainAction() {
                                                                   ifDebug("659 The Lights Will Dim Down In $dimDownTime Seconds")
                                                                   runIn(dimDownTime, dimLights)
                                                                  } 
-                                                     }
+                                                     //}
                                                  } else {
                                                          ifDebug("664 Doing Nothing Because 1 Of Your Other Areas Are Still Occupied")                                                                                                                
                                                         }
                                               } else {
-                                                      ifDebug("667 The Previous State Was $state.lightsState")
-                                                      if (!state.lightsState == 'lightsDimmed') {
+                                                      //ifDebug("667 The Previous State Was $state.lightsState")
+                                                     // if (state.lightsState == 'lightsOnBright') {
                                                           if (onlyDuringDaytime9) {
                                                               def s = getSunriseAndSunset()
                                                               def sunrise = s.sunrise.time
@@ -680,7 +654,7 @@ def mainAction() {
                                                                                 ifDebug("680 The Lights Will Dim Down In $dimDownTime Seconds")
                                                                                 runIn(dimDownTime, dimLights)
                                                                                } 
-                                                            }
+                                                            //}
                                                     }
                                       	   }
                            		  }
@@ -822,7 +796,7 @@ def dimLights() {
                 	it.setLevel(newLevel)
                 	}
      			}
-            state.lightsState = 'lightsDimmed'
+            //state.lightsState = 'lightsDimmed'
             ifDebug("The lights will turn off in $switchesOffCountdownInSeconds seconds")
         	runIn(switchesOffCountdownInSeconds, switches2Off)  
     		} else {
@@ -930,8 +904,6 @@ def engaged() {
         mainAction() 
         }
 } // end of engaged
-
-
 
 def	entryMotionActiveEventHandler(evt) {
     ifDebug("Re-Evaluation Caused By An Entry Motion Sensor Being 'ACTIVE'")
@@ -1102,6 +1074,7 @@ def monitoredDoorOpenedAction() {
     doorOpeningAction.each {
     it.on()
     it.setLevel(setLevelAt)
+    //state.lightsState = 'lightsOnBright'
     }
     mainAction()
 } // end of monitoredDoorOpenedAction
@@ -1111,6 +1084,7 @@ def monitoredDoorOpenedAction2() {
     doorOpeningAction2.each {
     it.on()
     it.setLevel(setLevelAt2)
+    //state.lightsState = 'lightsOnBright'
     }
     mainAction()
 } // end of monitoredDoorOpenedAction2
@@ -1265,7 +1239,6 @@ def monitoredDoorClosedEventHandler(evt) {
 } // end of monitoredDoorClosedEventHandler
 
 def occupied() {
-    //state.occupiedTime = now()
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
     if (actionOnVacant) {
@@ -1276,7 +1249,6 @@ def occupied() {
     if (checkableLights) {
         def lightsState = checkableLights.currentState("switch")
         if (lightsState.value.contains("on")) {
-            state.previousState = 'occupiedon'
             child.generateEvent('occupiedon')
            } else {                
                    child.generateEvent('occupied')
@@ -1407,7 +1379,6 @@ def turnOnAtThisTime() {
 
 def vacant() { 
     ifDebug("Performing vacant()")
-    //state.vacantTime = now()
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
     if (checkableLights) {
@@ -1439,8 +1410,10 @@ def turnalloff() {
         checkableLights.each {
         if (it.hasCommand("setLevel")) {
             it.setLevel(0)
+            //state.lightsState = 'lightsOff'
         } else {                                    
                 it.off()
+                //state.lightsState = 'lightsOff'
                 }
         }
         child.generateEvent('vacant')
@@ -1454,8 +1427,10 @@ def turnalloff() {
              checkableLights.each {
              if (it.hasCommand("setLevel")) {
                  it.setLevel(0)
+                 //state.lightsState = 'lightsOff'
              } else {
                      it.off()
+                    // state.lightsState = 'lightsOff'
                      }
              }
              child.generateEvent('vacant')
@@ -1474,8 +1449,10 @@ def turnon() {
         checkableLights.each {
         if (it.hasCommand("setLevel")) {
             it.setLevel(75)
+            //state.lightsState = 'lightsOnBright'
         } else {                                    
                 it.on()
+                //state.lightsState = 'lightsOnBright'
                 }
         }
         child.generateEvent('vacanton')
