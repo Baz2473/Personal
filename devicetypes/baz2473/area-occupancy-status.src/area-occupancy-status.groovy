@@ -2,7 +2,7 @@
   Copyright (C) 2017 Baz2473
   Name: Area Occupancy Status 
 */
-public static String DTHVersion() { return "v3.0.0.0" }
+public static String DTHVersion() { return "v3.0.0.3" }
 
 metadata {
 	      definition (
@@ -15,7 +15,9 @@ metadata {
 		                                  attribute "occupancyStatus", "string"
                                           attribute "automationStatus", "string"
                                           command "turnalloff"
+                                          command "turnon"
 		                                  command "vacant"
+                                          command "vacantdimmed"
                                           command "vacanton"
                                           command "occupied"
                                           command "occupiedon"
@@ -37,7 +39,8 @@ metadata {
 	tiles(scale: 2)	{
     	multiAttributeTile(name: "occupancyStatus", type: "generic", width: 2, height: 2, canChangeBackground: false) {
 			tileAttribute ("device.occupancyStatus", key: "PRIMARY_CONTROL") {
-				attributeState "vacant", label: 'Lights OFF', icon:"st.Home.home18", backgroundColor:"#606060"
+				attributeState "vacant", label: 'Lights OFF', action: "turnon", icon:"st.Home.home18", backgroundColor:"#606060"
+                attributeState "vacantdimmed", label: 'Dimmed', action: "turnalloff", icon:"st.Home.home18", backgroundColor:"#cdc8a3"
                 attributeState "vacanton", label: 'Lights ON', action: "turnalloff", icon:"st.Home.home18", backgroundColor:"#c1b419"
                 attributeState "occupied", label: 'Lights OFF', action: "vacant", icon:"st.Home.home4", backgroundColor:"#156700"
                 attributeState "occupiedon", label: 'Lights ON', action: "vacanton", icon:"st.Home.home4", backgroundColor:"#32cd32"
@@ -78,6 +81,9 @@ def initialize() {
     }
 def vacant() {
     stateUpdate('vacant')		
+    }
+def vacantdimmed() {
+    stateUpdate('vacantdimmed')
     }
 def vacanton() {	
     stateUpdate('vacanton')		
@@ -124,9 +130,9 @@ private	automationStateUpdate(automationState) {
             }
 private updateOccupancyStatus(occupancyStatus = null) {
 	    occupancyStatus = occupancyStatus?.toLowerCase()
-	    def msgTextMap = ['vacant':'Vacant Since: ', 'vacanton':'Vacant & On Since: ', 'occupied':'Occupied Since: ', 'occupiedon':'Occupied & On Since: ','checking':'Checking Status: ','checkingon':'Checking Status Since: ','engaged':'Engaged Since: ','engagedon':'Engaged & On Since: ' ,'donotdisturb':'DND Since: ','donotdisturbon':'DND & On Since: ']
+	    def msgTextMap = ['vacant':'Vacant Since: ','vacantdimmed':'Vacant & Dimmed Since: ','vacanton':'Vacant & On Since: ', 'occupied':'Occupied Since: ', 'occupiedon':'Occupied & On Since: ','checking':'Checking Status: ','checkingon':'Checking Status Since: ','engaged':'Engaged Since: ','engagedon':'Engaged & On Since: ' ,'donotdisturb':'DND Since: ','donotdisturbon':'DND & On Since: ']
         if (!occupancyStatus || !(msgTextMap.containsKey(occupancyStatus))) {
-    	     log.debug "${device.displayName}: Missing or invalid parameter Occupancy Status. Allowed values are: Vacant, Occupied, Checking, Engaged, Donotdisturb, Vacanton, Occupiedon, Checkingon, Engagedon or Donotdisturbon."
+    	     log.debug "${device.displayName}: Missing or invalid parameter Occupancy Status. Allowed values are: Vacant, Vacantdimmed, Occupied, Checking, Engaged, Donotdisturb, Vacanton, Occupiedon, Checkingon, Engagedon or Donotdisturbon."
              return
              }
 	    sendEvent(name: "occupancyStatus", value: occupancyStatus, descriptionText: "${device.displayName} changed to ${occupancyStatus}", isStateChange: true, displayed: true)
@@ -173,4 +179,7 @@ def getAutomationState() {
     }
 def turnalloff() {
     parent.turnalloff()
+    }
+def turnon() {
+    parent.turnon()
 }
