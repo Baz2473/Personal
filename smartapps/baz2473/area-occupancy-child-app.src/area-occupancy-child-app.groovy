@@ -2,7 +2,7 @@
  Copyright (C) 2017 Baz2473
  Name: Area Occupancy Child App
 */   
-public static String areaOccupancyChildAppVersion() { return "v3.1.1.3" }
+public static String areaOccupancyChildAppVersion() { return "v3.1.1.4" }
 
 private isDebug() {
         if (debugging) { 
@@ -646,7 +646,10 @@ def mainAction() {
                                                                                } 
                                                 		    }
                                       			   }
-                           				  }
+                           				  } else if (switches2State.value.contains("on") && ["vacantdimmed"].contains(areaState) && ['automationon'].contains(automationState)) {
+                                                       ifDebug("The lights will turn off in $switchesOffCountdownInSeconds seconds")
+        	                                           runIn(switchesOffCountdownInSeconds, switches2Off)  
+                                          }
                  				 }                      
 						}
 				}
@@ -801,8 +804,9 @@ def dimTheLights() {
      		   }
             def child = getChildDevice(getArea())
             child.generateEvent('vacantdimmed')
-            ifDebug("The lights will turn off in $switchesOffCountdownInSeconds seconds")
-        	runIn(switchesOffCountdownInSeconds, switches2Off)  
+            mainAction()
+            //ifDebug("The lights will turn off in $switchesOffCountdownInSeconds seconds")
+        	//runIn(switchesOffCountdownInSeconds, switches2Off)  
 }
 
 def dimmableSwitches1OnEventHandler(evt) { 
@@ -905,11 +909,11 @@ def	entryMotionActiveEventHandler(evt) {
     unschedule(vacant)
     unschedule(switches2Off)
     unschedule(dimLights)
-    unschedule(donotdisturb)
     unschedule(forceVacantIf)
     unschedule(checkOtherAreaAgain)
     if (doors) {    
                 unschedule(engaged)
+                unschedule(donotdusturb)
                 def doorsState = doors.currentState("contact") 
                 def child = getChildDevice(getArea())
   			    def areaState = child.getAreaState()
