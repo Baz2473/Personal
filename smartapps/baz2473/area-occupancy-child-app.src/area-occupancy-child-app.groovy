@@ -2,7 +2,7 @@
  Copyright (C) 2017 Baz2473
  Name: Area Occupancy Child App
 */   
-public static String areaOccupancyChildAppVersion() { return "v3.2.0.2" }
+public static String areaOccupancyChildAppVersion() { return "v3.2.0.3" }
 
 private isDebug() {
         if (debugging) { 
@@ -1319,10 +1319,7 @@ def switches2Off() {
     if (!entryMotionState.value.contains("active")) { 
     	if (['vacantdimmed'].contains(areaState)) {
         	  switches2.setLevel(0)
-		     // switches2.each {
-    		        //it.setLevel(0)  
-                    //ifDebug("the $it are now off")
-    		      // }       
+              ifDebug("the $switches2 are now off")
         } else {
             ifDebug("Re-Evaluated because the lights were told to switch off but the room was not in the vacantdimmed state!")
                 mainAction() 
