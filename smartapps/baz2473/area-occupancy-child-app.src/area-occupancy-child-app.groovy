@@ -2,7 +2,7 @@
  Copyright (C) 2017 Baz2473
  Name: Area Occupancy Child App
 */   
-public static String areaOccupancyChildAppVersion() { return "v3.1.1.4" }
+public static String areaOccupancyChildAppVersion() { return "v3.1.1.5" }
 
 private isDebug() {
         if (debugging) { 
@@ -805,8 +805,6 @@ def dimTheLights() {
             def child = getChildDevice(getArea())
             child.generateEvent('vacantdimmed')
             mainAction()
-            //ifDebug("The lights will turn off in $switchesOffCountdownInSeconds seconds")
-        	//runIn(switchesOffCountdownInSeconds, switches2Off)  
 }
 
 def dimmableSwitches1OnEventHandler(evt) { 
@@ -1093,7 +1091,6 @@ def monitoredDoorOpenedEventHandler(evt) {
     unschedule(forceVacantIf)
     unschedule(switches2Off)
     unschedule(dimLights)
-    unschedule(heavyuseCheck)
     unschedule(checkOtherAreaAgain)
     if (!actionOnDoorOpening) {                      
         ifDebug("Re-Evaluated by A Monitored Door Opening")
