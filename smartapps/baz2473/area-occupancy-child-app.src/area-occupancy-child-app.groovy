@@ -2,7 +2,7 @@
  Copyright (C) 2017 Baz2473
  Name: Area Occupancy Child App
 */   
-public static String areaOccupancyChildAppVersion() { return "v3.2.0.3" }
+public static String areaOccupancyChildAppVersion() { return "v3.2.0.5" }
 
 private isDebug() {
         if (debugging) { 
@@ -122,10 +122,10 @@ if (exitMotionSensors || entryMotionTimeout || monitoredDoor2) {
                  input "doors", "capability.contactSensor", title: "Doors?", multiple: true, required: true, submitOnChange: true
                  if (doors) { 
              	     input "actualEntrySensorsTimeout", "number", title: "$app.label's Timeout?",required: true, defaultValue: null, submitOnChange: true
-                     input "autoEngagedFunction", "bool", title: "Automatically Engage $app.label When A Switch Turns On?",defaultValue: false, submitOnChange: true
-                     if (autoEngagedFunction) {
-                         input "autoEngagedSwitches", "capability.switch", title: "Which Switches?", multiple: true, required: false, defaultValue: null, submitOnChange: true
-                         }
+                     //input "autoEngagedFunction", "bool", title: "Automatically Engage $app.label When A Switch Turns On?",defaultValue: false, submitOnChange: true
+                     //if (autoEngagedFunction) {
+                       //  input "autoEngagedSwitches", "capability.switch", title: "Which Switches?", multiple: true, required: false, defaultValue: null, submitOnChange: true
+                         //}
            		     input "actionOnDoorOpening", "bool", title: "Turn ON Something When\n$doors Opens?", defaultValue: false, submitOnChange: true
                      if (actionOnDoorOpening) {
                          input "onlyIfAreaVacant", "bool", title: "But Only IF $app.label Is Vacant", defaultValue: true, submitOnChnage: true
@@ -360,9 +360,9 @@ if (!childCreated()) {
     if (adjacentDoors && monitoredDoor2 && adjacentMonitoredDoorClosingSubscribed) { 
         subscribe(adjacentDoors, "contact.closed", adjacentMonitoredDoorClosingEventHandler) 
         }
-    if (autoEngagedFunction && autoEngagedSwitches && doors) {
-        subscribe(autoEngagedSwitches, "switch.on", autoEngagedSwitchesEventHandler)
-        }
+    //if (autoEngagedFunction && autoEngagedSwitches && doors) {
+      //  subscribe(autoEngagedSwitches, "switch.on", autoEngagedSwitchesEventHandler)
+        //}
     if (awayModes && noAwayMode || resetAutomationMode && resetAutomation) { 
         subscribe(location, modeEventHandler) 
         }
@@ -526,10 +526,10 @@ def mainAction() {
         ifDebug("mainAction() Running ---- Entry motion is Inactive")
         if (noExitSensor && ['occupied','occupiedon'].contains(areaState)) { 
             ifDebug("525 Vacant will be activated in $entryMotionTimeout seconds")
-            runIn(entryMotionTimeout, vacant)//, [overwrite: false])
+            runIn(entryMotionTimeout, vacant, [overwrite: false])
             }                            
         if (donotdisturbControl && ['engaged','engagedon'].contains(areaState)) {                             
-            runIn(dndCountdown * 60, donotdisturb)//, [overwrite: false])
+            runIn(dndCountdown * 60, donotdisturb, [overwrite: false])
             }
         if (exitMotionSensors && ['occupied','occupiedon'].contains(areaState) && !adjacentDoors) {
             def exitMotionState = exitMotionSensors.currentState("motion")
@@ -553,7 +553,7 @@ def mainAction() {
             }                                
         if (['checking','checkingon'].contains(areaState)) { 
               ifDebug("552 Vacant will be activated in $actualEntrySensorsTimeout seconds")
-              runIn(actualEntrySensorsTimeout, vacant)//, [overwrite: false])
+              runIn(actualEntrySensorsTimeout, vacant, [overwrite: false])
            } else {
                    if (anotherVacancyCheck && anotherCheckIn && ['occupied','occupiedon'].contains(areaState)) {
                        ifDebug("556 forceVacantIf() will be activated in $anotherCheckIn seconds")
@@ -646,7 +646,7 @@ def mainAction() {
                                       			   }
                        } else if (switches2State.value.contains("on") && ["vacantdimmed"].contains(areaState) && ['automationon'].contains(automationState)) {
                                   ifDebug("The lights will turn off in $switchesOffCountdownInSeconds seconds")
-        	                      runIn(switchesOffCountdownInSeconds, switches2Off)  
+        	                      runIn(switchesOffCountdownInSeconds, switches2Off, [overwrite: false])
                                  }
                  		 }                      
 				}
@@ -666,14 +666,14 @@ def adjacentMonitoredDoorOpeningEventHandler(evt) {
     mainAction()
 }
 
-def autoEngagedSwitchesEventHandler(evt) {
+/*def autoEngagedSwitchesEventHandler(evt) {
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()             
     def doorsState = doors.currentState("contact") 
     if (!doorsState.value.contains("open") && ['vacant','vacanton'].contains(areaState)) {
          engaged() 
          }
-}
+}*/
 
 def checkableLightsSwitchedOnEventHandler(evt) {
     def child = getChildDevice(getArea())
@@ -778,14 +778,12 @@ def dimLights() {
     def entryMotionState = entryMotionSensors.currentState("motion")
     if (!entryMotionState.value.contains("active")) { 
          if (['vacanton'].contains(areaState)) {
-			  // switches2.each {
         	   if (switches2.currentValue("switch") == 'on') {
                    def currentLevel = switches2.currentValue("level")
            	   	   def newLevel = (currentLevel > dimByLevel ? currentLevel - dimByLevel : 1)
                    switches2.setLevel(newLevel)
                    ifDebug("The $switches2 have been dimmed to $newLevel %")
                   }
-     		  // }
             child.generateEvent('vacantdimmed')
             mainAction()    		
          } else {
@@ -818,7 +816,7 @@ def dimmableSwitches2OffEventHandler(evt) {
     mainAction() 
 }
 
-def dimmableSwitches1On() {
+/*def dimmableSwitches1On() {
         if (onlyIfDisarmed) {
             def shmStatus = location.currentState("alarmSystemStatus")?.value
             if (shmStatus == "off") {
@@ -843,7 +841,7 @@ def dimmableSwitches1On() {
                      }
 				 }
          }
-}
+}*/
 
 def donotdisturb() {      
 def child = getChildDevice(getArea())
