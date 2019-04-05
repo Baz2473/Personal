@@ -2,7 +2,7 @@
  Copyright (C) 2017 Baz2473
  Name: Area Occupancy Child App
 */   
-public static String areaOccupancyChildAppVersion() { return "v3.2.0.5" }
+public static String areaOccupancyChildAppVersion() { return "v3.2.0.6" }
 
 private isDebug() {
         if (debugging) { 
@@ -256,14 +256,15 @@ section("Do Not Disturb Control") {
                   paragraph "Do Not Disturb Is Only Accessable In Conjunction With Entry Motion Sensors & A Monitored Door!"               
 
 }} // end of Do Not Disturb Control Section
-
-if(entryMotionSensors) {
+if (entryMotionSensors && doors) {
 	section("Action On Engaged") {
          input "actionOnEngaged", "bool", title: "Turn ON Something When\n$app.label Changes To Engaged?", defaultValue: false, submitOnChange: true
                      if (actionOnEngaged) {
                 		 input "engagedAction", "capability.switch", title: "Turn On?", multiple: true, required: true, submitOnChange: true
                          }
 }
+}
+if (entryMotionSensors) {
 section("Action On Vacant") {
          input "actionOnVacant", "bool", title: "Turn OFF Something When\n$app.label Changes To Vacant?", defaultValue: false, submitOnChange: true
                      if (actionOnVacant) {
