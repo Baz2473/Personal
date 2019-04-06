@@ -2,7 +2,7 @@
  Copyright (C) 2017 Baz2473
  Name: Area Occupancy Child App
 */   
-public static String areaOccupancyChildAppVersion() { return "v3.3.1.4" }
+public static String areaOccupancyChildAppVersion() { return "v3.3.1.7" }
 
 private isDebug() {
         if (debugging) { 
@@ -490,7 +490,7 @@ def mainAction() {
         }
         if (doors) {
                     def doorsState = doors.currentState("contact") 
-                       if (!doorsState.value.contains("open") && ['occupied','occupiedmotion','occupiedon','occupiedonmotion'].contains(areaState)) { 
+                       if (!doorsState.value.contains("open") && ['occupiedmotion','occupiedonmotion'].contains(areaState)) { 
                            checking()     
                            runIn(actualEntrySensorsTimeout, engaged, [overwrite: false])
                           } else if (doorsState.value.contains("open") && ['checking','checkingon','engaged','engagedmotion','engagedon','engagedonmotion','donotdisturb','donotdisturbon'].contains(areaState)) { 
@@ -746,9 +746,9 @@ def dimLights() {
            	   	   def newLevel = (currentLevel > dimByLevel ? currentLevel - dimByLevel : 1)
                    switches2.setLevel(newLevel)
                    ifDebug("The $switches2 have been dimmed to $newLevel %")
+                   child.generateEvent('vacantdimmed')
+                   mainAction()    		
                   }
-            child.generateEvent('vacantdimmed')
-            mainAction()    		
          } else {
                 ifDebug("Re-Evaluated because the lights were told to dim but your room is not in the vacanton state!")
                 mainAction() 
@@ -792,10 +792,6 @@ def areaState = child.getAreaState()
     } else {
             child.generateEvent('donotdisturb')
             }
-   // if (occupancyStatusChangesSubscribed) {
-     //   ifDebug("Re-Evaluation Caused By $app.label Changing To Do Not Disturb")
-       // mainAction() 
-        //}
 } // end of do not disturb
 
 def doaoff() {
@@ -814,17 +810,13 @@ def engaged() {
     if (checkableLights) {
         def lightsState = checkableLights.currentState("switch")
         if (lightsState.value.contains("on")) {
-            child.generateEvent('engagedon')
+            child.generateEvent('engagedonmotion')
         } else {                
-                child.generateEvent('engaged')
+                child.generateEvent('engagedmotion')
                 }
     } else {
-            child.generateEvent('engaged')
+            child.generateEvent('engagedmotion')
             }
-  //  if (occupancyStatusChangesSubscribed) { 
-    //    ifDebug("Re-Evaluation Caused By $app.label Changing To Engaged")
-      //  mainAction() 
-        //}
 } // end of engaged
 
 def	entryMotionActiveEventHandler(evt) {
@@ -897,7 +889,7 @@ def exitMotionActiveEventHandler(evt) {
     def areaState = child.getAreaState()
     if (doors) {
     def monitoredDoorState = doors.currentValue("contact")
-        if (!monitoredDoorState.contains("open")) {
+        if (!monitoredDoorState.contains("open") && !['vacantdimmed','vacanton'].contains(areaState)) {
     		 ifDebug("Exit motion is ACTIVE but the $app.label door is closed so this will be ignored!!!")
              } else {
              		ifDebug("Re-Evaluation Caused By An Exit Motion Sensor Being 'ACTIVE'")
@@ -914,7 +906,7 @@ def exitMotionInactiveEventHandler(evt) {
     def areaState = child.getAreaState()
     if (doors) {
     def monitoredDoorState = doors.currentValue("contact")
-        if (!monitoredDoorState.contains("open")) {
+        if (!monitoredDoorState.contains("open") && !['vacantdimmed','vacanton'].contains(areaState)) {
     		 ifDebug("Exit motion is INACTIVE but the $app.label door is closed so this will be ignored!!!")
              } else {
              		ifDebug("Re-Evaluation Caused By An Exit Motion Sensor Being 'INACTIVE'")
@@ -1230,10 +1222,6 @@ def occupied() {
     } else {
             child.generateEvent('occupiedmotion')
            }
-  // if (occupancyStatusChangesSubscribed) { 
-    //    ifDebug("Re-Evaluation Caused By $app.label Changing To Occupied")
-      //  mainAction() 
-    // }
 }
 
 def otherAreaOccupancyStatusEventHandler(evt) {
@@ -1373,11 +1361,6 @@ def vacant() {
             ifDebug("1348 Re-Evaluation Essential By $app.label Changing To Vacant as to start the lights dimming procedure")
             mainAction()
             }
-    
-    //if (occupancyStatusChangesSubscribed) {
-      //  ifDebug("1545 Re-Evaluation Caused By $app.label occupancyStatus Vacant(on) Change being subscribed to")
-        //mainAction() 
-        //}
 } // end of vacant  
 
 def turnalloff() {
