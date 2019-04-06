@@ -2,7 +2,7 @@
  Copyright (C) 2017 Baz2473
  Name: Area Occupancy Child App
 */   
-public static String areaOccupancyChildAppVersion() { return "v3.3.1.7" }
+public static String areaOccupancyChildAppVersion() { return "v3.3.1.8" }
 
 private isDebug() {
         if (debugging) { 
@@ -288,7 +288,6 @@ section("Subscriptions!") {
              if (switches3 && instantOff && offRequired) { input "instantOffSwitchesAndLightsSubscribed", "bool", title: "Lights Turning Off", required: false, submitOnChange: false }
              if (entryMotionSensors) { input "entryMotionActiveSubscribed", "bool", title: "Entry Motion Active", required: false, submitOnChange: true, defaultValue: true }
              if (entryMotionSensors) { input "entryMotionInactiveSubscribed", "bool", title: "Entry Motion Inactive", required: false, submitOnChange: true, defaultValue: true }
-            // input "occupancyStatusChangesSubscribed","bool", title: "$app.label's Occupancy Status Changes?", required: false, submitOnChange: true, defaultValue: false
              if (subscriptionsSelected) {
                 if (otherArea && otherAreaCheck) {
                    input "openOtherArea", "bool", title: "Open Other Area Subscriptions", defaultValue: true, submitOnChange: true
@@ -622,9 +621,15 @@ def mainAction() {
                                                                  } else { 
                                                                          ifDebug("638 The Time Is After Sunset, Doing Nothing")}
                                                                         } else {
+                                                                            if (canSchedule()) {
                                                                                 ifDebug("640 The Lights Will Dim Down In $dimDownTime Seconds")
                                                                                 runIn(dimDownTime, dimLights)
-                                                                               } 
+                                                                               } else {
+                                                                                       ifDebug("There are already too many active schedules present... Unscheduling dimLights()... Attempting runIn() again!")
+                                     												   unschedule(dimLights)
+                                                                                       runIn(dimDownTime, dimLights)
+                                                                                      }
+                                                                               }
                                                 		    }
                                       			   }
                        } else if (switches2State.value.contains("on") && ["vacantdimmed"].contains(areaState) && ['automationon'].contains(automationState)) {
@@ -632,7 +637,7 @@ def mainAction() {
                                   ifDebug("The lights will turn off in $switchesOffCountdownInSeconds seconds")
         	                      runIn(switchesOffCountdownInSeconds, switches2Off, [overwrite: false])
                             } else {
-                                     ifDebug("There are already too many active schedules present... Unscheduling... Attempting runIn() again!")
+                                     ifDebug("There are already too many active schedules present... Unscheduling switches2Off()... Attempting runIn() again!")
                                      unschedule(switches2Off)
                                      runIn(switchesOffCountdownInSeconds, switches2Off, [overwrite: false])
                             }
