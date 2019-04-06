@@ -2,7 +2,7 @@
  Copyright (C) 2017 Baz2473
  Name: Area Occupancy Child App
 */   
-public static String areaOccupancyChildAppVersion() { return "v3.3.1.0" }
+public static String areaOccupancyChildAppVersion() { return "v3.3.1.1" }
 
 private isDebug() {
         if (debugging) { 
@@ -896,7 +896,10 @@ def exitMotionActiveEventHandler(evt) {
     def monitoredDoorState = doors.currentValue("contact")
         if (!monitoredDoorState.contains("open")) {
     		 ifDebug("Exit motion is ACTIVE but the $app.label door is closed so this will be ignored!!!")
-             }
+             } else {
+             		ifDebug("Re-Evaluation Caused By An Exit Motion Sensor Being 'ACTIVE'")
+               		mainAction() 
+             		}
     } else if (!['vacant'].contains(areaState)) {       
                ifDebug("Re-Evaluation Caused By An Exit Motion Sensor Being 'ACTIVE'")
                mainAction() 
@@ -910,7 +913,10 @@ def exitMotionInactiveEventHandler(evt) {
     def monitoredDoorState = doors.currentValue("contact")
         if (!monitoredDoorState.contains("open")) {
     		 ifDebug("Exit motion is INACTIVE but the $app.label door is closed so this will be ignored!!!")
-             }
+             } else {
+             		ifDebug("Re-Evaluation Caused By An Exit Motion Sensor Being 'INACTIVE'")
+               		mainAction() 
+             		}
     } else if (!['vacant'].contains(areaState)) {
                ifDebug("Re-Evaluation Caused By An Exit Motion Sensor Being 'INACTIVE'")
                mainAction() 
