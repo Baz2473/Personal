@@ -2,7 +2,7 @@
  Copyright (C) 2017 Baz2473
  Name: Area Occupancy Child App
 */   
-public static String areaOccupancyChildAppVersion() { return "v3.2.1.8" }
+public static String areaOccupancyChildAppVersion() { return "v3.3.0.0" }
 
 private isDebug() {
         if (debugging) { 
@@ -490,30 +490,26 @@ def mainAction() {
         }
         if (doors) {
                     def doorsState = doors.currentState("contact") 
-                  //  if (!doorsState.value.contains("open") && ['donotdisturb','donotdisturbon'].contains(areaState)) {
-                    //     engaged() // not sure this is needed here snymore since i have the exact same function in the entrymotionactive function???
-                      // } else 
                        if (!doorsState.value.contains("open") && ['occupied','occupiedon'].contains(areaState)) { 
-                                   checking()     
-                                  // maybe do runin engaged here??? or in def checking() ?
-                                   runIn(actualEntrySensorsTimeout, engaged, [overwrite: false])
-                                // } else if (!doorsState.value.contains("open") && ['checking','checkingon'].contains(areaState)) {                                                                                                       
-                                     //        runIn(actualEntrySensorsTimeout, engaged, [overwrite: false])
-                                           } else if (doorsState.value.contains("open") && ['checking','checkingon','engaged','engagedon','donotdisturb','donotdisturbon'].contains(areaState)) { 
-                                                      occupied()   
-                                                     } else if (['vacant','vacantdimmed','vacanton'].contains(areaState)) { 
-                                                                  occupied()
-                                                               } 
+                           checking()     
+                           runIn(actualEntrySensorsTimeout, engaged, [overwrite: false])
+                          } else if (doorsState.value.contains("open") && ['checking','checkingon','engaged','engagedon','donotdisturb','donotdisturbon'].contains(areaState)) { 
+                                     occupied()   
+                                    } else if (['vacant','vacantdimmed','vacanton'].contains(areaState)) { 
+                                               occupied()
+                                              } 
                    } else if (['vacant','vacantdimmed','vacanton'].contains(areaState)) { 
-                                occupied()
+                              occupied()
                              }       
 
 //-----------------------------------------------------------------------INACTIVE FROM HERE DOWN---------------------------------------------------------------------------------------------
 
 } else { 
         ifDebug("mainAction() Running ---- Entry motion is Inactive")
+      //child.generateEvent('occupiedon')
+
         if (noExitSensor && ['occupied','occupiedon'].contains(areaState)) { 
-            ifDebug("525 Vacant will be activated in $entryMotionTimeout seconds")
+            ifDebug("510 Vacant will be activated in $entryMotionTimeout seconds")
             runIn(entryMotionTimeout, vacant, [overwrite: false])
             }                            
         if (donotdisturbControl && ['engaged','engagedon'].contains(areaState)) {                             
@@ -541,9 +537,7 @@ def mainAction() {
             }                                
         if (['checking','checkingon'].contains(areaState)) { 
               ifDebug("552 Vacant will be activated in $actualEntrySensorsTimeout seconds OR NOW AS THE NEW METHOD SAYS!!!")
-             // maybe just do vacant now???
               vacant()
-             // runIn(actualEntrySensorsTimeout, vacant, [overwrite: false])
            } else {
                    if (anotherVacancyCheck && anotherCheckIn && ['occupied','occupiedon'].contains(areaState)) {
                        ifDebug("556 forceVacantIf() will be activated in $anotherCheckIn seconds")
@@ -876,6 +870,11 @@ def	entryMotionActiveEventHandler(evt) {
 
 def	entryMotionInactiveEventHandler(evt) {
     ifDebug("Re-Evaluation Caused By An Entry Motion Sensor Being 'INACTIVE'")
+    def child = getChildDevice(getArea())
+    def areaState = child.getAreaState()
+    if (['occupiedonmotion'].contains(areaState)) {
+          child.generateEvent('occupiedon')
+          }
     if (doors) {
     	unschedule(engaged)
     }
@@ -991,7 +990,9 @@ def forceVacantIf() {
     def entryMotionState = entryMotionSensors.currentState("motion")
     if (!['vacant'].contains(areaState) && !entryMotionState.value.contains("active")) {
            vacant()
-           }
+           } else {
+           		   ifDebug("Vacant check returned '$app.label is NOT vacant!'")
+                 }
 }
 
 private getArea() {	
@@ -1206,7 +1207,8 @@ def occupied() {
     if (checkableLights) {
         def lightsState = checkableLights.currentState("switch")
         if (lightsState.value.contains("on")) {
-            child.generateEvent('occupiedon')
+            //child.generateEvent('occupiedon')
+            child.generateEvent('occupiedonmotion')
            } else {                
                    child.generateEvent('occupied')
                   }
