@@ -2,7 +2,7 @@
  Copyright (C) 2017 Baz2473
  Name: Area Occupancy Child App
 */   
-public static String areaOccupancyChildAppVersion() { return "v3.3.0.0" }
+public static String areaOccupancyChildAppVersion() { return "v3.3.0.3" }
 
 private isDebug() {
         if (debugging) { 
@@ -506,7 +506,6 @@ def mainAction() {
 
 } else { 
         ifDebug("mainAction() Running ---- Entry motion is Inactive")
-      //child.generateEvent('occupiedon')
 
         if (noExitSensor && ['occupied','occupiedon'].contains(areaState)) { 
             ifDebug("510 Vacant will be activated in $entryMotionTimeout seconds")
@@ -845,19 +844,22 @@ def	entryMotionActiveEventHandler(evt) {
     if (noExitSensor) {
         unschedule(vacant)
        }
-    //unschedule(vacant)
     unschedule(switches2Off)
     unschedule(dimLights)
     if (anotherVacancyCheck) {
         unschedule(forceVacantIf)
        }
-    //unschedule(forceVacantIf)
+    def child = getChildDevice(getArea())
+    def areaState = child.getAreaState()
+    if (['occupiedon'].contains(areaState)) {
+          child.generateEvent('occupiedonmotion')
+          }  
     if (doors) {    
-                //unschedule(engaged)
                 unschedule(donotdusturb)
                 def doorsState = doors.currentState("contact") 
-                def child = getChildDevice(getArea())
-  			    def areaState = child.getAreaState()
+                if (['engagedon'].contains(areaState)) {
+         			  child.generateEvent('engagedonmotion')
+         		    }
                 if (!doorsState.value.contains("open") && ['vacant','vacantdimmed','vacanton','occupied','occupiedon','checking','checkingon','donotdisturb','donotdisturbon'].contains(areaState)) {
                      engaged()
                 } else {
@@ -874,9 +876,12 @@ def	entryMotionInactiveEventHandler(evt) {
     def areaState = child.getAreaState()
     if (['occupiedonmotion'].contains(areaState)) {
           child.generateEvent('occupiedon')
-          }
+          }    
     if (doors) {
     	unschedule(engaged)
+        if (['engagedonmotion'].contains(areaState)) {
+              child.generateEvent('engagedon')
+           } 
     }
     mainAction() 
 }
@@ -1049,7 +1054,6 @@ def monitoredDoorOpenedAction2() {
 
 def monitoredDoorOpenedEventHandler(evt) { 
     unschedule(engaged)
-    //unschedule(vacant)
     unschedule(donotdisturb)
     if (anotherVacancyCheck) {
         unschedule(forceVacantIf)
