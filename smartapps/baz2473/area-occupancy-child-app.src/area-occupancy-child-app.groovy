@@ -2,7 +2,7 @@
  Copyright (C) 2017 Baz2473
  Name: Area Occupancy Child App
 */   
-public static String areaOccupancyChildAppVersion() { return "v3.3.1.2" }
+public static String areaOccupancyChildAppVersion() { return "v3.3.1.3" }
 
 private isDebug() {
         if (debugging) { 
@@ -886,6 +886,9 @@ def	entryMotionInactiveEventHandler(evt) {
              child.generateEvent('engaged')
              mainAction() 
            }    
+        if (['checking','checkingon'].contains(areaState)) {
+             mainAction() 
+           }       
     }
 }
 
