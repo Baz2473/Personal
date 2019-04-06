@@ -2,7 +2,7 @@
  Copyright (C) 2017 Baz2473
  Name: Area Occupancy Child App
 */   
-public static String areaOccupancyChildAppVersion() { return "v3.2.1.4" }
+public static String areaOccupancyChildAppVersion() { return "v3.2.1.6" }
 
 private isDebug() {
         if (debugging) { 
@@ -398,37 +398,28 @@ if (!childCreated()) {
     if (exitMotionSensorsWhenDoorIsClosed && monitoredDoor2 && exitMotionWhenDoorIsClosedInactiveSubscribed) {
         subscribe(exitMotionSensorsWhenDoorIsClosed, "motion.inactive", exitMotionSensorsWhenDoorIsClosedInactiveEventHandler)
         }  
-    if (otherArea && otherAreaCheck && otherAreaSubscribedVacant) {
-        subscribe(otherArea, "occupancyStatus.vacant", otherAreaOccupancyStatusEventHandler)
-        }
-    if (otherArea && otherAreaCheck && otherAreaSubscribedVacant) {
-        subscribe(otherArea, "occupancyStatus.vacanton", otherAreaOccupancyStatusEventHandler)
-        }
     if (onlyIfDisarmed) {
         subscribe(location, "alarmSystemStatus", shmStatusEventHandler)
+        }    
+    if (otherArea && otherAreaCheck && otherAreaSubscribedVacant) {
+        subscribe(otherArea, "occupancyStatus.vacant", otherAreaOccupancyStatusEventHandler)
+        subscribe(otherArea, "occupancyStatus.vacanton", otherAreaOccupancyStatusEventHandler)
+        subscribe(otherArea, "occupancyStatus.vacantdimmed", otherAreaOccupancyStatusEventHandler)
         }
     if (otherArea && otherAreaCheck && otherAreaSubscribedOccupied) {
         subscribe(otherArea, "occupancyStatus.occupied", otherAreaOccupancyStatusEventHandler)
-        }
-    if (otherArea && otherAreaCheck && otherAreaSubscribedOccupied) {
         subscribe(otherArea, "occupancyStatus.occupiedon", otherAreaOccupancyStatusEventHandler)
-        }
-    if (otherArea && otherAreaCheck && otherAreaSubscribedEngaged) {
-        subscribe(otherArea, "occupancyStatus.engaged", otherAreaOccupancyStatusEventHandler)
-        }
-    if (otherArea && otherAreaCheck && otherAreaSubscribedEngaged) {
-        subscribe(otherArea, "occupancyStatus.engagedon", otherAreaOccupancyStatusEventHandler)
         }
     if (otherArea && otherAreaCheck && otherAreaSubscribedChecking) {
         subscribe(otherArea, "occupancyStatus.checking", otherAreaOccupancyStatusEventHandler)
-        }
-    if (otherArea && otherAreaCheck && otherAreaSubscribedChecking) {
         subscribe(otherArea, "occupancyStatus.checkingon", otherAreaOccupancyStatusEventHandler)
-        }
+        } 
+    if (otherArea && otherAreaCheck && otherAreaSubscribedEngaged) {
+        subscribe(otherArea, "occupancyStatus.engaged", otherAreaOccupancyStatusEventHandler)
+        subscribe(otherArea, "occupancyStatus.engagedon", otherAreaOccupancyStatusEventHandler)
+       }
     if (otherArea && otherAreaCheck && otherAreaSubscribedDonotdisturb) {
         subscribe(otherArea, "occupancyStatus.donotdisturb", otherAreaOccupancyStatusEventHandler)
-        }
-    if (otherArea && otherAreaCheck && otherAreaSubscribedDonotdisturb) {
         subscribe(otherArea, "occupancyStatus.donotdisturbon", otherAreaOccupancyStatusEventHandler)
         }
     if (presenceSensors && presence) { 
@@ -1026,18 +1017,22 @@ def	modeEventHandler(evt) {
 def monitoredDoorOpenedAction() {
     def lightStateForDoorAction = doorOpeningAction.currentState("switch")
     doorOpeningAction.each {
-    it.on()
+    //it.on()
     it.setLevel(setLevelAt)
+    ifDebug("1031 Setting level of $it to $setLevelAt %")
     }
+    ifDebug("Re-Evaluation Caused By A Monitored Door Being 'OPENED'")
     mainAction()
 } // end of monitoredDoorOpenedAction
 
 def monitoredDoorOpenedAction2() {
     def lightStateForDoorAction2 = doorOpeningAction2.currentState("switch")
     doorOpeningAction2.each {
-    it.on()
+    //it.on()
     it.setLevel(setLevelAt2)
+    ifDebug("1042 Setting level of $it to $setLevelAt2 %")
     }
+    ifDebug("Re-Evaluation Caused By A Monitored Door Being 'OPENED'")
     mainAction()
 } // end of monitoredDoorOpenedAction2
 
