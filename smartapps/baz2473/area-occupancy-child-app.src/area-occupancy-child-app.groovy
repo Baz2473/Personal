@@ -2,7 +2,7 @@
  Copyright (C) 2017 Baz2473
  Name: Area Occupancy Child App
 */   
-public static String areaOccupancyChildAppVersion() { return "v3.2.1.7" }
+public static String areaOccupancyChildAppVersion() { return "v3.2.1.8" }
 
 private isDebug() {
         if (debugging) { 
@@ -885,19 +885,29 @@ def	entryMotionInactiveEventHandler(evt) {
 def exitMotionActiveEventHandler(evt) { 
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
-    if (!['vacant'].contains(areaState)) {       
-           ifDebug("Re-Evaluation Caused By An Exit Motion Sensor Being 'ACTIVE'")
-           mainAction() 
-           }
+    if (doors) {
+    def monitoredDoorState = doors.currentValue("contact")
+        if (!monitoredDoorState.contains("open")) {
+    		 ifDebug("Exit motion is ACTIVE but the $app.label door is closed so this will be ignored!!!")
+             }
+    } else if (!['vacant'].contains(areaState)) {       
+               ifDebug("Re-Evaluation Caused By An Exit Motion Sensor Being 'ACTIVE'")
+               mainAction() 
+              }
 }
 
 def exitMotionInactiveEventHandler(evt) { 
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
-    if (!['vacant'].contains(areaState)) {
-           ifDebug("Re-Evaluation Caused By An Exit Motion Sensor Being 'INACTIVE'")
-           mainAction() 
-           }
+    if (doors) {
+    def monitoredDoorState = doors.currentValue("contact")
+        if (!monitoredDoorState.contains("open")) {
+    		 ifDebug("Exit motion is INACTIVE but the $app.label door is closed so this will be ignored!!!")
+             }
+    } else if (!['vacant'].contains(areaState)) {
+               ifDebug("Re-Evaluation Caused By An Exit Motion Sensor Being 'INACTIVE'")
+               mainAction() 
+              }
 }
 
 def exitMotionSensorsWhenDoorIsOpenActiveEventHandler(evt) {
