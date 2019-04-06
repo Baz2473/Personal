@@ -2,7 +2,7 @@
   Copyright (C) 2017 Baz2473
   Name: Area Occupancy Status 
 */
-public static String DTHVersion() { return "v3.1.0.2" }
+public static String DTHVersion() { return "v3.1.0.4" }
 
 metadata {
 	      definition (
@@ -43,21 +43,21 @@ metadata {
 	tiles(scale: 2)	{
     	multiAttributeTile(name: "occupancyStatus", type: "generic", width: 2, height: 2, canChangeBackground: false) {
 			tileAttribute ("device.occupancyStatus", key: "PRIMARY_CONTROL") {
-				attributeState "vacant", label: 'Lights OFF', action: "turnon", icon:"st.Home.home18", backgroundColor:"#606060"
-                attributeState "vacantdimmed", label: 'Dimmed', action: "turnalloff", icon:"st.Home.home18", backgroundColor:"#cdc8a3"
-                attributeState "vacanton", label: 'Lights ON', action: "turnalloff", icon:"st.Home.home18", backgroundColor:"#c1b419"
-                attributeState "occupied", label: 'Lights OFF', action: "vacant", icon:"st.Home.home4", backgroundColor:"#156700"
+				attributeState "vacant", label: 'VACANT', action: "turnon", icon:"st.Home.home18", backgroundColor:"#606060"
+                attributeState "vacantdimmed", label: 'VACANT', action: "turnalloff", icon:"st.Home.home18", backgroundColor:"#cdc8a3"
+                attributeState "vacanton", label: 'VACANT', action: "turnalloff", icon:"st.Home.home18", backgroundColor:"#c1b419"
+                attributeState "occupied", label: 'OCCUPIED', action: "vacant", icon:"st.Home.home4", backgroundColor:"#156700"
                 attributeState "occupiedmotion", label: 'MOTION', action: "vacant", icon:"st.Health & Wellness.health12", backgroundColor:"#156700"
-                attributeState "occupiedon", label: 'Lights ON', action: "vacanton", icon:"st.Home.home4", backgroundColor:"#32cd32"
+                attributeState "occupiedon", label: 'OCCUPIED', action: "vacanton", icon:"st.Home.home4", backgroundColor:"#32cd32"
                 attributeState "occupiedonmotion", label: 'MOTION', action: "vacanton", icon:"st.Health & Wellness.health12", backgroundColor:"#32cd32"
-                attributeState "checking", label: 'Lights OFF', action: "vacant", icon:"st.Health & Wellness.health9", backgroundColor:"#bf6700"
-                attributeState "checkingon", label: 'Lights ON', action: "vacanton", icon:"st.Health & Wellness.health9", backgroundColor:"#ff8a00"
-				attributeState "engaged", label: 'Lights OFF', action: "vacant", icon:"st.locks.lock.locked", backgroundColor:"#af0000"
+                attributeState "checking", label: 'CHECKING', action: "vacant", icon:"st.Health & Wellness.health9", backgroundColor:"#bf6700"
+                attributeState "checkingon", label: 'CHECKING', action: "vacanton", icon:"st.Health & Wellness.health9", backgroundColor:"#ff8a00"
+				attributeState "engaged", label: 'ENGAGED', action: "vacant", icon:"st.locks.lock.locked", backgroundColor:"#af0000"
 				attributeState "engagedmotion", label: 'MOTION', action: "vacant", icon:"st.Health & Wellness.health12", backgroundColor:"#af0000"
-                attributeState "engagedon", label: 'Lights ON', action: "vacanton", icon:"st.locks.lock.locked", backgroundColor:"#ff0000"
+                attributeState "engagedon", label: 'ENGAGED', action: "vacanton", icon:"st.locks.lock.locked", backgroundColor:"#ff0000"
                 attributeState "engagedonmotion", label: 'MOTION', action: "vacanton", icon:"st.Health & Wellness.health12", backgroundColor:"#ff0000"
-                attributeState "donotdisturb", label: 'Lights OFF', action: "vacant", icon:"st.Office.office6", backgroundColor:"#410099"
-                attributeState "donotdisturbon", label: 'Lights ON', action: "vacanton", icon:"st.Office.office6", backgroundColor:"#6d00ff"
+                attributeState "donotdisturb", label: 'DND', action: "vacant", icon:"st.Office.office6", backgroundColor:"#410099"
+                attributeState "donotdisturbon", label: 'DND', action: "vacanton", icon:"st.Office.office6", backgroundColor:"#6d00ff"
                 }
        		tileAttribute ("device.status", key: "SECONDARY_CONTROL") {
 				attributeState "default", label:'${currentValue}'
