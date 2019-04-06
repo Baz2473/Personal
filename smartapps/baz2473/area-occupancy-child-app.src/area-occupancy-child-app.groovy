@@ -2,7 +2,7 @@
  Copyright (C) 2017 Baz2473
  Name: Area Occupancy Child App
 */   
-public static String areaOccupancyChildAppVersion() { return "v3.3.0.3" }
+public static String areaOccupancyChildAppVersion() { return "v3.3.0.4" }
 
 private isDebug() {
         if (debugging) { 
@@ -854,12 +854,18 @@ def	entryMotionActiveEventHandler(evt) {
     if (['occupiedon'].contains(areaState)) {
           child.generateEvent('occupiedonmotion')
           }  
+    if (['occupied'].contains(areaState)) {
+          child.generateEvent('occupiedmotion')
+          }       
     if (doors) {    
                 unschedule(donotdusturb)
                 def doorsState = doors.currentState("contact") 
                 if (['engagedon'].contains(areaState)) {
          			  child.generateEvent('engagedonmotion')
          		    }
+                if (['engaged'].contains(areaState)) {
+         			  child.generateEvent('engagedmotion')
+         		    }    
                 if (!doorsState.value.contains("open") && ['vacant','vacantdimmed','vacanton','occupied','occupiedon','checking','checkingon','donotdisturb','donotdisturbon'].contains(areaState)) {
                      engaged()
                 } else {
@@ -876,12 +882,18 @@ def	entryMotionInactiveEventHandler(evt) {
     def areaState = child.getAreaState()
     if (['occupiedonmotion'].contains(areaState)) {
           child.generateEvent('occupiedon')
-          }    
+          }   
+    if (['occupiedmotion'].contains(areaState)) {
+          child.generateEvent('occupied')
+          }      
     if (doors) {
     	unschedule(engaged)
         if (['engagedonmotion'].contains(areaState)) {
               child.generateEvent('engagedon')
            } 
+        if (['engagedmotion'].contains(areaState)) {
+              child.generateEvent('engaged')
+           }    
     }
     mainAction() 
 }
