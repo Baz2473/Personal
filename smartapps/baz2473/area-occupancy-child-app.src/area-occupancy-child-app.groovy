@@ -2,7 +2,7 @@
  Copyright (C) 2017 Baz2473
  Name: Area Occupancy Child App
 */   
-public static String areaOccupancyChildAppVersion() { return "v3.3.1.1" }
+public static String areaOccupancyChildAppVersion() { return "v3.3.1.2" }
 
 private isDebug() {
         if (debugging) { 
@@ -490,10 +490,10 @@ def mainAction() {
         }
         if (doors) {
                     def doorsState = doors.currentState("contact") 
-                       if (!doorsState.value.contains("open") && ['occupied','occupiedon'].contains(areaState)) { 
+                       if (!doorsState.value.contains("open") && ['occupied','occupiedmotion','occupiedon','occupiedonmotion'].contains(areaState)) { 
                            checking()     
                            runIn(actualEntrySensorsTimeout, engaged, [overwrite: false])
-                          } else if (doorsState.value.contains("open") && ['checking','checkingon','engaged','engagedon','donotdisturb','donotdisturbon'].contains(areaState)) { 
+                          } else if (doorsState.value.contains("open") && ['checking','checkingon','engaged','engagedmotion','engagedon','engagedonmotion','donotdisturb','donotdisturbon'].contains(areaState)) { 
                                      occupied()   
                                     } else if (['vacant','vacantdimmed','vacanton'].contains(areaState)) { 
                                                occupied()
