@@ -2,7 +2,7 @@
  Copyright (C) 2017 Baz2473
  Name: Area Occupancy Child App
 */   
-public static String areaOccupancyChildAppVersion() { return "v3.2.0.7" }
+public static String areaOccupancyChildAppVersion() { return "v3.2.1.4" }
 
 private isDebug() {
         if (debugging) { 
@@ -122,10 +122,6 @@ if (exitMotionSensors || entryMotionTimeout || monitoredDoor2) {
                  input "doors", "capability.contactSensor", title: "Doors?", multiple: true, required: true, submitOnChange: true
                  if (doors) { 
              	     input "actualEntrySensorsTimeout", "number", title: "$app.label's Timeout?",required: true, defaultValue: null, submitOnChange: true
-                     //input "autoEngagedFunction", "bool", title: "Automatically Engage $app.label When A Switch Turns On?",defaultValue: false, submitOnChange: true
-                     //if (autoEngagedFunction) {
-                       //  input "autoEngagedSwitches", "capability.switch", title: "Which Switches?", multiple: true, required: false, defaultValue: null, submitOnChange: true
-                         //}
            		     input "actionOnDoorOpening", "bool", title: "Turn ON Something When\n$doors Opens?", defaultValue: false, submitOnChange: true
                      if (actionOnDoorOpening) {
                          input "onlyIfAreaVacant", "bool", title: "But Only IF $app.label Is Vacant", defaultValue: true, submitOnChnage: true
@@ -361,9 +357,6 @@ if (!childCreated()) {
     if (adjacentDoors && monitoredDoor2 && adjacentMonitoredDoorClosingSubscribed) { 
         subscribe(adjacentDoors, "contact.closed", adjacentMonitoredDoorClosingEventHandler) 
         }
-    //if (autoEngagedFunction && autoEngagedSwitches && doors) {
-      //  subscribe(autoEngagedSwitches, "switch.on", autoEngagedSwitchesEventHandler)
-        //}
     if (awayModes && noAwayMode || resetAutomationMode && resetAutomation) { 
         subscribe(location, modeEventHandler) 
         }
@@ -506,14 +499,15 @@ def mainAction() {
         }
         if (doors) {
                     def doorsState = doors.currentState("contact") 
-                    if (!doorsState.value.contains("open") && ['donotdisturb','donotdisturbon'].contains(areaState)) {
-                         engaged() // not sure this is needed here snymore since i have the exact same function in the entrymotionactive function???
-                       } else if (!doorsState.value.contains("open") && ['occupied','occupiedon'].contains(areaState)) { 
+                  //  if (!doorsState.value.contains("open") && ['donotdisturb','donotdisturbon'].contains(areaState)) {
+                    //     engaged() // not sure this is needed here snymore since i have the exact same function in the entrymotionactive function???
+                      // } else 
+                       if (!doorsState.value.contains("open") && ['occupied','occupiedon'].contains(areaState)) { 
                                    checking()     
-                                   //maybe do runin engaged here??? or in def checking() ?
-                                   //runIn(actualEntrySensorsTimeout, engaged, [overwrite: false])
-                                 } else if (!doorsState.value.contains("open") && ['checking','checkingon'].contains(areaState)) {                                                                                                       
-                                             runIn(actualEntrySensorsTimeout, engaged, [overwrite: false])
+                                  // maybe do runin engaged here??? or in def checking() ?
+                                   runIn(actualEntrySensorsTimeout, engaged, [overwrite: false])
+                                // } else if (!doorsState.value.contains("open") && ['checking','checkingon'].contains(areaState)) {                                                                                                       
+                                     //        runIn(actualEntrySensorsTimeout, engaged, [overwrite: false])
                                            } else if (doorsState.value.contains("open") && ['checking','checkingon','engaged','engagedon','donotdisturb','donotdisturbon'].contains(areaState)) { 
                                                       occupied()   
                                                      } else if (['vacant','vacantdimmed','vacanton'].contains(areaState)) { 
@@ -555,14 +549,14 @@ def mainAction() {
                       }
             }                                
         if (['checking','checkingon'].contains(areaState)) { 
-              ifDebug("552 Vacant will be activated in $actualEntrySensorsTimeout seconds")
-              //maybe just do vacant now???
-              //vacant()
-              runIn(actualEntrySensorsTimeout, vacant, [overwrite: false])
+              ifDebug("552 Vacant will be activated in $actualEntrySensorsTimeout seconds OR NOW AS THE NEW METHOD SAYS!!!")
+             // maybe just do vacant now???
+              vacant()
+             // runIn(actualEntrySensorsTimeout, vacant, [overwrite: false])
            } else {
                    if (anotherVacancyCheck && anotherCheckIn && ['occupied','occupiedon'].contains(areaState)) {
                        ifDebug("556 forceVacantIf() will be activated in $anotherCheckIn seconds")
-                       runIn(anotherCheckIn, forceVacantIf)//, [overwrite: false])
+                       runIn(anotherCheckIn, forceVacantIf)
                       }
                    if (switches3 && instantOff && offRequired) { 
                        def switches3State = switches3.currentState("switch")  
@@ -650,14 +644,14 @@ def mainAction() {
                                                 		    }
                                       			   }
                        } else if (switches2State.value.contains("on") && ["vacantdimmed"].contains(areaState) && ['automationon'].contains(automationState)) {
-                       // if (canSchedule()) {
+                        if (canSchedule()) {
                                   ifDebug("The lights will turn off in $switchesOffCountdownInSeconds seconds")
         	                      runIn(switchesOffCountdownInSeconds, switches2Off, [overwrite: false])
-                            // } else {
-                                     //ifDebug("There are already too many active schedules present... Unscheduling... Attempting runIn() again!")
-                                     //unschedule(switches2Off)
-                                     //runIn(switchesOffCountdownInSeconds, switches2Off, [overwrite: false])
-                            //}
+                            } else {
+                                     ifDebug("There are already too many active schedules present... Unscheduling... Attempting runIn() again!")
+                                     unschedule(switches2Off)
+                                     runIn(switchesOffCountdownInSeconds, switches2Off, [overwrite: false])
+                            }
                                  }
                  		 }                      
 				}
@@ -676,15 +670,6 @@ def adjacentMonitoredDoorOpeningEventHandler(evt) {
     ifDebug("Re-Evaluation Caused By An Ajacent Monitored Door Opening")
     mainAction()
 }
-
-/*def autoEngagedSwitchesEventHandler(evt) {
-    def child = getChildDevice(getArea())
-    def areaState = child.getAreaState()             
-    def doorsState = doors.currentState("contact") 
-    if (!doorsState.value.contains("open") && ['vacant','vacanton'].contains(areaState)) {
-         engaged() 
-         }
-}*/
 
 def checkableLightsSwitchedOnEventHandler(evt) {
     def child = getChildDevice(getArea())
@@ -758,11 +743,6 @@ def areaState = child.getAreaState()
         }
 } // end of checking
 
-def checkOtherAreaAgain() {
-    unschedule(checkOtherAreaAgain)
-    mainAction()
-}
-
 private childAreaState() { 
         return (getChildDevice(getArea())).getAreaState() 
 }
@@ -827,33 +807,6 @@ def dimmableSwitches2OffEventHandler(evt) {
     mainAction() 
 }
 
-/*def dimmableSwitches1On() {
-        if (onlyIfDisarmed) {
-            def shmStatus = location.currentState("alarmSystemStatus")?.value
-            if (shmStatus == "off") {
-                def child = getChildDevice(getArea())
-                def automationState = child.getAutomationState()
-                     if (dimmableSwitches1 && switchOnControl && ['automationon'].contains(automationState)) {      
-                         ifDebug("The Selected Switch(es) Have Either Been Turned 'ON' Or Had Their Respective Level(s) Set")
-                         dimmableSwitches1.each {
-                         it.setLevel(setLevelTo)
-                         }
-					}
-            } else {
-            	ifDebug("SHM is ARMED! No Lights Will Turn On!")
-            }
-         } else {
-                 def child = getChildDevice(getArea())
-                 def automationState = child.getAutomationState()
-                 if (dimmableSwitches1 && switchOnControl && ['automationon'].contains(automationState)) {      
-                     ifDebug("The Selected Switch(es) Have Either Been Turned 'ON' Or Had Their Respective Level(s) & Color(s) Set")
-                     dimmableSwitches1.each {
-                     it.setLevel(setLevelTo)
-                     }
-				 }
-         }
-}*/
-
 def donotdisturb() {      
 def child = getChildDevice(getArea())
 def areaState = child.getAreaState()
@@ -904,18 +857,16 @@ def engaged() {
 
 def	entryMotionActiveEventHandler(evt) {
     ifDebug("Re-Evaluation Caused By An Entry Motion Sensor Being 'ACTIVE'")
-    //if (noExitSensor) {
-    //    unschedule(vacant)
-    //}
-    unschedule(vacant)
+    if (noExitSensor) {
+        unschedule(vacant)
+       }
+    //unschedule(vacant)
     unschedule(switches2Off)
     unschedule(dimLights)
-    //if (anotherVacancyCheck) {
-    //    unschedule(forceVacantIf)
-    // }
-    unschedule(forceVacantIf)
-    
-    unschedule(checkOtherAreaAgain) // whats this?????
+    if (anotherVacancyCheck) {
+        unschedule(forceVacantIf)
+       }
+    //unschedule(forceVacantIf)
     if (doors) {    
                 //unschedule(engaged)
                 unschedule(donotdusturb)
@@ -1092,12 +1043,13 @@ def monitoredDoorOpenedAction2() {
 
 def monitoredDoorOpenedEventHandler(evt) { 
     unschedule(engaged)
-    unschedule(vacant)
+    //unschedule(vacant)
     unschedule(donotdisturb)
-    unschedule(forceVacantIf)
+    if (anotherVacancyCheck) {
+        unschedule(forceVacantIf)
+       } 
     unschedule(switches2Off)
     unschedule(dimLights)
-    unschedule(checkOtherAreaAgain)
     if (!actionOnDoorOpening) {                      
         ifDebug("Re-Evaluated by A Monitored Door Opening")
         mainAction() 
@@ -1380,26 +1332,30 @@ def vacant() {
     ifDebug("Performing vacant()")
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
+    if (anotherVacancyCheck) {
+        unschedule(forceVacantIf)
+       }
     if (checkableLights) {
         def lightsState = checkableLights.currentState("switch")
         if (lightsState.value.contains("on")) {
             child.generateEvent('vacanton')  
-            ifDebug("1419 Re-Evaluation Caused By $app.label Changing To Vacanton")
+            ifDebug("1339 Re-Evaluation Essential By $app.label Changing To Vacanton as to start the lights dimming procedure")
             mainAction()
             } else { 
                     child.generateEvent('vacant')
-                    ifDebug("1423 Re-Evaluation Caused By $app.label Changing To Vacant")
+            		ifDebug("1343 Re-Evaluation Essential By $app.label Changing To Vacant as to start the lights dimming procedure")
                     mainAction()
                     }
     } else {
             child.generateEvent('vacant')
-            ifDebug("1541 Re-Evaluation Caused By $app.label Changing To Vacant")
+            ifDebug("1348 Re-Evaluation Essential By $app.label Changing To Vacant as to start the lights dimming procedure")
             mainAction()
             }
-    if (occupancyStatusChangesSubscribed) {
-        ifDebug("1545 Re-Evaluation Caused By $app.label occupancyStatus Vacant(on) Change being subscribed to")
-        mainAction() 
-        }
+    
+    //if (occupancyStatusChangesSubscribed) {
+      //  ifDebug("1545 Re-Evaluation Caused By $app.label occupancyStatus Vacant(on) Change being subscribed to")
+        //mainAction() 
+        //}
 } // end of vacant  
 
 def turnalloff() {
