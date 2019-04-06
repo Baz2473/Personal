@@ -2,7 +2,7 @@
  Copyright (C) 2017 Baz2473
  Name: Area Occupancy Child App
 */   
-public static String areaOccupancyChildAppVersion() { return "v3.3.0.4" }
+public static String areaOccupancyChildAppVersion() { return "v3.3.1.0" }
 
 private isDebug() {
         if (debugging) { 
@@ -288,7 +288,7 @@ section("Subscriptions!") {
              if (switches3 && instantOff && offRequired) { input "instantOffSwitchesAndLightsSubscribed", "bool", title: "Lights Turning Off", required: false, submitOnChange: false }
              if (entryMotionSensors) { input "entryMotionActiveSubscribed", "bool", title: "Entry Motion Active", required: false, submitOnChange: true, defaultValue: true }
              if (entryMotionSensors) { input "entryMotionInactiveSubscribed", "bool", title: "Entry Motion Inactive", required: false, submitOnChange: true, defaultValue: true }
-             input "occupancyStatusChangesSubscribed","bool", title: "$app.label's Occupancy Status Changes?", required: false, submitOnChange: true, defaultValue: false
+            // input "occupancyStatusChangesSubscribed","bool", title: "$app.label's Occupancy Status Changes?", required: false, submitOnChange: true, defaultValue: false
              if (subscriptionsSelected) {
                 if (otherArea && otherAreaCheck) {
                    input "openOtherArea", "bool", title: "Open Other Area Subscriptions", defaultValue: true, submitOnChange: true
@@ -659,36 +659,20 @@ def checkableLightsSwitchedOnEventHandler(evt) {
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
     if (['vacant','vacantdimmed'].contains(areaState)) { 
-          child.generateEvent('vacanton')
-          if (occupancyStatusChangesSubscribed) { 
-              ifDebug("Re-Evaluation Caused By $app.label Changing To VacantOn")
-              mainAction() 
-          	  }
-          } else if (['occupied'].contains(areaState)) { 
-                        child.generateEvent('occupiedon')
-                        if (occupancyStatusChangesSubscribed) { 
-                            ifDebug("Re-Evaluation Caused By $app.label Changing To OccupiedOn")
-                            mainAction() 
-                        	}
-                        } else if (['engaged'].contains(areaState)) { 
-                                      child.generateEvent('engagedon')
-                                      if (occupancyStatusChangesSubscribed) { 
-      									  ifDebug("Re-Evaluation Caused By $app.label Changing To EngagedOn")
-      									  mainAction() 
-                                     	  }
-                                      } else if (['checking'].contains(areaState)) { 
-                                                    child.generateEvent('checkingon')
-                                                    if (occupancyStatusChangesSubscribed) { 
-                                                        ifDebug("Re-Evaluation Caused By $app.label Changing To CheckingOn")
-     												    mainAction() 
-                                                   	    }
-                                                    } else if (['donotdisturb'].contains(areaState)) { 
-                                                                                child.generateEvent('donotdisturbon')
-                                                                                if (occupancyStatusChangesSubscribed) { 
-                                                                                    ifDebug("Re-Evaluation Caused By $app.label Changing To DonotdisturbON")
-                                                                                    mainAction() 
-                                                                                    }
-                                                                          }
+         child.generateEvent('vacanton')
+       } else if (['occupied'].contains(areaState)) { 
+                   child.generateEvent('occupiedon')
+                 } else if (['occupiedmotion'].contains(areaState)) {
+                        	 child.generateEvent('occupiedonmotion')
+                          }  else if (['engaged'].contains(areaState)) { 
+                                       child.generateEvent('engagedon')
+                                     } else if (['engagedmotion'].contains(areaState)) {
+                        				         child.generateEvent('engagedonmotion')
+                                               } else if (['checking'].contains(areaState)) { 
+                                                          child.generateEvent('checkingon')
+                                                        } else if (['donotdisturb'].contains(areaState)) { 
+                                                                    child.generateEvent('donotdisturbon')
+                                                                  }
 }
 
 def checkableLightsSwitchedOffEventHandler(evt) {
@@ -698,14 +682,18 @@ def checkableLightsSwitchedOffEventHandler(evt) {
     if (['vacanton','vacantdimmed'].contains(areaState) && !checkableLightsState.value.contains("on")) { 
           child.generateEvent('vacant')
           } else if (['occupiedon'].contains(areaState) && !checkableLightsState.value.contains("on")) { 
-                        child.generateEvent('occupied')
-                        } else if (['engagedon'].contains(areaState) && !checkableLightsState.value.contains("on")) { 
-                                      child.generateEvent('engaged')
-                                      } else if (['checkingon'].contains(areaState) && !checkableLightsState.value.contains("on")) { 
-                                                    child.generateEvent('checking')
-                                                    } else if (['donotdisturbon'].contains(areaState) && !checkableLightsState.value.contains("on")) { 
-                                                                                child.generateEvent('donotdisturb')
-                                                                                }
+                      child.generateEvent('occupied')
+                    } else if (['occupiedonmotion'].contains(areaState) && !checkableLightsState.value.contains("on")) { 
+                                child.generateEvent('occupiedmotion')
+                              } else if (['engagedon'].contains(areaState) && !checkableLightsState.value.contains("on")) { 
+                                          child.generateEvent('engaged')
+                                        } else if (['engagedonmotion'].contains(areaState) && !checkableLightsState.value.contains("on")) { 
+                                                    child.generateEvent('engagedmotion')
+                                                  } else if (['checkingon'].contains(areaState) && !checkableLightsState.value.contains("on")) { 
+                                                              child.generateEvent('checking')
+                                                            } else if (['donotdisturbon'].contains(areaState) && !checkableLightsState.value.contains("on")) { 
+                                                                        child.generateEvent('donotdisturb')
+                                                                      }
 } 
 
 def checking() {
@@ -721,10 +709,10 @@ def areaState = child.getAreaState()
      } else {
              child.generateEvent('checking')
      	    }
-    if (occupancyStatusChangesSubscribed) { 
-        ifDebug("Re-Evaluation Caused By $app.label Changing To Checking")
-        mainAction() 
-        }
+    //if (occupancyStatusChangesSubscribed) { 
+      //  ifDebug("Re-Evaluation Caused By $app.label Changing To Checking")
+        //mainAction() 
+        //}
 } // end of checking
 
 private childAreaState() { 
@@ -804,10 +792,10 @@ def areaState = child.getAreaState()
     } else {
             child.generateEvent('donotdisturb')
             }
-    if (occupancyStatusChangesSubscribed) {
-        ifDebug("Re-Evaluation Caused By $app.label Changing To Do Not Disturb")
-        mainAction() 
-        }
+   // if (occupancyStatusChangesSubscribed) {
+     //   ifDebug("Re-Evaluation Caused By $app.label Changing To Do Not Disturb")
+       // mainAction() 
+        //}
 } // end of do not disturb
 
 def doaoff() {
@@ -833,10 +821,10 @@ def engaged() {
     } else {
             child.generateEvent('engaged')
             }
-    if (occupancyStatusChangesSubscribed) { 
-        ifDebug("Re-Evaluation Caused By $app.label Changing To Engaged")
-        mainAction() 
-        }
+  //  if (occupancyStatusChangesSubscribed) { 
+    //    ifDebug("Re-Evaluation Caused By $app.label Changing To Engaged")
+      //  mainAction() 
+        //}
 } // end of engaged
 
 def	entryMotionActiveEventHandler(evt) {
@@ -851,10 +839,10 @@ def	entryMotionActiveEventHandler(evt) {
        }
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
-    if (['occupiedon'].contains(areaState)) {
+    if (['occupiedon','vacanton','vacantdimmed'].contains(areaState)) {
           child.generateEvent('occupiedonmotion')
           }  
-    if (['occupied'].contains(areaState)) {
+    if (['occupied','vacant'].contains(areaState)) {
           child.generateEvent('occupiedmotion')
           }       
     if (doors) {    
@@ -882,20 +870,23 @@ def	entryMotionInactiveEventHandler(evt) {
     def areaState = child.getAreaState()
     if (['occupiedonmotion'].contains(areaState)) {
           child.generateEvent('occupiedon')
+          mainAction() 
           }   
     if (['occupiedmotion'].contains(areaState)) {
           child.generateEvent('occupied')
+          mainAction() 
           }      
     if (doors) {
     	unschedule(engaged)
         if (['engagedonmotion'].contains(areaState)) {
-              child.generateEvent('engagedon')
+             child.generateEvent('engagedon')
+             mainAction() 
            } 
         if (['engagedmotion'].contains(areaState)) {
-              child.generateEvent('engaged')
+             child.generateEvent('engaged')
+             mainAction() 
            }    
     }
-    mainAction() 
 }
 
 def exitMotionActiveEventHandler(evt) { 
@@ -1223,18 +1214,17 @@ def occupied() {
     if (checkableLights) {
         def lightsState = checkableLights.currentState("switch")
         if (lightsState.value.contains("on")) {
-            //child.generateEvent('occupiedon')
             child.generateEvent('occupiedonmotion')
            } else {                
-                   child.generateEvent('occupied')
+                   child.generateEvent('occupiedmotion')
                   }
     } else {
-            child.generateEvent('occupied')
+            child.generateEvent('occupiedmotion')
            }
-    if (occupancyStatusChangesSubscribed) { 
-        ifDebug("Re-Evaluation Caused By $app.label Changing To Occupied")
-        mainAction() 
-     }
+  // if (occupancyStatusChangesSubscribed) { 
+    //    ifDebug("Re-Evaluation Caused By $app.label Changing To Occupied")
+      //  mainAction() 
+    // }
 }
 
 def otherAreaOccupancyStatusEventHandler(evt) {
