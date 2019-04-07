@@ -2,7 +2,7 @@
  Copyright (C) 2017 Baz2473
  Name: Area Occupancy Child App
 */   
-public static String areaOccupancyChildAppVersion() { return "v3.3.2.3" }
+public static String areaOccupancyChildAppVersion() { return "v3.3.2.4" }
 
 private isDebug() {
         if (debugging) { 
@@ -856,7 +856,9 @@ def	entryMotionActiveEventHandler(evt) {
     def entryMotionState = entryMotionSensors.currentState("motion")
     if (!entryMotionState.value.contains("active")) {
         mainAction()
-       }
+       } else {
+               ifDebug("not sending this second motion signal because one has already been sent!")
+              }
 }
 
 def	entryMotionInactiveEventHandler(evt) {
@@ -881,7 +883,9 @@ def	entryMotionInactiveEventHandler(evt) {
     def entryMotionState = entryMotionSensors.currentState("motion")
     if (!entryMotionState.value.contains("active")) {
         mainAction()
-       }
+       } else { 
+              ifDebug("Waiting for your second sensor to become INACTIVE")
+             }
 }
 
 def exitMotionActiveEventHandler(evt) { 
