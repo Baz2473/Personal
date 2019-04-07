@@ -2,7 +2,7 @@
  Copyright (C) 2017 Baz2473
  Name: Area Occupancy Child App
 */   
-public static String areaOccupancyChildAppVersion() { return "v3.3.2.2" }
+public static String areaOccupancyChildAppVersion() { return "v3.3.2.3" }
 
 private isDebug() {
         if (debugging) { 
@@ -851,41 +851,37 @@ def	entryMotionActiveEventHandler(evt) {
          		    }    
                 if (!doorsState.value.contains("open") && ['vacant','vacantdimmed','vacanton','occupied','occupiedmotion','occupiedon','occupiedonmotion','checking','checkingon','donotdisturb','donotdisturbon'].contains(areaState)) {
                      engaged()
-                     mainAction()
-                } else {
-                        mainAction()
                 }
-    } else {
-            mainAction() 
     }
+    def entryMotionState = entryMotionSensors.currentState("motion")
+    if (!entryMotionState.value.contains("active")) {
+        mainAction()
+       }
 }
 
 def	entryMotionInactiveEventHandler(evt) {
     ifDebug("Re-Evaluation Caused By An Entry Motion Sensor Being 'INACTIVE'")
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
-    if (['occupiedonmotion'].contains(areaState)) {
+    if (['occupiedonmotion'].contains(areaState) && !entryMotionState.value.contains("active")) {
           child.generateEvent('occupiedon')
-          mainAction() 
           }   
-    if (['occupiedmotion'].contains(areaState)) {
+    if (['occupiedmotion'].contains(areaState) && !entryMotionState.value.contains("active")) {
           child.generateEvent('occupied')
-          mainAction() 
           }      
     if (doors) {
     	unschedule(engaged)
         if (['engagedonmotion'].contains(areaState)) {
              child.generateEvent('engagedon')
-             mainAction() 
            } 
         if (['engagedmotion'].contains(areaState)) {
              child.generateEvent('engaged')
-             mainAction() 
            }    
-        if (['checking','checkingon'].contains(areaState)) {
-             mainAction() 
-           }       
     }
+    def entryMotionState = entryMotionSensors.currentState("motion")
+    if (!entryMotionState.value.contains("active")) {
+        mainAction()
+       }
 }
 
 def exitMotionActiveEventHandler(evt) { 
