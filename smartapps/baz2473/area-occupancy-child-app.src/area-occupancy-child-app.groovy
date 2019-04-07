@@ -2,7 +2,7 @@
  Copyright (C) 2017 Baz2473
  Name: Area Occupancy Child App
 */   
-public static String areaOccupancyChildAppVersion() { return "v3.3.2.0" }
+public static String areaOccupancyChildAppVersion() { return "v3.3.2.2" }
 
 private isDebug() {
         if (debugging) { 
@@ -571,7 +571,9 @@ def mainAction() {
                         if (switches2State.value.contains("on") && ['vacanton'].contains(areaState) && ['automationon'].contains(automationState)) { 
                             if (thisArea && !andThisArea) { 
                                 def thisAreaState = thisArea.currentState("occupancyStatus")
-                                if (thisAreaState.value.contains("vacant")) {
+                               // if (thisAreaState.value.contains("vacant")) {
+                                if (thisAreaState.value == ("vacant") || thisAreaState.value == "vacanton" || thisAreaState == "vacantdimmed") {
+
                                         if (onlyDuringDaytime9) {
                                             def s = getSunriseAndSunset()
                                             def sunrise = s.sunrise.time
@@ -745,9 +747,9 @@ def dimLights() {
         	   if (switches2.currentValue("switch") == 'on') {
                    def currentLevel = switches2.currentValue("level")
            	   	   def newLevel = (currentLevel > dimByLevel ? currentLevel - dimByLevel : 1)
+                   child.generateEvent('vacantdimmed')
                    switches2.setLevel(newLevel)
                    ifDebug("The $switches2 have been dimmed to $newLevel %")
-                   child.generateEvent('vacantdimmed')
                    mainAction()    		
                   }
          } else {
