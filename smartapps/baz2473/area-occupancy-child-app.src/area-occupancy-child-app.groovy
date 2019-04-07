@@ -2,7 +2,7 @@
  Copyright (C) 2017 Baz2473
  Name: Area Occupancy Child App
 */   
-public static String areaOccupancyChildAppVersion() { return "v3.3.2.4" }
+public static String areaOccupancyChildAppVersion() { return "v3.3.2.6" }
 
 private isDebug() {
         if (debugging) { 
@@ -823,7 +823,6 @@ def engaged() {
 } // end of engaged
 
 def	entryMotionActiveEventHandler(evt) {
-    ifDebug("Re-Evaluation Caused By An Entry Motion Sensor Being 'ACTIVE'")
     if (noExitSensor) {
         unschedule(vacant)
        }
@@ -855,6 +854,7 @@ def	entryMotionActiveEventHandler(evt) {
     }
     def entryMotionState = entryMotionSensors.currentState("motion")
     if (!entryMotionState.value.contains("active")) {
+        ifDebug("Re-Evaluation Caused By An Entry Motion Sensor Being 'ACTIVE'")
         mainAction()
        } else {
                ifDebug("not sending this second motion signal because one has already been sent!")
@@ -862,9 +862,9 @@ def	entryMotionActiveEventHandler(evt) {
 }
 
 def	entryMotionInactiveEventHandler(evt) {
-    ifDebug("Re-Evaluation Caused By An Entry Motion Sensor Being 'INACTIVE'")
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
+    def entryMotionState = entryMotionSensors.currentState("motion")
     if (['occupiedonmotion'].contains(areaState) && !entryMotionState.value.contains("active")) {
           child.generateEvent('occupiedon')
           }   
@@ -880,8 +880,8 @@ def	entryMotionInactiveEventHandler(evt) {
              child.generateEvent('engaged')
            }    
     }
-    def entryMotionState = entryMotionSensors.currentState("motion")
     if (!entryMotionState.value.contains("active")) {
+        ifDebug("Re-Evaluation Caused By An Entry Motion Sensor Being 'INACTIVE'")
         mainAction()
        } else { 
               ifDebug("Waiting for your second sensor to become INACTIVE")
@@ -1212,7 +1212,7 @@ def occupied() {
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
     if (actionOnVacant) {
-        if (['engaged','engagedon'].contains(areaState)) {
+        if (['engaged','engagedon','engagedmotion','engagedonmotion'].contains(areaState)) {
               vacantAction.off()
               }
     }
