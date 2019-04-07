@@ -2,7 +2,7 @@
  Copyright (C) 2017 Baz2473
  Name: Area Occupancy Child App
 */   
-public static String areaOccupancyChildAppVersion() { return "v3.3.1.8" }
+public static String areaOccupancyChildAppVersion() { return "v3.3.2.0" }
 
 private isDebug() {
         if (debugging) { 
@@ -568,7 +568,7 @@ def mainAction() {
                        }
                     if (switches2 && delayedOff && offRequired) { 
                         def switches2State = switches2.currentState("switch")  
-                        if (switches2State.value.contains("on") && ["vacanton"].contains(areaState) && ['automationon'].contains(automationState)) { 
+                        if (switches2State.value.contains("on") && ['vacanton'].contains(areaState) && ['automationon'].contains(automationState)) { 
                             if (thisArea && !andThisArea) { 
                                 def thisAreaState = thisArea.currentState("occupancyStatus")
                                 if (thisAreaState.value.contains("vacant")) {
@@ -632,7 +632,7 @@ def mainAction() {
                                                                                }
                                                 		    }
                                       			   }
-                       } else if (switches2State.value.contains("on") && ["vacantdimmed"].contains(areaState) && ['automationon'].contains(automationState)) {
+                       } else if (switches2State.value.contains("on") && ['vacantdimmed'].contains(areaState) && ['automationon'].contains(automationState)) {
                         if (canSchedule()) {
                                   ifDebug("The lights will turn off in $switchesOffCountdownInSeconds seconds")
         	                      runIn(switchesOffCountdownInSeconds, switches2Off, [overwrite: false])
@@ -714,10 +714,6 @@ def areaState = child.getAreaState()
      } else {
              child.generateEvent('checking')
      	    }
-    //if (occupancyStatusChangesSubscribed) { 
-      //  ifDebug("Re-Evaluation Caused By $app.label Changing To Checking")
-        //mainAction() 
-        //}
 } // end of checking
 
 private childAreaState() { 
@@ -853,6 +849,7 @@ def	entryMotionActiveEventHandler(evt) {
          		    }    
                 if (!doorsState.value.contains("open") && ['vacant','vacantdimmed','vacanton','occupied','occupiedmotion','occupiedon','occupiedonmotion','checking','checkingon','donotdisturb','donotdisturbon'].contains(areaState)) {
                      engaged()
+                     mainAction()
                 } else {
                         mainAction()
                 }
