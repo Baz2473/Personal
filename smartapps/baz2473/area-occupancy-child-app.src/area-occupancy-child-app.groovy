@@ -4,7 +4,7 @@
 */   
 
 public static String areaOccupancyChildAppVersion() { 
-					 return "v4.0.2.4" 
+					 return "v4.0.3.0" 
 }
 
 private isDebug() {
@@ -497,8 +497,13 @@ def mainAction() {
         if (doors) {
                     def doorsState = doors.currentState("contact") 
                        if (!doorsState.value.contains("open") && ['occupiedmotion','occupiedonmotion'].contains(areaState)) { 
-                           checking()     
-                           runIn(actualEntrySensorsTimeout, engaged, [overwrite: false])
+                           if (!atomicState.aeste) {
+                                checking()  
+                                runIn(actualEntrySensorsTimeout, engaged)
+                                atomicState.aeste = true
+                              } else {
+                              		  ifDebug("atomiState.aeste was already TRUE!!! Taking no action")
+                              		 }
                           } else if (doorsState.value.contains("open") && ['checking','checkingon','engaged','engagedmotion','engagedon','engagedonmotion','donotdisturb','donotdisturbon'].contains(areaState)) { 
                                      occupied()   
                                     } else if (['vacant','vacantdimmed','vacanton'].contains(areaState)) { 
@@ -773,7 +778,6 @@ def checkableLightsSwitchedOffEventHandler(evt) {
 
 def checking() {
 def child = getChildDevice(getArea())
-def areaState = child.getAreaState()
     if (checkableLights) {
         def lightsState = checkableLights.currentState("switch")
         if (lightsState.value.contains("on")) {
@@ -869,7 +873,6 @@ def dimmableSwitches2OffEventHandler(evt) {
 
 def donotdisturb() {      
 def child = getChildDevice(getArea())
-def areaState = child.getAreaState()
     if (checkableLights) {
         def lightsState = checkableLights.currentState("switch")
         if (lightsState.value.contains("on")) {
@@ -891,7 +894,6 @@ def doaoff() {
 
 def engaged() {
     def child = getChildDevice(getArea())
-    def areaState = child.getAreaState()
     if (actionOnEngaged) {
         engagedAction.on()
         }
@@ -979,6 +981,7 @@ def	entryMotionInactiveEventHandler(evt) {
           child.generateEvent('occupied')
           }      
     if (doors) {
+        atomicState.aeste = false
     	unschedule(engaged)
         if (['engagedonmotion'].contains(areaState)) {
              child.generateEvent('engagedon')
@@ -1121,7 +1124,6 @@ private getArea() {
 
 def leftHome() {
     def child = getChildDevice(getArea())
-    def areaState = child.getAreaState()
     def automationState = child.getAutomationState()
     if (['automationon'].contains(automationState)) {
           ifDebug("$app.label was set to 'VACANT' because the mode changed to away or Heavy Use Was Disabled!")
@@ -1133,7 +1135,6 @@ def leftHome() {
 
 def	modeEventHandler(evt) {
     def child = getChildDevice(getArea())
-    def areaState = child.getAreaState()
     def automationState = child.getAutomationState()
     if (resetAutomation && resetAutomationMode && resetAutomationMode.contains(evt.value) && ['automationoff'].contains(automationState)) {
        ifDebug("$app.label's Automation Has Been Enabled Because Your Reset Mode Was ACTIVATED!")
@@ -1148,7 +1149,6 @@ def	modeEventHandler(evt) {
 def monitoredDoorOpenedAction() {
     def lightStateForDoorAction = doorOpeningAction.currentState("switch")
     doorOpeningAction.each {
-    //it.on()
     it.setLevel(setLevelAt)
     ifDebug("1031 Setting level of $it to $setLevelAt %")
     }
@@ -1159,7 +1159,6 @@ def monitoredDoorOpenedAction() {
 def monitoredDoorOpenedAction2() {
     def lightStateForDoorAction2 = doorOpeningAction2.currentState("switch")
     doorOpeningAction2.each {
-    //it.on()
     it.setLevel(setLevelAt2)
     ifDebug("1042 Setting level of $it to $setLevelAt2 %")
     }
@@ -1168,6 +1167,7 @@ def monitoredDoorOpenedAction2() {
 } // end of monitoredDoorOpenedAction2
 
 def monitoredDoorOpenedEventHandler(evt) { 
+    atomicState.aeste = false
     unschedule(engaged)
     unschedule(donotdisturb)
     if (anotherVacancyCheck) {
@@ -1350,7 +1350,6 @@ def presenceAwayEventHandler(evt) {
 } 
 
 def shmStatusEventHandler(evt) {
-    def child = getChildDevice(getArea())
     def shmStatus = location.currentState("alarmSystemStatus")?.value 
     if (shmStatus == "away") {
         ifDebug("The Alarm Is Now ARMED AWAY!")
@@ -1455,7 +1454,6 @@ def turnOnAtThisTime() {
 def vacant() { 
     ifDebug("Performing vacant()")
     def child = getChildDevice(getArea())
-    def areaState = child.getAreaState()
     if (anotherVacancyCheck) {
         unschedule(forceVacantIf)
        }
@@ -1490,13 +1488,9 @@ def turnalloff() {
         }
         child.generateEvent('vacant')
         atomicState.emt = false
-        ifDebug("atomicState.emt is: $atomicState.emt")
         atomicState.ddtDimLights = false
-        ifDebug("atomicState.ddtDimLights is: $atomicState.ddtDimLights")
         atomicState.socis = false
-        ifDebug("atomicState.socis is: $atomicState.socis")
         atomicState.ffi = false 
-        ifDebug("atomicState.ffi is: $atomicState.ffi")
         unschedule()
         ifDebug("All Scheduled Jobs Have Been Cancelled!")                                                     
     }
@@ -1513,9 +1507,7 @@ def turnalloff() {
              }
              child.generateEvent('vacant')
              atomicState.ddtDimLights = false
-             ifDebug("atomicState.ddtDimLights is: $atomicState.ddtDimLights")
              atomicState.socis = false
-             ifDebug("atomicState.socis is: $atomicState.socis")
              unschedule()
              ifDebug("All Scheduled Jobs Have Been Cancelled!")
         } else {
