@@ -4,7 +4,7 @@
 */   
 
 public static String areaOccupancyChildAppVersion() { 
-					 return "v4.1.0.1" 
+					 return "v4.1.0.2" 
 }
 
 definition	(
@@ -817,15 +817,18 @@ def dimLightsNow() {
     log.trace "Dimming The Lights NOW!"  
     setVacantDimmed()           
     switches2.each {
-    if (it.currentValue("switch") == 'on') {
-        def currentLevel = it.currentValue("level")
-        def newLevel = (currentLevel > dimByLevel ? currentLevel - dimByLevel : 1)
+    //if (it.currentValue("switch") == 'on') {
+    def currentLevel = it.currentValue("level")
+    if (currentLevel > dimByLevel) {
+        def newLevel = (currentLevel - dimByLevel)
+        //def newLevel = (currentLevel > dimByLevel ? currentLevel - dimByLevel : 1)
         it.setLevel(newLevel)
         log.trace "The $it have been dimmed to $newLevel %"
-        } else {
-                log.trace "The $it was not 'ON' so i couldnt dim it!"
-               }
-    }
+       // } else {
+         //       log.trace "The $it was not 'ON' so i couldnt dim it!"
+           //    }
+   	    }
+	}
 }
 
 def setVacantDimmed() {
