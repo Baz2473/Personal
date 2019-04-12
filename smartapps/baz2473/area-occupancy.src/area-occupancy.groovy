@@ -2,7 +2,10 @@
   Copyright (C) 2017 Baz2473
   Name: Area Occupancy
 */
-public static String areaOccupancyVersion() { return "v1.0.0.0" }
+
+public static String areaOccupancyVersion() { 
+                     return "v1.0.0.0" 
+}
 
 definition (
     name: "Area Occupancy",
@@ -24,15 +27,19 @@ preferences	{
         remove("Remove Area Occupancy?", "Are You Sure You Want To Remove Area Occupancy Completley!", "Removing Area Occupancy Will Also Remove All Area's Created By This SmartApp")
 	}
 }
+
 def installed()	{
     initialize()	
     }
+    
 def updated() {
 	initialize()
     }
+    
 def initialize() {
 	log.info "You Have Created ${childApps.size()} Areas To Monitor."
 	childApps.each {
-    child ->
-    log.info "There Is An Area Called: ${child.label}"
-}}
+                    child ->
+   				    log.info "There Is An Area Called: ${child.label}"
+				   }
+}

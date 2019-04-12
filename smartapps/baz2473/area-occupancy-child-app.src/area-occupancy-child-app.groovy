@@ -2,18 +2,21 @@
  Copyright (C) 2017 Baz2473
  Name: Area Occupancy Child App
 */   
-public static String areaOccupancyChildAppVersion() { return "v4.0.0.0" }
+
+public static String areaOccupancyChildAppVersion() { 
+					 return "v4.0.2.4" 
+}
 
 private isDebug() {
         if (debugging) { 
             return true 
-        } else {
-                return false
-                }
+           } else {
+                   return false
+                  }
 }
 
-private ifDebug(msg = null)     { 
-         if (msg && isDebug()) log.debug msg 
+private ifDebug(msg = null) { 
+        if (msg && isDebug()) log.debug msg 
 }
 
 definition	(
@@ -36,28 +39,27 @@ preferences {
 def versions() {
     dynamicPage(name: "versions", title: "\t\t\t\t      Reference") {
     section("") { 
-          paragraph image : "https://raw.githubusercontent.com/Baz2473/Personal/master/Ao3.png",
-          title: "\t  Current App Versions:\n\nArea Occupancy:\t\t\t\t\t${areaOccupancyVersion()}\n\nArea Occupancy Child App:\t\t${areaOccupancyChildAppVersion()}\n\nArea Occupancy DTH:\t\t\t${areaOccupancyDTHVersion()}",
-		  end
+         		 paragraph image : "https://raw.githubusercontent.com/Baz2473/Personal/master/Ao3.png",
+          		 title: "\t  Current App Versions:\n\nArea Occupancy:\t\t\t\t\t${areaOccupancyVersion()}\n\nArea Occupancy Child App:\t\t${areaOccupancyChildAppVersion()}\n\nArea Occupancy DTH:\t\t\t${areaOccupancyDTHVersion()}",
+		  		 end
+               	} // end of versions section
+    }
+}  // end of versions page
 
-   } // end of versions section
-                                                                   }
-}  // end of versions page "
 def areaName() {
 	dynamicPage(name: "areaName", title: "A New Device Will Be Created With This Name!", install: true, uninstall: childCreated()) {
 	if (!childCreated()) {
 	     section {
 		 label title: "What Name?\n(Required):", required: true,  submitOnChange: true
-}}
-    else {
-          section {
-	      paragraph "Area Name:\n${app.label}"
-}}
-
+		}
+	} else {
+            section {
+	        		 paragraph "Area Name:\n${app.label}"
+		   			}
+    	   }
      section("") {
-     href(name: "href", title: "View App Versions", required: false, page: "versions")
-     }
-
+     			  href(name: "href", title: "View App Versions", required: false, page: "versions")
+     			 }
      section("debugLogging") {
      input "debugging", "bool", title: "Enable Logging?", defaultValue: false, submitOnChange: true
      }
@@ -66,179 +68,178 @@ def areaName() {
      }
      section("To Proceed, Please Select Motion As Method For Detecting Occupancy\nFor $app.label!") {
      input "motionActivated", "bool", title: "Motion?", defaultValue: false, submitOnChange: true
-     
-}
-
+	 }
 if (motionActivated) {
     section("Select The Motion Sensors In '$app.label'") {
              input "entryMotionSensors", "capability.motionSensor", title: "Entry Sensors?", required: true, multiple: true, submitOnChange: true            	     
 }
 if (entryMotionSensors && !exitMotionSensors) {
     section("Manually Force Vacant State\nWith A Timer For $app.label's Area?") {
-             input "noExitSensor", "bool", title: "No Exit Sensor For\n$app.label?", defaultValue: false, submitOnChange: true
+    input "noExitSensor", "bool", title: "No Exit Sensor For\n$app.label?", defaultValue: false, submitOnChange: true
 }}
 if (entryMotionSensors || entryMotionTimeout) {
     section("Monitored Door In An Adjacent Area To $app.label") {
-             input "monitoredDoor2", "bool", title: "Adjacent Monitored Doors?", defaultValue: false, submitOnChange: true
+    input "monitoredDoor2", "bool", title: "Adjacent Monitored Doors?", defaultValue: false, submitOnChange: true
 }}
 if (monitoredDoor2) {
     section("Select The Doors\nThat Are Monitored 'Off Of' '$app.label'?") {
-             input "adjacentDoors", "capability.contactSensor", title: "Which Adjacent Doors?", multiple: true, required: true, submitOnChange: true
+    input "adjacentDoors", "capability.contactSensor", title: "Which Adjacent Doors?", multiple: true, required: true, submitOnChange: true
 }}
 if (entryMotionSensors && monitoredDoor2) {  
-          section("Motion Sensors When The Door Is 'Open'\n'Outside' Of $app.label") {
-                   input "exitMotionSensorsWhenDoorIsOpen", "capability.motionSensor", title: "$adjacentDoors OPEN Exit Sensors?", required: true, multiple: true, submitOnChange: false     
+    section("Motion Sensors When The Door Is 'Open'\n'Outside' Of $app.label") {
+    input "exitMotionSensorsWhenDoorIsOpen", "capability.motionSensor", title: "$adjacentDoors OPEN Exit Sensors?", required: true, multiple: true, submitOnChange: false     
 }}
 if (entryMotionSensors && monitoredDoor2) {  
-          section("Motion Sensors When The Door Is 'Closed'\n'Outside' Of $app.label") {
-                   input "exitMotionSensorsWhenDoorIsClosed", "capability.motionSensor", title: "$adjacentDoors CLOSED Exit Sensors?", required: true, multiple: true, submitOnChange: false   
+    section("Motion Sensors When The Door Is 'Closed'\n'Outside' Of $app.label") {
+    input "exitMotionSensorsWhenDoorIsClosed", "capability.motionSensor", title: "$adjacentDoors CLOSED Exit Sensors?", required: true, multiple: true, submitOnChange: false   
 }}
 if (entryMotionSensors && !doors2 && !monitoredDoor2 && !noExitSensor) {  
-          section("Select The Motion Sensors 'Outside' $app.label") {
-                   input "exitMotionSensors", "capability.motionSensor", title: "Exit Sensors?", required: true, multiple: true, submitOnChange: true   
+    section("Select The Motion Sensors 'Outside' $app.label") {
+    input "exitMotionSensors", "capability.motionSensor", title: "Exit Sensors?", required: true, multiple: true, submitOnChange: true   
 }}
 if (entryMotionSensors) {
     section("Use The Status Change Of Another Area To Force A Check On $app.label's State?") {
-             input "otherAreaCheck", "bool", title: "Other Area Occupancy Changes?", defaultValue: false, submitOnChange: true
-             if (otherAreaCheck) {
-                 input "otherArea", "capability.estimatedTimeOfArrival", title: "Subscribe To This Area's Occupancy Changes?", required: true, multiple: true, submitOnChange: true
+    input "otherAreaCheck", "bool", title: "Other Area Occupancy Changes?", defaultValue: false, submitOnChange: true
+    if (otherAreaCheck) {
+        input "otherArea", "capability.estimatedTimeOfArrival", title: "Subscribe To This Area's Occupancy Changes?", required: true, multiple: true, submitOnChange: true
 }}}
 if (entryMotionSensors) {
     section("Perform Another Vacancy Check If $app.label Is 'Occupied' And Motionless?") {
-             input "anotherVacancyCheck", "bool", title: "Another Vacancy Check?", defaultValue: false, submitOnChange: true
-             if (anotherVacancyCheck) {
-                 input "anotherCheckIn", "number", title: "How Many Seconds 'After' Inactivity\n(Only Checks When $app.label is 'Occupied')", required: true, submitOnChange: true, range: "actualEntrySensorsTimeout..99999"
+    input "anotherVacancyCheck", "bool", title: "Another Vacancy Check?", defaultValue: false, submitOnChange: true
+    if (anotherVacancyCheck) {
+        input "anotherCheckIn", "number", title: "How Many Seconds 'After' Inactivity\n(Only Checks When $app.label is 'Occupied')", required: true, submitOnChange: true, range: "actualEntrySensorsTimeout..99999"
 }}}
 if (noExitSensor) {
     section("Use A Countdown Timer To Change This Rooms State?") {
-             input "countdownTimer", "bool", title: "Use A Countdown Timer?", defaultValue: false, submitOnChange: true
-             if (countdownTimer) { 
-                 input "entryMotionTimeout", "number", title: "How Many Seconds After Inactivity?", required: false, multiple: false, defaultValue: null, range: "1..99999", submitOnChange: true
+    input "countdownTimer", "bool", title: "Use A Countdown Timer?", defaultValue: false, submitOnChange: true
+    if (countdownTimer) { 
+        input "entryMotionTimeout", "number", title: "How Many Seconds After Inactivity?", required: false, multiple: false, defaultValue: null, range: "1..99999", submitOnChange: true
 }}}
 if (exitMotionSensors || entryMotionTimeout || monitoredDoor2) {
     section("Select If $app.label Has A Door To Monitor?") {
-             input "monitoredDoor", "bool", title: "Monitor Doors?", defaultValue: false, submitOnChange: true
-             if (monitoredDoor) {
-                 input "doors", "capability.contactSensor", title: "Doors?", multiple: true, required: true, submitOnChange: true
-                 if (doors) { 
-             	     input "actualEntrySensorsTimeout", "number", title: "$app.label's Timeout?",required: true, defaultValue: null, submitOnChange: true
-           		     input "actionOnDoorOpening", "bool", title: "Turn ON Something When\n$doors Opens?", defaultValue: false, submitOnChange: true
-                     if (actionOnDoorOpening) {
-                         input "onlyIfAreaVacant", "bool", title: "But Only IF $app.label Is Vacant", defaultValue: true, submitOnChnage: true
-                		 input "doorOpeningAction", "capability.switchLevel", title: "Turn On?", multiple: true, required: true, submitOnChange: true
-                		 input "setLevelAt", "number", title: "Set Level To? %", required: true, multiple: false, range: "1..100", submitOnChange: true, defaultValue: null 
-                 		 if (setLevelAt) {  
-                     	 input "onlyDuringCertainTimes", "bool", title: "Only During Certain Times?", defaultValus: false, submitOnChange: true
-                         if (onlyDuringCertainTimes) {
-                             if (!onlyDuringNighttime && !fromTime) {
-                                  input "onlyDuringDaytime", "bool", title: "Only During The Daytime", defaultValue: false, submitOnChange: true
-                                  }
-                             if (!onlyDuringDaytime && !fromTime) {
-                                  input "onlyDuringNighttime", "bool", title: "Only During The Nighttime", defaultValue: false, submitOnChange: true
-                                  }
-                             if (!onlyDuringDaytime && !onlyDuringNighttime) {
-                                  input "fromTime", "time", title: "From?", required: true, submitOnChange: true
-                                  input "toTime", "time", title: "Until?", required: true
-                                  }
-                         input "anotherAction", "bool", title: "Another Time Schedule?", defaultValue: false, submitOnChange: true
-                         if (anotherAction) {
-                             input "onlyIfASensorIsActive", "bool", title: "But Only If A Sensor Is Active?", defaultValue: false, submitOnChange: true
-                             if (onlyIfASensorIsActive) {
-                                 input "onlyIfThisSensorIsActive", "capability.motionSensor", title: "Only If This Sensor Is Active!", multiple: true, required: true
-                                 }
-                             input "onlyIfAreaVacant2", "bool", title: "But Only IF $app.label Is Vacant", defaultValue: false, submitOnChnage: true
-                             input "doorOpeningAction2", "capability.switchLevel", title: "Turn On?", multiple: true, required: true, submitOnChange: true
-                             input "setLevelAt2", "number", title: "Set Level To? %", required: true, multiple: false, range: "1..100", submitOnChange: true 
-                             if (!onlyDuringNighttime2 && !fromTime2) {
-                                  input "onlyDuringDaytime2", "bool", title: "Only During The Daytime", defaultValue: false, submitOnChange: true
-                                  }
-                             if (!onlyDuringDaytime2 && !fromTime2) {
-                                  input "onlyDuringNighttime2", "bool", title: "Only During The Nighttime", defaultValue: false, submitOnChange: true
-                                  }
-                             if (!onlyDuringDaytime2 && !onlyDuringNighttime2) {
-                                  input "fromTime2", "time", title: "From?", required: true, submitOnChange: true
-                                  input "toTime2", "time", title: "Until?", required: true
-                                  }
-                         input "turnOffAfter", "bool", title: "Turn Off After Set Time?", defaultValue: false, submitOnChange: true
-                         if (turnOffAfter) {
-                             input "offAfter", "number", title: "Turn Off After?", required: true, submitOnChange: true, defaultValue: null 
-                         }
-                         }}
-                   }
+    input "monitoredDoor", "bool", title: "Monitor Doors?", defaultValue: false, submitOnChange: true
+    if (monitoredDoor) {
+        input "doors", "capability.contactSensor", title: "Doors?", multiple: true, required: true, submitOnChange: true
+        if (doors) { 
+             	    input "actualEntrySensorsTimeout", "number", title: "$app.label's Timeout?",required: true, defaultValue: null, submitOnChange: true
+           		    input "actionOnDoorOpening", "bool", title: "Turn ON Something When\n$doors Opens?", defaultValue: false, submitOnChange: true
+                    if (actionOnDoorOpening) {
+                        input "onlyIfAreaVacant", "bool", title: "But Only IF $app.label Is Vacant", defaultValue: true, submitOnChnage: true
+               		    input "doorOpeningAction", "capability.switchLevel", title: "Turn On?", multiple: true, required: true, submitOnChange: true
+               		    input "setLevelAt", "number", title: "Set Level To? %", required: true, multiple: false, range: "1..100", submitOnChange: true, defaultValue: null 
+                 		if (setLevelAt) {  
+                            input "onlyDuringCertainTimes", "bool", title: "Only During Certain Times?", defaultValus: false, submitOnChange: true
+                            if (onlyDuringCertainTimes) {
+                                if (!onlyDuringNighttime && !fromTime) {
+                                     input "onlyDuringDaytime", "bool", title: "Only During The Daytime", defaultValue: false, submitOnChange: true
+                                    }
+                                if (!onlyDuringDaytime && !fromTime) {
+                                     input "onlyDuringNighttime", "bool", title: "Only During The Nighttime", defaultValue: false, submitOnChange: true
+                                   }
+                                if (!onlyDuringDaytime && !onlyDuringNighttime) {
+                                     input "fromTime", "time", title: "From?", required: true, submitOnChange: true
+                                     input "toTime", "time", title: "Until?", required: true
+                                    }
+                        input "anotherAction", "bool", title: "Another Time Schedule?", defaultValue: false, submitOnChange: true
+                        if (anotherAction) {
+                            input "onlyIfASensorIsActive", "bool", title: "But Only If A Sensor Is Active?", defaultValue: false, submitOnChange: true
+                            if (onlyIfASensorIsActive) {
+                                input "onlyIfThisSensorIsActive", "capability.motionSensor", title: "Only If This Sensor Is Active!", multiple: true, required: true
+                               }
+                            input "onlyIfAreaVacant2", "bool", title: "But Only IF $app.label Is Vacant", defaultValue: false, submitOnChnage: true
+                            input "doorOpeningAction2", "capability.switchLevel", title: "Turn On?", multiple: true, required: true, submitOnChange: true
+                            input "setLevelAt2", "number", title: "Set Level To? %", required: true, multiple: false, range: "1..100", submitOnChange: true 
+                            if (!onlyDuringNighttime2 && !fromTime2) {
+                                 input "onlyDuringDaytime2", "bool", title: "Only During The Daytime", defaultValue: false, submitOnChange: true
+                                }
+                            if (!onlyDuringDaytime2 && !fromTime2) {
+                                 input "onlyDuringNighttime2", "bool", title: "Only During The Nighttime", defaultValue: false, submitOnChange: true
+                                }
+                            if (!onlyDuringDaytime2 && !onlyDuringNighttime2) {
+                                 input "fromTime2", "time", title: "From?", required: true, submitOnChange: true
+                                 input "toTime2", "time", title: "Until?", required: true
+                                }
+                            input "turnOffAfter", "bool", title: "Turn Off After Set Time?", defaultValue: false, submitOnChange: true
+                            if (turnOffAfter) {
+                                input "offAfter", "number", title: "Turn Off After?", required: true, submitOnChange: true, defaultValue: null 
+                               }
+                            }
+                        }
+                    }
              input "actionOnDoorClosing", "bool", title: "Turn OFF When\n$doors Closes?", defaultValue: false, submitOnChange: true
 
 }}}}} // end of Monitored Door Control Section
 
 if ((exitMotionSensors || entryMotionTimeout || monitoredDoor2) && !switches) {
     section("Do You Want 'Any' Lights\nTo Automatically Turn 'ON'?") {
-             input "switchOnControl", "bool", title: "OCCUPIED 'ON' Control?", defaultValue: false, submitOnChange: true
+    input "switchOnControl", "bool", title: "OCCUPIED 'ON' Control?", defaultValue: false, submitOnChange: true
 }}
 if (switchOnControl) {
     section("Turn ON Which Dimmable Lights?\nWhen '$app.label' Changes To 'OCCUPIED'") {
-             input "dimmableSwitches1", "capability.switchLevel", title: "Lights?", required: true, multiple: true, submitOnChange: true
-             if (dimmableSwitches1) {          
-                 input "setLevelTo", "number", title: "Set Level To %", required: true, multiple: false, range: "1..100", submitOnChange: true, defaultValue: null             
+    input "dimmableSwitches1", "capability.switchLevel", title: "Lights?", required: true, multiple: true, submitOnChange: true
+    if (dimmableSwitches1) {          
+        input "setLevelTo", "number", title: "Set Level To %", required: true, multiple: false, range: "1..100", submitOnChange: true, defaultValue: null             
 }}}
  // end of Auto ON Control Section
 
 if (exitMotionSensors || entryMotionTimeout || monitoredDoor2) {
     section("Do You Want Any Lights\nTo Automatically Turn 'OFF'?") {
-             input "offRequired", "bool", title: "VACANT 'OFF' Control?", defaultValue: false, submitOnChange: true
+    input "offRequired", "bool", title: "VACANT 'OFF' Control?", defaultValue: false, submitOnChange: true
 }}
 if (offRequired) {
     section("Only If Different Chosen Areas Are 'Vacant'?") {
-             input "otherAreaVacancyCheck", "bool", title: "Other Area Vacancy Check", defaultValue: false, submitOnChange: true
-             if (otherAreaVacancyCheck) {
-                 input "thisArea", "capability.estimatedTimeOfArrival", title: "What Area?", defaultValue: null, multiple: false, required: false, submitOnChange: true
-                 if (offRequired && thisArea) {
-                      input "andThisArea", "capability.estimatedTimeOfArrival",  title: "What Other Area?", defaultValue: null, multiple: false, required: false, submitOnChange: true
+    input "otherAreaVacancyCheck", "bool", title: "Other Area Vacancy Check", defaultValue: false, submitOnChange: true
+    if (otherAreaVacancyCheck) {
+        input "thisArea", "capability.estimatedTimeOfArrival", title: "What Area?", defaultValue: null, multiple: false, required: false, submitOnChange: true
+        if (offRequired && thisArea) {
+            input "andThisArea", "capability.estimatedTimeOfArrival",  title: "What Other Area?", defaultValue: null, multiple: false, required: false, submitOnChange: true
 }}}}
 if (offRequired) {
     section("Do You Want 'Any' Lights\nTo Instantly Turn 'OFF'!!\nWhen $app.label Changes To Vacant?") {
-             input "instantOff", "bool", title: "Instant Off!!", defaultValue: false, submitOnChange: true
+    input "instantOff", "bool", title: "Instant Off!!", defaultValue: false, submitOnChange: true
 }}
 if (instantOff) {
     section("Turn OFF Which Lights\nIMMEDIATELY When $app.label Changes to 'VACANT'") {
-             input "switches3", "capability.switchLevel", title: "Lights?", required: true, multiple: false, submitOnChange: true
+    input "switches3", "capability.switchLevel", title: "Lights?", required: true, multiple: false, submitOnChange: true
 }}
 if (offRequired) {
     section("Do You Want Any Lights\nTo Turn 'OFF' With A Delay?\nAfter $app.label Changes To 'VACANT'") {
-             input "delayedOff", "bool", title: "Delayed Off?", defaultValue: false, submitOnChange: true
-             input "onlyDuringDaytime9", "bool", title: "Only During The Daytime", defaultValue: false, submitOnChange: true
+    input "delayedOff", "bool", title: "Delayed Off?", defaultValue: false, submitOnChange: true
+    input "onlyDuringDaytime9", "bool", title: "Only During The Daytime", defaultValue: false, submitOnChange: true
 }}
 if (delayedOff) {
     section("Turn OFF Which Lights\nWith A Delay,\nAfter $app.label Changes to 'VACANT'") {
-             input "switches2", "capability.switchLevel", title: "Lights?", required: true, multiple: true, submitOnChange: true
-             if (switches2) {
-                 input "dimByLevel", "number", title: "Reduce Level By %\nBefore Turning Off!", required: false, multiple: false, range: "1..99", submitOnChange: false, defaultValue: null               
+    input "switches2", "capability.switchLevel", title: "Lights?", required: true, multiple: true, submitOnChange: true
+    if (switches2) {
+        input "dimByLevel", "number", title: "Reduce Level By %\nBefore Turning Off!", required: false, multiple: false, range: "1..99", submitOnChange: false, defaultValue: null               
 }}}
 if ((exitMotionSensors || entryMotionTimeout || monitoredDoor2) && switches2 && delayedOff) {
-    section("How Many Seconds 'After' $app.label Is 'VACANT'\nUntil You Want The Lights To Dim Down?") {
-             input "dimDownTime", "number", title: "How Many Seconds?", required: true, defaultValue: null, submitOnChange: false
+     section("How Many Seconds 'After' $app.label Is 'VACANT'\nUntil You Want The Lights To Dim Down?") {
+     input "dimDownTime", "number", title: "How Many Seconds?", required: true, defaultValue: null, submitOnChange: false
 }}
 if ((exitMotionSensors || entryMotionTimeout || monitoredDoor2) && switches2 && delayedOff) {
-    section("How Many Seconds 'After'\n$app.label's Lights Have Dimmed Down,\nUntil You Want Them To Turn OFF?") {
-             input "switchesOffCountdownInSeconds", "number", title: "How Many Seconds?", required: true, defaultValue: null, submitOnChange: false
+     section("How Many Seconds 'After'\n$app.label's Lights Have Dimmed Down,\nUntil You Want Them To Turn OFF?") {
+     input "switchesOffCountdownInSeconds", "number", title: "How Many Seconds?", required: true, defaultValue: null, submitOnChange: false
              
 }} // end of Auto OFF Control Section
 
 if (exitMotionSensors || entryMotionTimeout || monitoredDoor2) {
     section("Do You Want To Automatically Switch\n$app.label's Automation 'ON' If It Was Disabled\nWhen Activation Of Certain Modes Occur?") {
-             input "resetAutomation", "bool", title: "Reset Automation On Mode Selection?", defaultValue: false, submitOnChange: true
-             if (resetAutomation) {
-                 input "resetAutomationMode", "mode", title: "Select Your Automation Reset Modes?", required: true, multiple: true, submitOnChange: true
+    input "resetAutomation", "bool", title: "Reset Automation On Mode Selection?", defaultValue: false, submitOnChange: true
+    if (resetAutomation) {
+        input "resetAutomationMode", "mode", title: "Select Your Automation Reset Modes?", required: true, multiple: true, submitOnChange: true
 }}}
 if (exitMotionSensors || entryMotionTimeout || monitoredDoor2) {
     section("Do You Require Switching $app.label To 'VACANT'\nOn Activation Of Your Away Modes") {
-             input "noAwayMode", "bool", title: "Auto Vacate When\nYour Away Modes Activate?", defaultValue: false, submitOnChange: true
-             if (noAwayMode) {
-                 input "awayModes", "mode", title: "Select Your Away Modes?", required: true, multiple: true, submitOnChange: true
+    input "noAwayMode", "bool", title: "Auto Vacate When\nYour Away Modes Activate?", defaultValue: false, submitOnChange: true
+    if (noAwayMode) {
+        input "awayModes", "mode", title: "Select Your Away Modes?", required: true, multiple: true, submitOnChange: true
 }}}
 if (exitMotionSensors || entryMotionTimeout || monitoredDoor2) {
     section("Do You Require Switching $app.label To 'VACANT'\nIf Any Persons Presence Changes To Away?") {
-             input "presence", "bool", title: "Auto Vacate On\nAny Presence Change?", defaultValue: false, submitOnChange: true
-             if (presence) {
-                 input "presenceSensors", "capability.presenceSensor", title: "Select Who? Leaving\nWill Activate 'VACANT'", required: true, multiple: true, submitOnChange: true
+    input "presence", "bool", title: "Auto Vacate On\nAny Presence Change?", defaultValue: false, submitOnChange: true
+    if (presence) {
+        input "presenceSensors", "capability.presenceSensor", title: "Select Who? Leaving\nWill Activate 'VACANT'", required: true, multiple: true, submitOnChange: true
        
 }}} // end of Resetting Section
 
@@ -248,24 +249,25 @@ section("Do Not Disturb Control") {
              if (donotdisturbControl) {
                  paragraph "How Many Minutes Must $app.label\nStay Motionless While 'Engaged'\nBefore Activating 'Do Not Disturb'?"
                  input "dndCountdown", "number", title: "How Many Minutes?", required: true, submitOnChange: true
-          }} else {
-                  paragraph "Do Not Disturb Is Only Accessable In Conjunction With Entry Motion Sensors & A Monitored Door!"               
+             }
+         } else {
+                 paragraph "Do Not Disturb Is Only Accessable In Conjunction With Entry Motion Sensors & A Monitored Door!"               
 
 }} // end of Do Not Disturb Control Section
 if (entryMotionSensors && doors) {
 	section("Action On Engaged") {
-         input "actionOnEngaged", "bool", title: "Turn ON Something When\n$app.label Changes To Engaged?", defaultValue: false, submitOnChange: true
-                     if (actionOnEngaged) {
-                		 input "engagedAction", "capability.switch", title: "Turn On?", multiple: true, required: true, submitOnChange: true
-                         }
-}
+    input "actionOnEngaged", "bool", title: "Turn ON Something When\n$app.label Changes To Engaged?", defaultValue: false, submitOnChange: true
+    if (actionOnEngaged) {
+    	input "engagedAction", "capability.switch", title: "Turn On?", multiple: true, required: true, submitOnChange: true
+       }
+    }
 }
 if (entryMotionSensors) {
-section("Action On Vacant") {
-         input "actionOnVacant", "bool", title: "Turn OFF Something When\n$app.label Changes To Vacant?", defaultValue: false, submitOnChange: true
-                     if (actionOnVacant) {
-                		 input "vacantAction", "capability.switch", title: "Turn Off?", multiple: true, required: true, submitOnChange: true
-                         }
+    section("Action On Vacant") {
+    input "actionOnVacant", "bool", title: "Turn OFF Something When\n$app.label Changes To Vacant?", defaultValue: false, submitOnChange: true
+    if (actionOnVacant) {
+    	input "vacantAction", "capability.switch", title: "Turn Off?", multiple: true, required: true, submitOnChange: true
+       }
 }
 section("Reset Entire Room On SHM Setting To Away?") {
          input "resetOnSHMChangingToAway", "bool", title: "Reset Entire Area When SHM Sets To AWAY?", required: false, submitOnChange: false
@@ -273,12 +275,12 @@ section("Reset Entire Room On SHM Setting To Away?") {
 section("Subscriptions!") {
          input "subscriptionsSelected", "bool", title: "Override Subscriptions?", required: false, submitOnChange: true
          if (subscriptionsSelected) {
-             if (exitMotionSensors) { input "exitMotionActiveSubscribed", "bool", title: "Exit Motion Active?", required: false, submitOnChange: true, defaultValue: true }
-             if (exitMotionSensors) { input "exitMotionInactiveSubscribed", "bool", title: "Exit Motion Inactive?", required: false, submitOnChange: true, defaultValue: true }
-             if (exitMotionSensorsWhenDoorIsOpen && monitoredDoor2) { input "exitMotionWhenDoorIsOpenActiveSubscribed", "bool", title: "Exit Motion When Door Is Open Active?", required: false, submitOnChange: true, defaultValue: true }
-             if (exitMotionSensorsWhenDoorIsOpen && monitoredDoor2) { input "exitMotionWhenDoorIsOpenInactiveSubscribed", "bool", title: "Exit Motion When Door Is Open Inactive?", required: false, submitOnChange: true, defaultValue: true }
-             if (exitMotionSensorsWhenDoorIsClosed && monitoredDoor2) { input "exitMotionWhenDoorIsClosedActiveSubscribed", "bool", title: "Exit Motion When Door Is Closed Active?", required: false, submitOnChange: true, defaultValue: true }
-             if (exitMotionSensorsWhenDoorIsClosed && monitoredDoor2) { input "exitMotionWhenDoorIsClosedInactiveSubscribed", "bool", title: "Exit Motion When Door Is Closed Inactive?", required: false, submitOnChange: true, defaultValue: true }
+             if (exitMotionSensors) { input "exitMotionActiveSubscribed", "bool", title: "Exit Motion Active?", required: false, submitOnChange: true, defaultValue: false }
+             if (exitMotionSensors) { input "exitMotionInactiveSubscribed", "bool", title: "Exit Motion Inactive?", required: false, submitOnChange: true, defaultValue: false }
+             if (exitMotionSensorsWhenDoorIsOpen && monitoredDoor2) { input "exitMotionWhenDoorIsOpenActiveSubscribed", "bool", title: "Exit Motion When Door Is Open Active?", required: false, submitOnChange: true, defaultValue: false }
+             if (exitMotionSensorsWhenDoorIsOpen && monitoredDoor2) { input "exitMotionWhenDoorIsOpenInactiveSubscribed", "bool", title: "Exit Motion When Door Is Open Inactive?", required: false, submitOnChange: true, defaultValue: false }
+             if (exitMotionSensorsWhenDoorIsClosed && monitoredDoor2) { input "exitMotionWhenDoorIsClosedActiveSubscribed", "bool", title: "Exit Motion When Door Is Closed Active?", required: false, submitOnChange: true, defaultValue: false }
+             if (exitMotionSensorsWhenDoorIsClosed && monitoredDoor2) { input "exitMotionWhenDoorIsClosedInactiveSubscribed", "bool", title: "Exit Motion When Door Is Closed Inactive?", required: false, submitOnChange: true, defaultValue: false }
              if (doors && monitoredDoor) { input "monitoredDoorsOpeningSubscribed", "bool", title: "Monitored Doors Opening?", required: false, submitOnChange: true, defaultValue: true }
              if (doors && monitoredDoor) { input "monitoredDoorsClosingSubscribed", "bool", title: "Monitored Doors Closing?", required: false, submitOnChange: true, defaultValue: true }
              if (adjacentDoors && monitoredDoor2) { input "adjacentMonitoredDoorOpeningSubscribed", "bool", title: "Adjacent Monitored Doors Opening?", required: false, submitOnChange: true, defaultValue: true }
@@ -289,17 +291,19 @@ section("Subscriptions!") {
              if (entryMotionSensors) { input "entryMotionActiveSubscribed", "bool", title: "Entry Motion Active", required: false, submitOnChange: true, defaultValue: true }
              if (entryMotionSensors) { input "entryMotionInactiveSubscribed", "bool", title: "Entry Motion Inactive", required: false, submitOnChange: true, defaultValue: true }
              if (subscriptionsSelected) {
-                if (otherArea && otherAreaCheck) {
-                   input "openOtherArea", "bool", title: "Open Other Area Subscriptions", defaultValue: true, submitOnChange: true
-                   if (openOtherArea) {
-                      input "otherAreaSubscribedVacant", "bool", title: "Force A Vacancy Check When $otherArea Changes To VACANT!", required: false, submitOnChange: true, defaultValue: false
-                      input "otherAreaSubscribedOccupied", "bool", title: "Force A Vacancy Check When $otherArea Changes To OCCUPIED!", required: false, submitOnChange: true, defaultValue: false 
-                      input "otherAreaSubscribedChecking", "bool", title: "Force A Vacancy Check When $otherArea Changes To CHECKING!", required: false, submitOnChange: true, defaultValue: false
-                      input "otherAreaSubscribedEngaged", "bool", title: "Force A Vacancy Check When $otherArea Changes To ENGAGED", required: false, submitOnChange: true, defaultValue: false
-                      input "otherAreaSubscribedDonotdisturb", "bool", title: "Force A Vacancy Check When $otherArea Changes To DO NOT DISTURB", required: false, submitOnChange: true, defaultValue: false                 
-                   }} else {
-                            paragraph "Checking the status of other areas is only possible if you have selected the area"
-                            }}
+                 if (otherArea && otherAreaCheck) {
+                     input "openOtherArea", "bool", title: "Open Other Area Subscriptions", defaultValue: true, submitOnChange: true
+                     if (openOtherArea) {
+                         input "otherAreaSubscribedVacant", "bool", title: "Force A Vacancy Check When $otherArea Changes To VACANT!", required: false, submitOnChange: true, defaultValue: false
+                         input "otherAreaSubscribedOccupied", "bool", title: "Force A Vacancy Check When $otherArea Changes To OCCUPIED!", required: false, submitOnChange: true, defaultValue: false 
+                         input "otherAreaSubscribedChecking", "bool", title: "Force A Vacancy Check When $otherArea Changes To CHECKING!", required: false, submitOnChange: true, defaultValue: false
+                         input "otherAreaSubscribedEngaged", "bool", title: "Force A Vacancy Check When $otherArea Changes To ENGAGED", required: false, submitOnChange: true, defaultValue: false
+                         input "otherAreaSubscribedDonotdisturb", "bool", title: "Force A Vacancy Check When $otherArea Changes To DO NOT DISTURB", required: false, submitOnChange: true, defaultValue: false                 
+                        }
+                 } else {
+                         paragraph "Checking the status of other areas is only possible if you have selected the area"
+                        }
+             }
     
 } // end of Subscriptions Selection Section
 } // end of Section After Occupancy Selection Section
@@ -448,7 +452,8 @@ if (onAtSunsetChosen || offAtSunsetChosen) {
     }}
 def uninstalled() {
 	getChildDevices().each {
-    deleteChildDevice(it.deviceNetworkId) }
+    						deleteChildDevice(it.deviceNetworkId) 
+                           }
     }
 def areaOccupancyVersion() {
     parent.areaOccupancyVersion()
@@ -466,7 +471,7 @@ def mainAction() {
     def automationState = child.getAutomationState()
     def entryMotionState = entryMotionSensors.currentState("motion")
     if (entryMotionState.value.contains("active")) {
-        ifDebug("mainAction() Running ---- Entry motion is Active")
+        ifDebug("474 mainAction() Running ---- Entry motion is Active")
         if (dimmableSwitches1 && switchOnControl && ['automationon'].contains(automationState)) {
             dimmableSwitches1.each {
             def currentLevel = it.currentValue("level")
@@ -475,17 +480,17 @@ def mainAction() {
                     def shmStatus = location.currentState("alarmSystemStatus")?.value
                     if (shmStatus == "off") {
                         it.setLevel(setLevelTo)
-                        ifDebug("478 Setting level of $it to $setLevelTo %")
+                        ifDebug("483 Setting level of $it to $setLevelTo %")
                        } else {
-                               ifDebug("SHM is ARMED! No Lights Will Turn On!")
+                               ifDebug("485 SHM is ARMED! No Lights Will Turn On!")
                               }
                    } else {
                            it.setLevel(setLevelTo)
-                           ifDebug("484 Setting level of $it to $setLevelTo %")
+                           ifDebug("489 Setting level of $it to $setLevelTo %")
                           }
             } else if (it.currentValue("switch") == 'off') {
                        it.on()
-                       ifDebug("Level previously set... Switching on $it")
+                       ifDebug("493 Level previously set... Switching on $it")
                      }
            }
         }
@@ -506,19 +511,24 @@ def mainAction() {
 //-----------------------------------------------------------------------INACTIVE FROM HERE DOWN---------------------------------------------------------------------------------------------
 
 } else { 
-        ifDebug("mainAction() Running ---- Entry motion is Inactive")
+        ifDebug("514 mainAction() Running ---- Entry motion is Inactive")
 
         if (noExitSensor && ['occupied','occupiedon','occupiedmotion','occupiedonmotion'].contains(areaState)) { 
             if (!atomicState.emt) {
-                 ifDebug("512 Vacant will be activated in $entryMotionTimeout seconds")
+                 ifDebug("518 Vacant will be activated in $entryMotionTimeout seconds")
                  runIn(entryMotionTimeout, vacant)
                  atomicState.emt = true
                } else {
-                      ifDebug("atomicState.emt was already TRUE!!!   Taking no action")
+                      ifDebug("522 atomicState.emt was already TRUE!!!   Taking no action")
                       }
         }
-        if (donotdisturbControl && ['engaged','engagedon'].contains(areaState)) {                             
-            runIn(dndCountdown * 60, donotdisturb, [overwrite: false])
+        if (donotdisturbControl && ['engaged','engagedon'].contains(areaState)) { 
+            if (!atomicState.dnd) {
+                runIn(dndCountdown * 60, donotdisturb)
+                atomicState.dnd = true
+               } else {
+                       ifDebug("530 atomicState.dnd was already TRUE!!... Taking no action")
+                      }
             }
         if (exitMotionSensors && ['occupied','occupiedon','occupiedmotion','occupiedonmotion'].contains(areaState) && !adjacentDoors) {
             def exitMotionState = exitMotionSensors.currentState("motion")
@@ -541,12 +551,16 @@ def mainAction() {
                       }
             }                                
         if (['checking','checkingon'].contains(areaState)) { 
-              ifDebug("552 Vacant will be activated in $actualEntrySensorsTimeout seconds OR NOW AS THE NEW METHOD SAYS!!!")
               vacant()
            } else {
                    if (anotherVacancyCheck && anotherCheckIn && ['occupied','occupiedon'].contains(areaState)) {
-                       ifDebug("556 forceVacantIf() will be activated in $anotherCheckIn seconds")
-                       runIn(anotherCheckIn, forceVacantIf)
+                       if (!atomicState.ffi) {
+                           ifDebug("558 forceVacantIf() will be activated in $anotherCheckIn seconds")
+                           runIn(anotherCheckIn, forceVacantIf)
+                           atomicState.ffi = true
+                          } else {
+                          	      ifDebug("562 atomicState.ffi was already TRUE!!!... Taking no action")
+                          }
                       }
                    if (switches3 && instantOff && offRequired) { 
                        def switches3State = switches3.currentState("switch")  
@@ -556,7 +570,7 @@ def mainAction() {
                                if (thisAreaState.value.contains("vacant")) {
                                    switches3.off()
                                   } else { 
-                                          ifDebug("568 Doing Nothing Because Your Other Area Is Still Occupied")                                                                                   
+                                          ifDebug("573 Doing Nothing Because Your Other Area Is Still Occupied")                                                                                   
                                          }
                               } else {
                                       if (thisArea && andThisArea) { 
@@ -565,7 +579,7 @@ def mainAction() {
                                           if (thisAreaState.value.contains("vacant") && andThisAreaState.value.contains("vacant")) {
                                               switches3.off()     
                                              } else {
-                                                     ifDebug("576 Doing Nothing Because 1 Of Your Other Areas Are Still Occupied")                                             
+                                                     ifDebug("582 Doing Nothing Because 1 Of Your Other Areas Are Still Occupied")                                             
                                                     }
                                          } else {
                                                  switches3.off()
@@ -586,24 +600,24 @@ def mainAction() {
                                             def timenow = now()
                                             if (timenow > sunrise && timenow < sunset) {
                                                 if (!atomicState.ddtDimLights) {                                            
-                                                     ifDebug("590 The Lights Will Dim Down In $dimDownTime Seconds")
+                                                     ifDebug("603 The Lights Will Dim Down In $dimDownTime Seconds")
                                                      runIn(dimDownTime, dimLights)
                                                      atomicState.ddtDimLights = true
                                                    } else {
-                                                      	   ifDebug("atomicState.ddtDimLights was already TRUE!!!... Taking no action") 
+                                                      	   ifDebug("607 atomicState.ddtDimLights was already TRUE!!!... Taking no action") 
                                                           }
                                                }
                                            } else {
                                                    if (!atomicState.ddtDimLights) {
-                                                        ifDebug("598 The Lights Will Dim Down In $dimDownTime Seconds")
+                                                        ifDebug("612 The Lights Will Dim Down In $dimDownTime Seconds")
                                                         runIn(dimDownTime, dimLights)
                                                         atomicState.ddtDimLights = true
                                                       } else {
-                                                      		  ifDebug("atomicState.ddtDimLights was already TRUE!!!... Taking no action") 
+                                                      		  ifDebug("616 atomicState.ddtDimLights was already TRUE!!!... Taking no action") 
                                                              }
                                                  } 
                                      } else {
-                                             ifDebug("605 Doing Nothing Because Your Other Area Is Still Occupied, its displaying as $thisAreaState")                          
+                                             ifDebug("620 Doing Nothing Because The $thisArea Is Still Occupied")                          
                                             }
                                   } else {
                                           if (thisArea && andThisArea) { 
@@ -617,24 +631,24 @@ def mainAction() {
                                                           def timenow = now()
                                                           if (timenow > sunrise && timenow < sunset) {
 														      if (!atomicState.ddtDimLights) {                                            
-                                                                   ifDebug("620 The Lights Will Dim Down In $dimDownTime Seconds")
+                                                                   ifDebug("634 The Lights Will Dim Down In $dimDownTime Seconds")
                                                                    runIn(dimDownTime, dimLights)
                                                    			       atomicState.ddtDimLights = true
                                                                  } else {
-                                                      	                 ifDebug("atomicState.ddtDimLights was already TRUE!!!... Taking no action") 
+                                                      	                 ifDebug("638 atomicState.ddtDimLights was already TRUE!!!... Taking no action") 
                                                                         }                                                          
                                                              }
                                                           } else {
 														          if (!atomicState.ddtDimLights) {                                            
-                                                  			           ifDebug("629 The Lights Will Dim Down In $dimDownTime Seconds")
+                                                  			           ifDebug("643 The Lights Will Dim Down In $dimDownTime Seconds")
                                                     				   runIn(dimDownTime, dimLights)
                                                    				       atomicState.ddtDimLights = true
                                                    				     } else {
-                                                      	   				     ifDebug("atomicState.ddtDimLights was already TRUE!!!... Taking no action") 
+                                                      	   				     ifDebug("647 atomicState.ddtDimLights was already TRUE!!!... Taking no action") 
                                                           					}                                                                 
                                                                  } 
                                                  } else {
-                                                         ifDebug("637 Doing Nothing Because 1 Of Your Other Areas Are Still Occupied")                                                                                                                
+                                                         ifDebug("651 Doing Nothing Because 1 Of Your Other Areas Are Still Occupied")                                                                                                                
                                                         }
                                               } else {
                                                           if (onlyDuringDaytime9) {
@@ -644,55 +658,57 @@ def mainAction() {
                                                               def timenow = now()
                                                               if (timenow > sunrise && timenow < sunset) {
 													              if (!atomicState.ddtDimLights) {                                            
-                                                  			           ifDebug("647 The Lights Will Dim Down In $dimDownTime Seconds")
+                                                  			           ifDebug("661 The Lights Will Dim Down In $dimDownTime Seconds")
                                                     				   runIn(dimDownTime, dimLights)
                                                    				       atomicState.ddtDimLights = true
                                                    				     } else {
-                                                      	   				     ifDebug("atomicState.ddtDimLights was already TRUE!!!... Taking no action") 
+                                                      	   				     ifDebug("665 atomicState.ddtDimLights was already TRUE!!!... Taking no action") 
                                                           					}                   
                                                                  } else { 
-                                                                         ifDebug("646 The Time Is After Sunset, Doing Nothing")}
-                                                                        } else {
-                                                                            if (canSchedule()) {
-                                                                                if (!atomicState.ddtDimLights) {                                            
-                                                    						         ifDebug("650 The Lights Will Dim Down In $dimDownTime Seconds")
-                                                     							     runIn(dimDownTime, dimLights)
-                                                    						         atomicState.ddtDimLights = true
-	                                                   						       } else {
-                                                      	  							       ifDebug("atomicState.ddtDimLights was already TRUE!!!... Taking no action") 
-                                                         				                  }
-                                                                               } else {
-                                                                                       ifDebug("There are already too many active schedules present... Unscheduling dimLights()... Attempting runIn() again!")
-                                     												   unschedule(dimLights)
-																					   if (!atomicState.ddtDimLights) {                                            
-                                                  			           					    ifDebug("627 The Lights Will Dim Down In $dimDownTime Seconds")
-                                                    				   						runIn(dimDownTime, dimLights)
-                                                   				       						atomicState.ddtDimLights = true
-                                                   				     					  } else {
-                                                      	   				    			 		  ifDebug("atomicState.ddtDimLights was already TRUE!!!... Taking no action") 
-                                                          										 }                                                                                                          
-                                                                                      }
-                                                                               }
+                                                                         ifDebug("668 The Time Is After Sunset, Doing Nothing")
+                                                                        }
+                                                           } else {
+                                                                   if (canSchedule()) {
+                                                                       if (!atomicState.ddtDimLights) {                                            
+                                                					        ifDebug("673 The Lights Will Dim Down In $dimDownTime Seconds")
+                                                     					    runIn(dimDownTime, dimLights)
+                                                    						atomicState.ddtDimLights = true
+	                                                   			       } else {
+                                                      	  				       ifDebug("677 atomicState.ddtDimLights was already TRUE!!!... Taking no action") 
+                                                         				      }
+                                                                   } else {
+                                                                           ifDebug("680 There are already too many active schedules present... Unscheduling dimLights()... Attempting runIn() again!")
+                                     								       unschedule(dimLights)
+																		   if (!atomicState.ddtDimLights) {                                            
+                                                  			           		    ifDebug("683 The Lights Will Dim Down In $dimDownTime Seconds")
+                                                    				   			runIn(dimDownTime, dimLights)
+                                                   				       			atomicState.ddtDimLights = true
+                                                   				     	   } else {
+                                                      	   				           ifDebug("687 atomicState.ddtDimLights was already TRUE!!!... Taking no action") 
+                                                          						  }                                                                                                          
+                                                                          }
+                                                                   }
                                                 		    }
                                       			   }
                        } else if (switches2State.value.contains("on") && ['vacantdimmed'].contains(areaState) && ['automationon'].contains(automationState)) {
                         if (canSchedule()) {
                             if (!atomicState.socis) {
-                                ifDebug("The lights will turn off in $switchesOffCountdownInSeconds seconds")
+                                ifDebug("696 The lights will turn off in $switchesOffCountdownInSeconds seconds")
         	                    runIn(switchesOffCountdownInSeconds, switches2Off)
                                 atomicState.socis = true
                                } else {
-                                	   ifDebug("atomicState.socis was already TRUE!!! Taking no action")
+                                	   ifDebug("700 atomicState.socis was already TRUE!!! Taking no action")
                                       }
                             } else {
-                                     ifDebug("There are already too many active schedules present... Unscheduling switches2Off()... Attempting runIn() again!")
+                                     ifDebug("703 There are already too many active schedules present... Unscheduling switches2Off()... Attempting runIn() again!")
                                      unschedule(switches2Off)
+                                     atomicState.socis = false
 								     if (!atomicState.socis) {
-                                          ifDebug("The lights will turn off in $switchesOffCountdownInSeconds seconds")
+                                          ifDebug("707 The lights will turn off in $switchesOffCountdownInSeconds seconds")
         	                   		      runIn(switchesOffCountdownInSeconds, switches2Off)
                                 		  atomicState.socis = true
                               		    } else {
-                                	  		    ifDebug("atomicState.socis was already TRUE!!! Taking no action")
+                                	  		    ifDebug("711 atomicState.socis was already TRUE!!! Taking no action")
                                       		   }                          
                                        }
                                  }
@@ -791,32 +807,45 @@ def childUninstalled() {
 
 def dimLights() {
     ifDebug("Activating dimLights()")
-    def child = getChildDevice(getArea())
-   // def areaState = child.getAreaState()
-   // def entryMotionState = entryMotionSensors.currentState("motion")
-   // if (!entryMotionState.value.contains("active")) { 
-        // if (['vacanton'].contains(areaState)) {            
-            switches2.each {
-        	if (it.currentValue("switch") == 'on') {
-            	def currentLevel = it.currentValue("level")
-           	    def newLevel = (currentLevel > dimByLevel ? currentLevel - dimByLevel : 1)
-                it.setLevel(newLevel)
-                ifDebug("The $it have been dimmed to $newLevel %")
-               } else {
-                       ifDebug("The $it was not 'ON' so i couldnt dim it!")
-                      }
-     		}
-            child.generateEvent('vacantdimmed')
-            mainAction()    		
-       //  } else {
-         //        ifDebug("Re-Evaluated because the lights were told to dim but your room is not in the vacanton state!")
-           //      mainAction() 
-             //  }
-        //} else {
-          //      ifDebug("Re-Evaluated because the lights were told to dim but the motion in this room is not inactive")
-        	//    mainAction()
-              // }
+    atomicState.ddtDimLights = false
+    def entryMotionState = entryMotionSensors.currentState("motion")
+    if (!entryMotionState.value.contains("active")) { 
+         def child = getChildDevice(getArea())
+         def areaState = child.getAreaState()
+         if (['vacanton'].contains(areaState)) { 
+               dimLightsNow()
+            } else {
+                    ifDebug("Re-Evaluated because the lights were told to dim but your room is not in the vacanton state!")
+                    mainAction() 
+                   }
+        } else {
+                ifDebug("Re-Evaluated because the lights were told to dim but the motion in this room is not inactive")
+        	    mainAction()
+               }
 } 
+
+def dimLightsNow() {
+    ifDebug("Dimming The Lights NOW!")           
+    switches2.each {
+    if (it.currentValue("switch") == 'on') {
+        def currentLevel = it.currentValue("level")
+        def newLevel = (currentLevel > dimByLevel ? currentLevel - dimByLevel : 1)
+        it.setLevel(newLevel)
+        ifDebug("The $it have been dimmed to $newLevel %")
+        } else {
+                ifDebug("The $it was not 'ON' so i couldnt dim it!")
+               }
+    }
+    setVacantDimmed()
+}
+
+def setVacantDimmed() {
+    ifDebug("Setting vacantdimmed now!")
+    def child = getChildDevice(getArea())
+    child.generateEvent('vacantdimmed')
+    ifDebug("Re-Evaluation essential to check for vacancy before switching off the lights.")
+    mainAction()
+}
 
 def dimmableSwitches1OnEventHandler(evt) { 
     ifDebug("Re-Evaluated by Dimmable Switches1 On")
@@ -880,11 +909,15 @@ def engaged() {
 
 def	entryMotionActiveEventHandler(evt) {
     if (noExitSensor) {
+        atomicState.emt = false
         unschedule(vacant)
        }
+    atomicState.socis = false
     unschedule(switches2Off)
+    atomicState.ddtDimLights = false
     unschedule(dimLights)
     if (anotherVacancyCheck) {
+        atomicState.ffi = false
         unschedule(forceVacantIf)
        }
     def child = getChildDevice(getArea())
@@ -896,6 +929,7 @@ def	entryMotionActiveEventHandler(evt) {
           child.generateEvent('occupiedmotion')
           }       
     if (doors) {    
+                atomicState.dnd = false 
                 unschedule(donotdusturb)
                 def doorsState = doors.currentState("contact") 
                 if (['engagedon'].contains(areaState)) {
@@ -906,15 +940,32 @@ def	entryMotionActiveEventHandler(evt) {
          		    }    
                 if (!doorsState.value.contains("open") && ['vacant','vacantdimmed','vacanton','occupied','occupiedmotion','occupiedon','occupiedonmotion','checking','checkingon','donotdisturb','donotdisturbon'].contains(areaState)) {
                      engaged()
-                }
+                     if (dimmableSwitches1 && switchOnControl && ['automationon'].contains(automationState)) {
+           			     dimmableSwitches1.each {
+           			     def currentLevel = it.currentValue("level")
+           			     if (currentLevel < setLevelTo) { 
+               				 if (onlyIfDisarmed) {
+                 		         def shmStatus = location.currentState("alarmSystemStatus")?.value
+                   			     if (shmStatus == "off") {
+                       			     it.setLevel(setLevelTo)
+                       			     ifDebug("478 Setting level of $it to $setLevelTo %")
+                      			 } else {
+                              			 ifDebug("SHM is ARMED! No Lights Will Turn On!")
+                             		    }
+                  			 } else {
+                         		     it.setLevel(setLevelTo)
+                           			 ifDebug("484 Setting level of $it to $setLevelTo %")
+                          			}
+            			} else if (it.currentValue("switch") == 'off') {
+                      			   it.on()
+                      			   ifDebug("Level previously set... Switching on $it")
+                     			  }
+           				}
+       			 }     
+           }
     }
-    def entryMotionState = entryMotionSensors.currentState("motion")
-  //  if (entryMotionState.value.contains("inactive")) {
-        ifDebug("Re-Evaluation Caused By An Entry Motion Sensor Being 'ACTIVE'")
-        mainAction()
-   //    } else {
-       //        ifDebug("not sending this second motion signal because one has already been sent!")
-       //       }
+    ifDebug("Re-Evaluation Caused By An Entry Motion Sensor Being 'ACTIVE'")
+    mainAction()
 }
 
 def	entryMotionInactiveEventHandler(evt) {
@@ -1351,21 +1402,28 @@ def switches2OffEventHandler(evt) {
 }
 
 def switches2Off() {
-    //def child = getChildDevice(getArea())
-    //def areaState = child.getAreaState()
-    //def entryMotionState = entryMotionSensors.currentState("motion")
-   // if (!entryMotionState.value.contains("active")) { 
-    	//if (['vacantdimmed'].contains(areaState)) {
-        	  switches2.setLevel(0)
-              ifDebug("the $switches2 are now off")
-      //  } else {
-        //        ifDebug("Re-Evaluated because the lights were told to switch off but the room was not in the vacantdimmed state!")
-          //      mainAction() 
-            //   }   
-   // } else {
-     //       ifDebug("Re-Evaluated because the lights were told to switch off but the motion in the room was not inactive!")
-       // 	mainAction()
-         //  }
+    atomicState.socis = false
+    def entryMotionState = entryMotionSensors.currentState("motion")
+    if (!entryMotionState.value.contains("active")) { 
+         def child = getChildDevice(getArea())
+         def areaState = child.getAreaState()
+    	 if (['vacantdimmed'].contains(areaState)) {
+               switches2OffNow() 
+         } else {
+                 ifDebug("Re-Evaluated because the lights were told to switch off but the room was not in the vacantdimmed state!")
+                 mainAction() 
+                }   
+    } else {
+          ifDebug("Re-Evaluated because the lights were told to switch off but the motion in the room was not inactive!")
+          mainAction()
+           }
+}
+
+def switches2OffNow() {
+	switches2.each {
+   				    it.setLevel(0)
+    				ifDebug("The $it are now off")
+                   }
 }
 
 def switches3OnEventHandler(evt) { 
@@ -1379,16 +1437,12 @@ def switches3OffEventHandler(evt) {
 }
 
 def turnOffAtThisTime() {
-    ifDebug("the time turn OFF test worked")
-    def child = getChildDevice(getArea())
-    def automationState = child.getAutomationState()
     switchOffAtThisTime.each {
-    it.off()
-    }
+                              it.off()
+                             }
 } 
 
 def turnOnAtThisTime() {
-    ifDebug("the time turn ON test worked")
     def child = getChildDevice(getArea())
     def automationState = child.getAutomationState()
     switchOnAtThisTime.each {
@@ -1435,6 +1489,14 @@ def turnalloff() {
                 }
         }
         child.generateEvent('vacant')
+        atomicState.emt = false
+        ifDebug("atomicState.emt is: $atomicState.emt")
+        atomicState.ddtDimLights = false
+        ifDebug("atomicState.ddtDimLights is: $atomicState.ddtDimLights")
+        atomicState.socis = false
+        ifDebug("atomicState.socis is: $atomicState.socis")
+        atomicState.ffi = false 
+        ifDebug("atomicState.ffi is: $atomicState.ffi")
         unschedule()
         ifDebug("All Scheduled Jobs Have Been Cancelled!")                                                     
     }
@@ -1450,6 +1512,10 @@ def turnalloff() {
                      }
              }
              child.generateEvent('vacant')
+             atomicState.ddtDimLights = false
+             ifDebug("atomicState.ddtDimLights is: $atomicState.ddtDimLights")
+             atomicState.socis = false
+             ifDebug("atomicState.socis is: $atomicState.socis")
              unschedule()
              ifDebug("All Scheduled Jobs Have Been Cancelled!")
         } else {
