@@ -4,7 +4,7 @@
 */   
 
 public static String areaOccupancyChildAppVersion() { 
-					 return "v4.1.0.3" 
+					 return "v5.0.0.0" 
 }
 
 definition	(
@@ -58,11 +58,7 @@ if (motionActivated) {
     section("Select The Motion Sensors In '$app.label'") {
              input "entryMotionSensors", "capability.motionSensor", title: "Entry Sensors?", required: true, multiple: true, submitOnChange: true            	     
 }
-if (entryMotionSensors && !exitMotionSensors) {
-    section("Manually Force Vacant State\nWith A Timer For $app.label's Area?") {
-    input "noExitSensor", "bool", title: "No Exit Sensor For\n$app.label?", defaultValue: false, submitOnChange: true
-}}
-if (entryMotionSensors || entryMotionTimeout) {
+if (entryMotionSensors) { 
     section("Monitored Door In An Adjacent Area To $app.label") {
     input "monitoredDoor2", "bool", title: "Adjacent Monitored Doors?", defaultValue: false, submitOnChange: true
 }}
@@ -78,7 +74,7 @@ if (entryMotionSensors && monitoredDoor2) {
     section("Motion Sensors When The Door Is 'Closed'\n'Outside' Of $app.label") {
     input "exitMotionSensorsWhenDoorIsClosed", "capability.motionSensor", title: "$adjacentDoors CLOSED Exit Sensors?", required: true, multiple: true, submitOnChange: false   
 }}
-if (entryMotionSensors && !doors2 && !monitoredDoor2 && !noExitSensor) {  
+if (entryMotionSensors && !doors2 && !monitoredDoor2) { 
     section("Select The Motion Sensors 'Outside' $app.label") {
     input "exitMotionSensors", "capability.motionSensor", title: "Exit Sensors?", required: true, multiple: true, submitOnChange: true   
 }}
@@ -94,13 +90,7 @@ if (entryMotionSensors) {
     if (anotherVacancyCheck) {
         input "anotherCheckIn", "number", title: "How Many Seconds 'After' Inactivity\n(Only Checks When $app.label is 'Occupied')", required: true, submitOnChange: true, range: "actualEntrySensorsTimeout..99999"
 }}}
-if (noExitSensor) {
-    section("Use A Countdown Timer To Change This Rooms State?") {
-    input "countdownTimer", "bool", title: "Use A Countdown Timer?", defaultValue: false, submitOnChange: true
-    if (countdownTimer) { 
-        input "entryMotionTimeout", "number", title: "How Many Seconds After Inactivity?", required: false, multiple: false, defaultValue: null, range: "1..99999", submitOnChange: true
-}}}
-if (exitMotionSensors || entryMotionTimeout || monitoredDoor2) {
+if (exitMotionSensors || monitoredDoor2) {
     section("Select If $app.label Has A Door To Monitor?") {
     input "monitoredDoor", "bool", title: "Monitor Doors?", defaultValue: false, submitOnChange: true
     if (monitoredDoor) {
@@ -155,7 +145,7 @@ if (exitMotionSensors || entryMotionTimeout || monitoredDoor2) {
 
 }}}}} // end of Monitored Door Control Section
 
-if ((exitMotionSensors || entryMotionTimeout || monitoredDoor2) && !switches) {
+if ((exitMotionSensors || monitoredDoor2) && !switches) {
     section("Do You Want 'Any' Lights\nTo Automatically Turn 'ON'?") {
     input "switchOnControl", "bool", title: "OCCUPIED 'ON' Control?", defaultValue: false, submitOnChange: true
 }}
@@ -167,7 +157,7 @@ if (switchOnControl) {
 }}}
  // end of Auto ON Control Section
 
-if (exitMotionSensors || entryMotionTimeout || monitoredDoor2) {
+if (exitMotionSensors || monitoredDoor2) {
     section("Do You Want Any Lights\nTo Automatically Turn 'OFF'?") {
     input "offRequired", "bool", title: "VACANT 'OFF' Control?", defaultValue: false, submitOnChange: true
 }}
@@ -176,9 +166,7 @@ if (offRequired) {
     input "otherAreaVacancyCheck", "bool", title: "Other Area Vacancy Check", defaultValue: false, submitOnChange: true
     if (otherAreaVacancyCheck) {
         input "thisArea", "capability.estimatedTimeOfArrival", title: "What Area?", defaultValue: null, multiple: false, required: false, submitOnChange: true
-        if (offRequired && thisArea) {
-            input "andThisArea", "capability.estimatedTimeOfArrival",  title: "What Other Area?", defaultValue: null, multiple: false, required: false, submitOnChange: true
-}}}}
+}}}
 if (offRequired) {
     section("Do You Want 'Any' Lights\nTo Instantly Turn 'OFF'!!\nWhen $app.label Changes To Vacant?") {
     input "instantOff", "bool", title: "Instant Off!!", defaultValue: false, submitOnChange: true
@@ -198,29 +186,20 @@ if (delayedOff) {
     if (switches2) {
         input "dimByLevel", "number", title: "Reduce Level By %\nBefore Turning Off!", required: false, multiple: false, range: "1..99", submitOnChange: false, defaultValue: null               
 }}}
-if ((exitMotionSensors || entryMotionTimeout || monitoredDoor2) && switches2 && delayedOff) {
-     section("How Many Seconds 'After' $app.label Is 'VACANT'\nUntil You Want The Lights To Dim Down?") {
-     input "dimDownTime", "number", title: "How Many Seconds?", required: true, defaultValue: null, submitOnChange: false
-}}
-if ((exitMotionSensors || entryMotionTimeout || monitoredDoor2) && switches2 && delayedOff) {
-     section("How Many Seconds 'After'\n$app.label's Lights Have Dimmed Down,\nUntil You Want Them To Turn OFF?") {
-     input "switchesOffCountdownInSeconds", "number", title: "How Many Seconds?", required: true, defaultValue: null, submitOnChange: false
-             
-}} // end of Auto OFF Control Section
 
-if (exitMotionSensors || entryMotionTimeout || monitoredDoor2) {
+if (exitMotionSensors || monitoredDoor2) {
     section("Do You Want To Automatically Switch\n$app.label's Automation 'ON' If It Was Disabled\nWhen Activation Of Certain Modes Occur?") {
     input "resetAutomation", "bool", title: "Reset Automation On Mode Selection?", defaultValue: false, submitOnChange: true
     if (resetAutomation) {
         input "resetAutomationMode", "mode", title: "Select Your Automation Reset Modes?", required: true, multiple: true, submitOnChange: true
 }}}
-if (exitMotionSensors || entryMotionTimeout || monitoredDoor2) {
+if (exitMotionSensors || monitoredDoor2) {
     section("Do You Require Switching $app.label To 'VACANT'\nOn Activation Of Your Away Modes") {
     input "noAwayMode", "bool", title: "Auto Vacate When\nYour Away Modes Activate?", defaultValue: false, submitOnChange: true
     if (noAwayMode) {
         input "awayModes", "mode", title: "Select Your Away Modes?", required: true, multiple: true, submitOnChange: true
 }}}
-if (exitMotionSensors || entryMotionTimeout || monitoredDoor2) {
+if (exitMotionSensors || monitoredDoor2) {
     section("Do You Require Switching $app.label To 'VACANT'\nIf Any Persons Presence Changes To Away?") {
     input "presence", "bool", title: "Auto Vacate On\nAny Presence Change?", defaultValue: false, submitOnChange: true
     if (presence) {
@@ -391,8 +370,6 @@ if (!childCreated()) {
         }    
     if (otherArea && otherAreaCheck && otherAreaSubscribedVacant) {
         subscribe(otherArea, "occupancyStatus.vacant", otherAreaOccupancyStatusEventHandler)
-        //subscribe(otherArea, "occupancyStatus.vacanton", otherAreaOccupancyStatusEventHandler)
-        //subscribe(otherArea, "occupancyStatus.vacantdimmed", otherAreaOccupancyStatusEventHandler)
         }
     if (otherArea && otherAreaCheck && otherAreaSubscribedOccupied) {
         subscribe(otherArea, "occupancyStatus.occupied", otherAreaOccupancyStatusEventHandler)
@@ -484,8 +461,8 @@ def mainAction() {
                        if (!doorsState.value.contains("open") && ['occupiedmotion','occupiedonmotion'].contains(areaState)) { 
                            if (!atomicState.aeste) {
                                 checking()  
-                                runIn(actualEntrySensorsTimeout, engaged)
                                 atomicState.aeste = true
+                                runIn(actualEntrySensorsTimeout, engaged)
                               } 
                           } else if (doorsState.value.contains("open") && ['checking','checkingon','engaged','engagedmotion','engagedon','engagedonmotion','donotdisturb','donotdisturbon'].contains(areaState)) { 
                                      occupied()   
@@ -500,27 +477,20 @@ def mainAction() {
 
 } else { 
         log.trace "514 mainAction() Running ---- Entry motion is Inactive"
-
-        if (noExitSensor && ['occupied','occupiedon','occupiedmotion','occupiedonmotion'].contains(areaState)) { 
-            if (!atomicState.emt) {
-                 log.trace "518 Vacant will be activated in $entryMotionTimeout seconds"
-                 runIn(entryMotionTimeout, vacant)
-                 atomicState.emt = true
-               }
-        }
+        
         if (donotdisturbControl && ['engaged','engagedon'].contains(areaState)) { 
             if (!atomicState.dnd) {
-                runIn(dndCountdown * 60, donotdisturb)
                 atomicState.dnd = true
+                runIn(dndCountdown * 60, donotdisturb)
                }
             }
-        if (exitMotionSensors && ['occupied','occupiedon','occupiedmotion','occupiedonmotion'].contains(areaState) && !adjacentDoors) {
+        if (exitMotionSensors && ['occupied','occupiedon'].contains(areaState) && !adjacentDoors) {
             def exitMotionState = exitMotionSensors.currentState("motion")
             if (exitMotionState.value.contains("active")) { 
                 vacant()
                 }
            }                            
-        if (adjacentDoors && ['occupied','occupiedon','occupiedmotion','occupiedonmotion'].contains(areaState) && !exitMotionSensors) {         
+        if (adjacentDoors && ['occupied','occupiedon'].contains(areaState) && !exitMotionSensors) {         
             def adjacentDoorsState = adjacentDoors.currentValue("contact")
             if (adjacentDoorsState.contains("open")) {
                 def exitMotionStateWithDoorsOpen = exitMotionSensorsWhenDoorIsOpen.currentValue("motion") 
@@ -540,8 +510,8 @@ def mainAction() {
                    if (anotherVacancyCheck && anotherCheckIn && ['occupied','occupiedon'].contains(areaState)) {
                        if (!atomicState.ffi) {
                            log.trace "558 forceVacantIf will be activated in $anotherCheckIn seconds"
-                           runIn(anotherCheckIn, forceVacantIf)
                            atomicState.ffi = true
+                           runIn(anotherCheckIn, forceVacantIf)
                           }
                       }
                    if (switches3 && instantOff && offRequired) { 
@@ -571,92 +541,67 @@ def mainAction() {
                        }
                     if (switches2 && delayedOff && offRequired) { 
                         def switches2State = switches2.currentState("switch")  
-                        if (switches2State.value.contains("on") && ['vacanton','vacantonmotion'].contains(areaState) && ['automationon'].contains(automationState)) { 
-                            if (thisArea && !andThisArea) { 
+                        if (switches2State.value.contains("on") && ['vacanton'].contains(areaState) && ['automationon'].contains(automationState)) { 
+                            if (thisArea) { 
                                 def thisAreaState = thisArea.currentState("occupancyStatus")
-                                if (thisAreaState.value.contains("vacant") || thisAreaState.value.contains("vacanton") || thisAreaState.value.contains("vacantdimmed")) {
+                                if (thisAreaState.value.contains("vacant")) {
                                         if (onlyDuringDaytime9) {
                                             def s = getSunriseAndSunset()
                                             def sunrise = s.sunrise.time
                                             def sunset = s.sunset.time
                                             def timenow = now()
                                             if (timenow > sunrise && timenow < sunset) {
-                                                if (!atomicState.ddtDimLights) {                                            
-                                                     log.trace "603 The Lights Will Dim Down In $dimDownTime Seconds"
-                                                     runIn(dimDownTime, dimLights)
+                                                if (!atomicState.ddtDimLights) { 
                                                      atomicState.ddtDimLights = true
+                                                     dimLights()
                                                    } 
                                                }
                                            } else {
                                                    if (!atomicState.ddtDimLights) {
-                                                        log.trace "612 The Lights Will Dim Down In $dimDownTime Seconds"
-                                                        runIn(dimDownTime, dimLights)
                                                         atomicState.ddtDimLights = true
+                                                        dimLights()
                                                       }
                                                  } 
                                      } else {
                                              log.trace "620 Doing Nothing Because The $thisArea Is Still Occupied"                          
                                             }
                                   } else {
-                                          if (thisArea && andThisArea) { 
-                                              def thisAreaState = thisArea.currentState("occupancyStatus")
-                                              def andThisAreaState = andThisArea.currentState("occupancyStatus")
-                                              if (thisAreaState.value.contains("vacant") && andThisAreaState.value.contains("vacant")) {
-                                                      if (onlyDuringDaytime9) {
-                                                          def s = getSunriseAndSunset()
-                                                          def sunrise = s.sunrise.time
-                                                          def sunset = s.sunset.time
-                                                          def timenow = now()
-                                                          if (timenow > sunrise && timenow < sunset) {
-														      if (!atomicState.ddtDimLights) {                                            
-                                                                   log.trace "634 The Lights Will Dim Down In $dimDownTime Seconds"
-                                                                   runIn(dimDownTime, dimLights)
-                                                   			       atomicState.ddtDimLights = true
-                                                                 }                                                         
-                                                             }
-                                                          } else {
-														          if (!atomicState.ddtDimLights) {                                            
-                                                  			           log.trace "643 The Lights Will Dim Down In $dimDownTime Seconds"
-                                                    				   runIn(dimDownTime, dimLights)
-                                                   				       atomicState.ddtDimLights = true
-                                                   				     }                                                            
-                                                                 } 
-                                                 } else {
-                                                         log.trace "651 Doing Nothing Because 1 Of Your Other Areas Are Still Occupied"                                                                                                               
-                                                        }
-                                              } else {
-                                                          if (onlyDuringDaytime9) {
-                                                              def s = getSunriseAndSunset()
-                                                              def sunrise = s.sunrise.time
-                                                              def sunset = s.sunset.time
-                                                              def timenow = now()
-                                                              if (timenow > sunrise && timenow < sunset) {
-													              if (!atomicState.ddtDimLights) {                                            
-                                                  			           log.trace "661 The Lights Will Dim Down In $dimDownTime Seconds"
-                                                    				   runIn(dimDownTime, dimLights)
-                                                   				       atomicState.ddtDimLights = true
-                                                   				     }                  
-                                                                 } else { 
-                                                                         log.trace "668 The Time Is After Sunset, Doing Nothing"
-                                                                        }
-                                                           } else {
-                                                                   if (!atomicState.ddtDimLights) {                                            
-                                                					    log.trace "673 The Lights Will Dim Down In $dimDownTime Seconds"
-                                                     		            runIn(dimDownTime, dimLights)
-                                                    					atomicState.ddtDimLights = true
-	                                                   			       } 
-                                                                   }
-                                                		    }
+                                          if (onlyDuringDaytime9) {
+                                              def s = getSunriseAndSunset()
+                                              def sunrise = s.sunrise.time
+                                              def sunset = s.sunset.time
+                                              def timenow = now()
+                                              if (timenow > sunrise && timenow < sunset) {
+										          if (!atomicState.ddtDimLights) {                                                                                          				       
+                                                       atomicState.ddtDimLights = true
+                                                       dimLights()
+                                         		     }                  
+                                              } else { 
+                                                      log.trace "668 The Time Is After Sunset, Doing Nothing"
+                                                     }
+                                           } else {
+                                                   if (!atomicState.ddtDimLights) {                                                                                               					
+                                                        atomicState.ddtDimLights = true
+                                                        dimLights()
+	                                      		       } 
+                                                     }
                                       			   }
                        } else if (switches2State.value.contains("on") && ['vacantdimmed'].contains(areaState) && ['automationon'].contains(automationState)) {
                             if (!atomicState.socis) {
-                                log.trace "696 The lights will turn off in $switchesOffCountdownInSeconds seconds"
-        	                    runIn(switchesOffCountdownInSeconds, switches2Off)
-                                atomicState.socis = true
-                               }
-                             }
-                 		 }                      
-				}
+                                 if (exitMotionSensors) {
+                                     def exitMotionState = exitMotionSensors.currentState("motion")
+                                     if (!exitMotionState.value.contains("active")) { 
+                                          atomicState.socis = true
+                                          switches2Off()
+                                        }
+                                 } else {
+                                    	 atomicState.socis = true
+                                         switches2Off()
+                                        }
+                        }
+                    }
+                }                      
+			}
 		}
 	}
 }                    
@@ -761,8 +706,7 @@ def dimLights() {
                     mainAction() 
                    }
         } else {
-                log.trace "Re-Evaluated because the lights were told to dim but the motion in this room is not inactive"
-        	    mainAction()
+                log.trace "The lights were told to dim but the motion in this room is not inactive"
                }
 } 
 
@@ -770,16 +714,11 @@ def dimLightsNow() {
     log.trace "Dimming The Lights NOW!"  
     setVacantDimmed()           
     switches2.each {
-    //if (it.currentValue("switch") == 'on') {
     def currentLevel = it.currentValue("level")
     if (currentLevel > dimByLevel) {
         def newLevel = (currentLevel - dimByLevel)
-        //def newLevel = (currentLevel > dimByLevel ? currentLevel - dimByLevel : 1)
         it.setLevel(newLevel)
         log.trace "The $it have been dimmed to $newLevel %"
-       // } else {
-         //       log.trace "The $it was not 'ON' so i couldnt dim it!"
-           //    }
    	    }
 	}
 }
@@ -788,8 +727,6 @@ def setVacantDimmed() {
     log.trace "Setting vacantdimmed now!"
     def child = getChildDevice(getArea())
     child.generateEvent('vacantdimmed')
-    log.trace "Re-Evaluation essential to check for vacancy before switching off the lights."
-    mainAction()
 }
 
 def dimmableSwitches1OnEventHandler(evt) { 
@@ -851,14 +788,8 @@ def engaged() {
 } // end of engaged
 
 def	entryMotionActiveEventHandler(evt) {
-    if (noExitSensor) {
-        atomicState.emt = false
-        unschedule(vacant)
-       }
     atomicState.socis = false
-    unschedule(switches2Off)
     atomicState.ddtDimLights = false
-    unschedule(dimLights)
     if (anotherVacancyCheck) {
         atomicState.ffi = false
         unschedule(forceVacantIf)
@@ -1069,8 +1000,7 @@ def leftHome() {
     if (['automationon'].contains(automationState)) {
           log.trace "$app.label was set to 'VACANT' because the mode changed to away or Heavy Use Was Disabled!"
           vacant()
-          log.trace "switchesOffCountdown Sent"
-          runIn(switchesOffCountdownInSeconds, switches2Off)  
+          switches2Off()  
           }
 }
 
@@ -1114,8 +1044,6 @@ def monitoredDoorOpenedEventHandler(evt) {
     if (anotherVacancyCheck) {
         unschedule(forceVacantIf)
        } 
-    unschedule(switches2Off)
-    unschedule(dimLights)
     if (!actionOnDoorOpening) {                      
         log.trace "Re-Evaluated by A Monitored Door Opening"
         mainAction() 
@@ -1418,6 +1346,7 @@ def vacant() {
             child.generateEvent('vacant')
             log.trace "1348 Re-Evaluation Essential By $app.label Changing To Vacant as to start the lights dimming procedure"
             mainAction()
+            
             }
 } // end of vacant  
 
@@ -1433,11 +1362,9 @@ def turnalloff() {
                 }
         }
         child.generateEvent('vacant')
-        atomicState.emt = false
         atomicState.ddtDimLights = false
         atomicState.socis = false
         atomicState.ffi = false 
-        unschedule()
         log.trace "All Scheduled Jobs Have Been Cancelled!"                                                     
     }
     if (entryMotionSensors && checkableLights) {
@@ -1453,8 +1380,7 @@ def turnalloff() {
              }
              child.generateEvent('vacant')
              atomicState.ddtDimLights = false
-             atomicState.socis = false
-             unschedule()
+             atomicState.socis = false            
              log.trace "All Scheduled Jobs Have Been Cancelled!"
         } else {
                 log.trace "Not Performing All Off Because $app.label Was Not Vacant!"
@@ -1474,7 +1400,6 @@ def turnon() {
                 }
         }
         child.generateEvent('vacanton')
-        unschedule()
     }
 
 }
