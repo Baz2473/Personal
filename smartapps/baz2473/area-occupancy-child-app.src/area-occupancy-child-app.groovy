@@ -4,7 +4,7 @@
 */   
 
 public static String areaOccupancyChildAppVersion() { 
-					 return "v4.1.0.2" 
+					 return "v4.1.0.3" 
 }
 
 definition	(
@@ -486,9 +486,7 @@ def mainAction() {
                                 checking()  
                                 runIn(actualEntrySensorsTimeout, engaged)
                                 atomicState.aeste = true
-                              } else {
-                              		  log.trace "atomiState.aeste was already TRUE!!! Taking no action"
-                              		 }
+                              } 
                           } else if (doorsState.value.contains("open") && ['checking','checkingon','engaged','engagedmotion','engagedon','engagedonmotion','donotdisturb','donotdisturbon'].contains(areaState)) { 
                                      occupied()   
                                     } else if (['vacant','vacantdimmed','vacanton'].contains(areaState)) { 
@@ -508,17 +506,13 @@ def mainAction() {
                  log.trace "518 Vacant will be activated in $entryMotionTimeout seconds"
                  runIn(entryMotionTimeout, vacant)
                  atomicState.emt = true
-               } else {
-                      log.trace "522 atomicState.emt was already TRUE!!!   Taking no action"
-                      }
+               }
         }
         if (donotdisturbControl && ['engaged','engagedon'].contains(areaState)) { 
             if (!atomicState.dnd) {
                 runIn(dndCountdown * 60, donotdisturb)
                 atomicState.dnd = true
-               } else {
-                       log.trace "530 atomicState.dnd was already TRUE!!... Taking no action"
-                      }
+               }
             }
         if (exitMotionSensors && ['occupied','occupiedon','occupiedmotion','occupiedonmotion'].contains(areaState) && !adjacentDoors) {
             def exitMotionState = exitMotionSensors.currentState("motion")
@@ -545,11 +539,9 @@ def mainAction() {
            } else {
                    if (anotherVacancyCheck && anotherCheckIn && ['occupied','occupiedon'].contains(areaState)) {
                        if (!atomicState.ffi) {
-                           log.trace "558 forceVacantIf() will be activated in $anotherCheckIn seconds"
+                           log.trace "558 forceVacantIf will be activated in $anotherCheckIn seconds"
                            runIn(anotherCheckIn, forceVacantIf)
                            atomicState.ffi = true
-                          } else {
-                          	      log.trace "562 atomicState.ffi was already TRUE!!!... Taking no action"
                           }
                       }
                    if (switches3 && instantOff && offRequired) { 
@@ -560,7 +552,7 @@ def mainAction() {
                                if (thisAreaState.value.contains("vacant")) {
                                    switches3.off()
                                   } else { 
-                                          log.trace "573 Doing Nothing Because Your Other Area Is Still Occupied"                                                                                 
+                                          log.trace "555 Doing Nothing Because The $thisArea Is Still Occupied"                          
                                          }
                               } else {
                                       if (thisArea && andThisArea) { 
@@ -593,18 +585,14 @@ def mainAction() {
                                                      log.trace "603 The Lights Will Dim Down In $dimDownTime Seconds"
                                                      runIn(dimDownTime, dimLights)
                                                      atomicState.ddtDimLights = true
-                                                   } else {
-                                                      	   log.trace "607 atomicState.ddtDimLights was already TRUE!!!... Taking no action" 
-                                                          }
+                                                   } 
                                                }
                                            } else {
                                                    if (!atomicState.ddtDimLights) {
                                                         log.trace "612 The Lights Will Dim Down In $dimDownTime Seconds"
                                                         runIn(dimDownTime, dimLights)
                                                         atomicState.ddtDimLights = true
-                                                      } else {
-                                                      		  log.trace "616 atomicState.ddtDimLights was already TRUE!!!... Taking no action"
-                                                             }
+                                                      }
                                                  } 
                                      } else {
                                              log.trace "620 Doing Nothing Because The $thisArea Is Still Occupied"                          
@@ -624,18 +612,14 @@ def mainAction() {
                                                                    log.trace "634 The Lights Will Dim Down In $dimDownTime Seconds"
                                                                    runIn(dimDownTime, dimLights)
                                                    			       atomicState.ddtDimLights = true
-                                                                 } else {
-                                                      	                 log.trace "638 atomicState.ddtDimLights was already TRUE!!!... Taking no action"
-                                                                        }                                                          
+                                                                 }                                                         
                                                              }
                                                           } else {
 														          if (!atomicState.ddtDimLights) {                                            
                                                   			           log.trace "643 The Lights Will Dim Down In $dimDownTime Seconds"
                                                     				   runIn(dimDownTime, dimLights)
                                                    				       atomicState.ddtDimLights = true
-                                                   				     } else {
-                                                      	   				     log.trace "647 atomicState.ddtDimLights was already TRUE!!!... Taking no action" 
-                                                          					}                                                                 
+                                                   				     }                                                            
                                                                  } 
                                                  } else {
                                                          log.trace "651 Doing Nothing Because 1 Of Your Other Areas Are Still Occupied"                                                                                                               
@@ -651,57 +635,26 @@ def mainAction() {
                                                   			           log.trace "661 The Lights Will Dim Down In $dimDownTime Seconds"
                                                     				   runIn(dimDownTime, dimLights)
                                                    				       atomicState.ddtDimLights = true
-                                                   				     } else {
-                                                      	   				     log.trace "665 atomicState.ddtDimLights was already TRUE!!!... Taking no action" 
-                                                          					}                   
+                                                   				     }                  
                                                                  } else { 
                                                                          log.trace "668 The Time Is After Sunset, Doing Nothing"
                                                                         }
                                                            } else {
-                                                                   if (canSchedule()) {
-                                                                       if (!atomicState.ddtDimLights) {                                            
-                                                					        log.trace "673 The Lights Will Dim Down In $dimDownTime Seconds"
-                                                     					    runIn(dimDownTime, dimLights)
-                                                    						atomicState.ddtDimLights = true
-	                                                   			       } else {
-                                                      	  				       log.trace "677 atomicState.ddtDimLights was already TRUE!!!... Taking no action"
-                                                         				      }
-                                                                   } else {
-                                                                           log.trace "680 There are already too many active schedules present... Unscheduling dimLights()... Attempting runIn() again!"
-                                     								       unschedule(dimLights)
-																		   if (!atomicState.ddtDimLights) {                                            
-                                                  			           		    log.trace "683 The Lights Will Dim Down In $dimDownTime Seconds"
-                                                    				   			runIn(dimDownTime, dimLights)
-                                                   				       			atomicState.ddtDimLights = true
-                                                   				     	   } else {
-                                                      	   				           log.trace "687 atomicState.ddtDimLights was already TRUE!!!... Taking no action" 
-                                                          						  }                                                                                                          
-                                                                          }
+                                                                   if (!atomicState.ddtDimLights) {                                            
+                                                					    log.trace "673 The Lights Will Dim Down In $dimDownTime Seconds"
+                                                     		            runIn(dimDownTime, dimLights)
+                                                    					atomicState.ddtDimLights = true
+	                                                   			       } 
                                                                    }
                                                 		    }
                                       			   }
                        } else if (switches2State.value.contains("on") && ['vacantdimmed'].contains(areaState) && ['automationon'].contains(automationState)) {
-                        if (canSchedule()) {
                             if (!atomicState.socis) {
                                 log.trace "696 The lights will turn off in $switchesOffCountdownInSeconds seconds"
         	                    runIn(switchesOffCountdownInSeconds, switches2Off)
                                 atomicState.socis = true
-                               } else {
-                                	   log.trace "700 atomicState.socis was already TRUE!!! Taking no action"
-                                      }
-                            } else {
-                                     log.trace "703 There are already too many active schedules present... Unscheduling switches2Off()... Attempting runIn() again!"
-                                     unschedule(switches2Off)
-                                     atomicState.socis = false
-								     if (!atomicState.socis) {
-                                          log.trace "707 The lights will turn off in $switchesOffCountdownInSeconds seconds"
-        	                   		      runIn(switchesOffCountdownInSeconds, switches2Off)
-                                		  atomicState.socis = true
-                              		    } else {
-                                	  		    log.trace "711 atomicState.socis was already TRUE!!! Taking no action"
-                                      		   }                          
-                                       }
-                                 }
+                               }
+                             }
                  		 }                      
 				}
 		}
