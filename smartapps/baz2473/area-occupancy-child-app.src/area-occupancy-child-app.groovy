@@ -5,7 +5,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v5.1.0.0"
+    return "v5.1.0.1"
 }
 
 definition    (
@@ -421,13 +421,13 @@ def mainAction() {
                    runIn(dndCountdown * 60, donotdisturb)
                    }
           }
-          if (exitMotionSensors && ['occupied','occupiedon'].contains(areaState)) { // && !adjacentDoor1) {
+          if (exitMotionSensors && ['occupied','occupiedon'].contains(areaState)) {
               def ems = exitMotionSensors.currentState("motion")
               if (ems.value.contains("active")) {
                   vacant()
                   }
           }  
-          if (numberOfMonitoredDoors == "2" && ['occupied','occupiedon'].contains(areaState) && !exitMotionSensors) {
+          if (numberOfMonitoredDoors == "2" && ['occupied','occupiedon'].contains(areaState)) {
               def adjacentDoor1State = adjacentDoor1.currentValue("contact")
               def adjacentDoor2State = adjacentDoor2.currentValue("contact")   
               if (adjacentDoor1State.contains("open") && adjacentDoor2State.contains("open")) {
@@ -446,7 +446,7 @@ def mainAction() {
                              vacant()
                             }
               } else if (!adjacentDoor1State.contains("open") && adjacentDoor2State.contains("open")) {
-                          def emsD1cND2o = exitMotionSensorsWhenDoor1IsClosed2IsOpen.currentValue("motion")
+                          def emsD1cND2o = exitMotionSensorsWhenDoor2IsOpen1IsClosed.currentValue("motion")
                           if (emsD1cND2o.contains("active")) {
                               vacant()
                              }
@@ -760,7 +760,7 @@ def engaged() {
     }
 } // end of engaged
 
-def    entryMotionActiveEventHandler(evt) {
+def entryMotionActiveEventHandler(evt) {
     atomicState.socis = false
     atomicState.ddtDimLights = false
     if (anotherVacancyCheck) {
@@ -794,7 +794,7 @@ def    entryMotionActiveEventHandler(evt) {
     mainAction()
 }
 
-def    entryMotionInactiveEventHandler(evt) {
+def entryMotionInactiveEventHandler(evt) {
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
     def entryMotionState = entryMotionSensors.currentState("motion")
