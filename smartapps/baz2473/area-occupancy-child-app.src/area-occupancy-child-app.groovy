@@ -5,7 +5,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v5.0.0.1"
+    return "v5.1.0.0"
 }
 
 definition    (
@@ -52,42 +52,34 @@ def areaName() {
         section("Only turn things 'ON' if the alarm is disarmed") {
             input "onlyIfDisarmed", "bool", title: "Only if disarmed?", defaultValue: false, submitOnChange: false
         }
-      //  section("To Proceed, Please Select Motion As Method For Detecting Occupancy\nFor $app.label!") {
-        //    input "motionActivated", "bool", title: "Motion?", defaultValue: false, submitOnChange: true
-        //}
-      //  if (motionActivated) {
-            section("Select the motion sensors in '$app.label'") {
-                input "entryMotionSensors", "capability.motionSensor", title: "Entry motion sensors?", required: true, multiple: true, submitOnChange: true
+        section("Select the motion sensors in '$app.label'") {
+            input "entryMotionSensors", "capability.motionSensor", title: "Entry motion sensors?", required: true, multiple: true, submitOnChange: true
+        }
+        if (entryMotionSensors) {
+            section("Does $app.label have any monitored doors by another area?") {
+                input "monitoredDoor2", "bool", title: "Other monitored doors?", defaultValue: false, submitOnChange: true
             }
-            if (entryMotionSensors) {
-                section("Does $app.label have any monitored doors by another area?") {
-                    input "monitoredDoor2", "bool", title: "Other monitored doors?", defaultValue: false, submitOnChange: true
-                }}
-            
-            
-            
-            
-            
-            if (monitoredDoor2) {
-                section("How many doors are in $app.label ?") {
-                    input name: "numberOfMonitoredDoors", type: "enum", title: "Number of monitored doors", options: ["1","2"], defaultValue: "null", required: true, submitOnChange: true
-                }}
-            if (numberOfMonitoredDoors == "1" || numberOfMonitoredDoors == "2") {
-                section("Select the first door\nTo be monitored in '$app.label'?") {
-                    input "adjacentDoor1", "capability.contactSensor", title: "Which door?", multiple: false, required: true, submitOnChange: true
-                }}
-            if (numberOfMonitoredDoors == "1" && adjacentDoor1) {
-                section("Motion sensors when $adjacentDoor1 is 'Open'\n'Outside' of $app.label") {
-                    input "exitMotionSensorsWhenDoorIsOpen", "capability.motionSensor", title: "'$adjacentDoor1 'OPEN' exit sensors?", required: true, multiple: true, submitOnChange: true
-                }}
-            if (numberOfMonitoredDoors == "1" && adjacentDoor1 && exitMotionSensorsWhenDoorIsOpen) {
-                section("Motion sensors when $adjacentDoor1 is 'Closed'\n'Outside' of $app.label") {
-                    input "exitMotionSensorsWhenDoorIsClosed", "capability.motionSensor", title: "'$adjacentDoor1 'CLOSED' exit sensors?", required: true, multiple: true, submitOnChange: true
-                }}
-            if (numberOfMonitoredDoors == "2") {
-                section("Select the second door\nTo be monitored in '$app.label'?") {
-                    input "adjacentDoor2", "capability.contactSensor", title: "Which door?", multiple: false, required: true, submitOnChange: true
-                }}
+        }
+        if (monitoredDoor2) {
+            section("How many doors are in $app.label ?") {
+                input name: "numberOfMonitoredDoors", type: "enum", title: "Number of monitored doors", options: ["1","2"], defaultValue: "null", required: true, submitOnChange: true
+            }}
+        if (numberOfMonitoredDoors == "1" || numberOfMonitoredDoors == "2") {
+            section("Select the first door\nTo be monitored in '$app.label'?") {
+                input "adjacentDoor1", "capability.contactSensor", title: "Which door?", multiple: false, required: true, submitOnChange: true
+            }}
+        if (numberOfMonitoredDoors == "1" && adjacentDoor1) {
+            section("Motion sensors when $adjacentDoor1 is 'Open'\n'Outside' of $app.label") {
+                input "exitMotionSensorsWhenDoorIsOpen", "capability.motionSensor", title: "'$adjacentDoor1 'OPEN' exit sensors?", required: true, multiple: true, submitOnChange: true
+            }}
+        if (numberOfMonitoredDoors == "1" && adjacentDoor1 && exitMotionSensorsWhenDoorIsOpen) {
+            section("Motion sensors when $adjacentDoor1 is 'Closed'\n'Outside' of $app.label") {
+                input "exitMotionSensorsWhenDoorIsClosed", "capability.motionSensor", title: "'$adjacentDoor1 'CLOSED' exit sensors?", required: true, multiple: true, submitOnChange: true
+            }}
+        if (numberOfMonitoredDoors == "2") {
+            section("Select the second door\nTo be monitored in '$app.label'?") {
+                input "adjacentDoor2", "capability.contactSensor", title: "Which door?", multiple: false, required: true, submitOnChange: true
+            }}
             if (adjacentDoor2) {
                 if (numberOfMonitoredDoors == "2") {
                     section("Motion sensors when $adjacentDoor1 & $adjacentDoor2 are both 'Open'\n'Outside' of $app.label") {
@@ -267,42 +259,6 @@ def areaName() {
                 section("Reset Entire Room On SHM Setting To Away?") {
                     input "resetOnSHMChangingToAway", "bool", title: "Reset Entire Area When SHM Sets To AWAY?", required: false, submitOnChange: false
                 }
-               /* section("Subscriptions!") {
-                    input "subscriptionsSelected", "bool", title: "Override Subscriptions?", required: false, submitOnChange: true
-                    if (subscriptionsSelected) {
-                        //if (exitMotionSensors) { input "exitMotionActiveSubscribed", "bool", title: "Exit Motion Active?", required: false, submitOnChange: true, defaultValue: false }
-                        if (exitMotionSensors) { input "exitMotionInactiveSubscribed", "bool", title: "Exit Motion Inactive?", required: false, submitOnChange: true, defaultValue: false }
-                        //if (exitMotionSensorsWhenDoorIsOpen && monitoredDoor2) { input "exitMotionWhenDoorIsOpenActiveSubscribed", "bool", title: "Exit Motion When Door Is Open Active?", required: false, submitOnChange: true, defaultValue: false }
-                        if (exitMotionSensorsWhenDoorIsOpen && monitoredDoor2) { input "exitMotionWhenDoorIsOpenInactiveSubscribed", "bool", title: "Exit Motion When Door Is Open Inactive?", required: false, submitOnChange: true, defaultValue: false }
-                        //if (exitMotionSensorsWhenDoorIsClosed && monitoredDoor2) { input "exitMotionWhenDoorIsClosedActiveSubscribed", "bool", title: "Exit Motion When Door Is Closed Active?", required: false, submitOnChange: true, defaultValue: false }
-                        if (exitMotionSensorsWhenDoorIsClosed && monitoredDoor2) { input "exitMotionWhenDoorIsClosedInactiveSubscribed", "bool", title: "Exit Motion When Door Is Closed Inactive?", required: false, submitOnChange: true, defaultValue: false }
-                        if (doors && monitoredDoor) { input "monitoredDoorsOpeningSubscribed", "bool", title: "Monitored Doors Opening?", required: false, submitOnChange: true, defaultValue: true }
-                        if (doors && monitoredDoor) { input "monitoredDoorsClosingSubscribed", "bool", title: "Monitored Doors Closing?", required: false, submitOnChange: true, defaultValue: true }
-                        //if (adjacentDoor1 && monitoredDoor2) { input "adjacentMonitoredDoorOpeningSubscribed", "bool", title: "Adjacent Monitored Doors Opening?", required: false, submitOnChange: true, defaultValue: false }
-                        //if (adjacentDoor1 && monitoredDoor2) { input "adjacentMonitoredDoorClosingSubscribed", "bool", title: "Adjacent Monitored Doors Closing?", required: false, submitOnChange: true, defaultValue: false }
-                        //if (dimmableSwitches1 && switchOnControl) { input "onSwitchesAndLightsSubscribed1", "bool", title: "Lights Turning ON", required: false, submitOnChange: true, defaultValue: false }
-                        //if (switches2 && delayedOff && offRequired) { input "dimmingLightsSubscribed", "bool", title: "Lights Dimming Off", required: false, submitOnChange: true, defaultValue: false }
-                        //if (switches3 && instantOff && offRequired) { input "instantOffSwitchesAndLightsSubscribed", "bool", title: "Lights Turning Off", required: false, submitOnChange: false }
-                        if (entryMotionSensors) { input "entryMotionActiveSubscribed", "bool", title: "Entry Motion Active", required: false, submitOnChange: true, defaultValue: true }
-                        if (entryMotionSensors) { input "entryMotionInactiveSubscribed", "bool", title: "Entry Motion Inactive", required: false, submitOnChange: true, defaultValue: true }
-                        if (subscriptionsSelected) {
-                            if (otherArea && otherAreaCheck) {
-                                //input "openOtherArea", "bool", title: "Open Other Area Subscriptions", defaultValue: true, submitOnChange: true
-                               // if (openOtherArea) {
-                                    input "otherAreaSubscribedVacant", "bool", title: "Force A Vacancy Check When $otherArea Changes To VACANT!", required: false, submitOnChange: true, defaultValue: false
-                                    //input "otherAreaSubscribedOccupied", "bool", title: "Force A Vacancy Check When $otherArea Changes To OCCUPIED!", required: false, submitOnChange: true, defaultValue: false
-                                    //input "otherAreaSubscribedChecking", "bool", title: "Force A Vacancy Check When $otherArea Changes To CHECKING!", required: false, submitOnChange: true, defaultValue: false
-                                    //input "otherAreaSubscribedEngaged", "bool", title: "Force A Vacancy Check When $otherArea Changes To ENGAGED", required: false, submitOnChange: true, defaultValue: false
-                                    //input "otherAreaSubscribedDonotdisturb", "bool", title: "Force A Vacancy Check When $otherArea Changes To DO NOT DISTURB", required: false, submitOnChange: true, defaultValue: false
-                                //}
-                            } else {
-                                paragraph "Checking the status of other areas is only possible if you have selected the area"
-                            }
-                        }
-                        
-                    } // end of Subscriptions Selection Section
-                } */
-                
                 section("Turn Something 'ON' or 'OFF' In $app.label\nAt A Certain Time!") {
                     input "timedControl", "bool", title: "Perform Timed Actions?", required: false, defualtValue: false, submitOnChange: true
                     if (timedControl) {
@@ -349,12 +305,6 @@ def updated() {
     if (!childCreated()) {
         spawnChildDevice(app.label)
     }
-    //if (adjacentDoor1 && monitoredDoor2 && adjacentMonitoredDoorOpeningSubscribed) {
-    //   subscribe(adjacentDoor1, "contact.open", adjacentMonitoredDoorOpeningEventHandler)
-    //   }
-    // if (adjacentDoor1 && monitoredDoor2 && adjacentMonitoredDoorClosingSubscribed) {
-    //   subscribe(adjacentDoor1, "contact.closed", adjacentMonitoredDoorClosingEventHandler)
-    //   }
     if (awayModes && noAwayMode || resetAutomationMode && resetAutomation) {
         subscribe(location, modeEventHandler)
     }
@@ -362,31 +312,15 @@ def updated() {
         subscribe(checkableLights, "switch.on", checkableLightsSwitchedOnEventHandler)
         subscribe(checkableLights, "switch.off", checkableLightsSwitchedOffEventHandler)
     }
-   // if (dimmableSwitches1 && switchOnControl && onSwitchesAndLightsSubscribed1) {
-     //   subscribe(dimmableSwitches1, "switch.on", dimmableSwitches1OnEventHandler)
-       // subscribe(dimmableSwitches1, "switch.off", dimmableSwitches1OffEventHandler)
-   // }
-    if (doors && monitoredDoor) { // && monitoredDoorsOpeningSubscribed) {
+    if (doors && monitoredDoor) {
         subscribe(doors, "contact.open", monitoredDoorOpenedEventHandler)
         subscribe(doors, "contact.closed", monitoredDoorClosedEventHandler)
     }
-   // if (doors && monitoredDoor && monitoredDoorsClosingSubscribed) {
-    //}
-    if (entryMotionSensors) { // && entryMotionActiveSubscribed)    {
+    if (entryMotionSensors) { 
         subscribe(entryMotionSensors, "motion.active", entryMotionActiveEventHandler)
         subscribe(entryMotionSensors, "motion.inactive", entryMotionInactiveEventHandler)
     }
-    
-   // if (entryMotionSensors && entryMotionInactiveSubscribed)    {
-    //}
-    
-    ///////////////
-    // if (exitMotionSensors && exitMotionActiveSubscribed) {
-    //   subscribe(exitMotionSensors, "motion.active", exitMotionActiveEventHandler)
-    //   }
-    ////////////////
-    
-    if (exitMotionSensors) { // && exitMotionInactiveSubscribed) {
+    if (exitMotionSensors) { 
         subscribe(exitMotionSensors, "motion.inactive", exitMotionInactiveEventHandler)
     }
     if (numberOfMonitoredDoors == "1") {
@@ -395,58 +329,15 @@ def updated() {
     if (numberOfMonitoredDoors == "2") {
         subscribe(exitMotionSensorsWhenDoor1N2AreOpen, "motion.inactive", emswd1N2aboEventHandler)
     }
-    //////////
-    //if (exitMotionSensorsWhenDoorIsOpen && monitoredDoor2 && exitMotionWhenDoorIsOpenActiveSubscribed) {
-    //    subscribe(exitMotionSensorsWhenDoorIsOpen, "motion.active", exitMotionSensorsWhenDoorIsOpenActiveEventHandler)
-    //    }
-    //////////
-    
-    // if (exitMotionSensorsWhenDoorIsOpen && monitoredDoor2 && exitMotionWhenDoorIsOpenInactiveSubscribed) {
-    //   subscribe(exitMotionSensorsWhenDoorIsOpen, "motion.inactive", exitMotionSensorsWhenDoorIsOpenInactiveEventHandler)
-    // }
-    
-    //////////
-    //if (exitMotionSensorsWhenDoorIsClosed && monitoredDoor2 && exitMotionWhenDoorIsClosedActiveSubscribed) {
-    //   subscribe(exitMotionSensorsWhenDoorIsClosed, "motion.active", exitMotionSensorsWhenDoorIsClosedActiveEventHandler)
-    //   }
-    //////////
-    
-    // if (exitMotionSensorsWhenDoorIsClosed && monitoredDoor2 && exitMotionWhenDoorIsClosedInactiveSubscribed) {
-    //   subscribe(exitMotionSensorsWhenDoorIsClosed, "motion.inactive", exitMotionSensorsWhenDoorIsClosedInactiveEventHandler)
-    // }
     if (onlyIfDisarmed) {
         subscribe(location, "alarmSystemStatus", shmStatusEventHandler)
     }
-    if (otherArea && otherAreaCheck) { // && otherAreaSubscribedVacant) {
+    if (otherArea && otherAreaCheck) { 
         subscribe(otherArea, "occupancyStatus.vacant", otherAreaOccupancyStatusEventHandler)
     }
-   // if (otherArea && otherAreaCheck && otherAreaSubscribedOccupied) {
-     //   subscribe(otherArea, "occupancyStatus.occupied", otherAreaOccupancyStatusEventHandler)
-       // subscribe(otherArea, "occupancyStatus.occupiedon", otherAreaOccupancyStatusEventHandler)
-    //}
-    //if (otherArea && otherAreaCheck && otherAreaSubscribedChecking) {
-      //  subscribe(otherArea, "occupancyStatus.checking", otherAreaOccupancyStatusEventHandler)
-        //subscribe(otherArea, "occupancyStatus.checkingon", otherAreaOccupancyStatusEventHandler)
-    //}
-    //if (otherArea && otherAreaCheck && otherAreaSubscribedEngaged) {
-      //  subscribe(otherArea, "occupancyStatus.engaged", otherAreaOccupancyStatusEventHandler)
-        //subscribe(otherArea, "occupancyStatus.engagedon", otherAreaOccupancyStatusEventHandler)
-    //}
-    //if (otherArea && otherAreaCheck && otherAreaSubscribedDonotdisturb) {
-      //  subscribe(otherArea, "occupancyStatus.donotdisturb", otherAreaOccupancyStatusEventHandler)
-        //subscribe(otherArea, "occupancyStatus.donotdisturbon", otherAreaOccupancyStatusEventHandler)
-    //}
     if (presenceSensors && presence) {
         subscribe(presenceSensors, "presence.not present", presenceAwayEventHandler)
     }
-    //if (switches2 && delayedOff && dimmingLightsSubscribed) {
-      //  subscribe(switches2, "switch.on", switches2OnEventHandler)
-        //subscribe(switches2, "switch.off", switches2OffEventHandler)
-    //}
-    //if (switches3 && instantOff && instantOffSwitchesAndLightsSubscribed) {
-      //  subscribe(switches3, "switch.on", switches3OnEventHandler)
-        //subscribe(switches3, "switch.off", switches3OffEventHandler)
-    //}
     }
 def    initialize() {
     
@@ -477,7 +368,6 @@ def areaOccupancyDTHVersion() {
 
 //88888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
 def mainAction() {
-  //  if (entryMotionSensors) {
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
     def automationState = child.getAutomationState()
@@ -563,7 +453,6 @@ def mainAction() {
               }
            }
            if (numberOfMonitoredDoors == "1" && ['occupied','occupiedon'].contains(areaState) && !exitMotionSensors) {
-            //if (adjacentDoor1 && ['occupied','occupiedon'].contains(areaState) && !exitMotionSensors) {
                def adjacentDoor1State = adjacentDoor1.currentValue("contact")
                if (adjacentDoor1State.contains("open")) {
                    def exitMotionStateWithDoorsOpen = exitMotionSensorsWhenDoorIsOpen.currentValue("motion")
@@ -676,20 +565,9 @@ def mainAction() {
                 }
             }
         }
-   // }
 }
 
 //888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
-
-//def adjacentMonitoredDoorClosingEventHandler(evt) {
-//    log.trace "Re-Evaluation Caused By An Ajacent Monitored Door Closing"
-//    mainAction()
-//}
-
-//def adjacentMonitoredDoorOpeningEventHandler(evt) {
-//    log.trace "Re-Evaluation Caused By An Ajacent Monitored Door Opening"
-//    mainAction()
-//}
 
 def checkableLightsSwitchedOnEventHandler(evt) {
     def child = getChildDevice(getArea())
@@ -943,23 +821,6 @@ def    entryMotionInactiveEventHandler(evt) {
     }
 }
 
-/*def exitMotionActiveEventHandler(evt) {
- def child = getChildDevice(getArea())
- def areaState = child.getAreaState()
- if (doors) {
- def monitoredDoorState = doors.currentValue("contact")
- if (!monitoredDoorState.contains("open") && !['vacantdimmed','vacanton'].contains(areaState)) {
- log.trace "Exit motion is ACTIVE but the $app.label door is closed so this will be ignored!!!"
- } else {
- log.trace "Re-Evaluation Caused By An Exit Motion Sensor Being 'ACTIVE'"
- mainAction()
- }
- } else if (!['vacant'].contains(areaState)) {
- log.trace "Re-Evaluation Caused By An Exit Motion Sensor Being 'ACTIVE'"
- mainAction()
- }
- } */
-
 def exitMotionInactiveEventHandler(evt) {
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
@@ -983,23 +844,6 @@ def emswd1N2aboEventHandler(evt) {
     mainAction()
 }
 
-////////////////////
-/*def exitMotionSensorsWhenDoorIsOpenActiveEventHandler(evt) {
- def child = getChildDevice(getArea())
- def areaState = child.getAreaState()
- if (!['vacant'].contains(areaState)) {
- if (adjacentDoor1) {
- def adjacentDoor1State = adjacentDoor1.currentValue("contact")
- if (adjacentDoor1State.contains("open")) {
- log.trace "Re-Evaluation Caused By An (OPEN) Exit Motion Sensor Being 'ACTIVE'"
- mainAction()
- }
- }
- }
- } */
-////////////////////
-
-
 
 def exitMotionSensorsWhenDoorIsOpenInactiveEventHandler(evt) {
     def child = getChildDevice(getArea())
@@ -1014,25 +858,6 @@ def exitMotionSensorsWhenDoorIsOpenInactiveEventHandler(evt) {
         }
     }
 }
-
-
-
-////////////////////
-/*def exitMotionSensorsWhenDoorIsClosedActiveEventHandler(evt) {
- def child = getChildDevice(getArea())
- def areaState = child.getAreaState()
- if (!['vacant'].contains(areaState)) {
- if (adjacentDoor1) {
- def adjacentDoor1State = adjacentDoor1.currentValue("contact")
- if (!adjacentDoor1State.contains("open")) {
- log.trace "Re-Evaluation Caused By A (CLOSED) Exit Motion Sensor Being 'ACTIVE'"
- mainAction()
- }
- }
- }
- }*/
-////////////////////
-
 
 
 def exitMotionSensorsWhenDoorIsClosedInactiveEventHandler(evt) {
