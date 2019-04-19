@@ -5,7 +5,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v5.1.0.1"
+    return "v5.1.0.3"
 }
 
 definition    (
@@ -325,9 +325,13 @@ def updated() {
     }
     if (numberOfMonitoredDoors == "1") {
         subscribe(exitMotionSensorsWhenDoorIsOpen, "motion.inactive", exitMotionSensorsWhenDoorIsOpenInactiveEventHandler)
+        subscribe(exitMotionSensorsWhenDoorIsClosed, "motion.inactive", exitMotionSensorsWhenDoorIsClosedInactiveEventHandler)
     }
     if (numberOfMonitoredDoors == "2") {
         subscribe(exitMotionSensorsWhenDoor1N2AreOpen, "motion.inactive", emswd1N2aboEventHandler)
+        subscribe(exitMotionSensorsWhenDoor1N2AreClosed, "motion.inactive", emswd1N2abcEventHandler)
+        subscribe(exitMotionSensorsWhenDoor1IsOpen2IsClosed, "motion.inactive", emswd1o2cEventHandler)
+        subscribe(exitMotionSensorsWhenDoor2IsOpen1IsClosed, "motion.inactive", emswd2o1cEventHandler)
     }
     if (onlyIfDisarmed) {
         subscribe(location, "alarmSystemStatus", shmStatusEventHandler)
@@ -339,6 +343,7 @@ def updated() {
         subscribe(presenceSensors, "presence.not present", presenceAwayEventHandler)
     }
     }
+    
 def    initialize() {
     
     if (onAtThisTime && timedTurnOnControl && timedControl) {
@@ -560,6 +565,8 @@ def mainAction() {
                                 atomicState.socis = true
                                 switches2Off()
                             }
+                        } else {
+                                log.trace("socis already true!")
                         }
                     }
                 }
@@ -787,7 +794,6 @@ def entryMotionActiveEventHandler(evt) {
         }
         if (!doorsState.value.contains("open") && ['vacant','vacantdimmed','vacanton','occupied','occupiedmotion','occupiedon','occupiedonmotion','checking','checkingon','donotdisturb','donotdisturbon'].contains(areaState)) {
             engaged()
-            
         }
     }
     log.trace "Re-Evaluation Caused By An Entry Motion Sensor Being 'ACTIVE'"
@@ -797,6 +803,7 @@ def entryMotionActiveEventHandler(evt) {
 def entryMotionInactiveEventHandler(evt) {
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
+    //if (!numberOfSensorsToMonitor == 1 || !numberOfSensorsToMonotor == 2) {
     def entryMotionState = entryMotionSensors.currentState("motion")
     if (['occupiedonmotion'].contains(areaState) && !entryMotionState.value.contains("active")) {
         child.generateEvent('occupiedon')
@@ -841,7 +848,36 @@ def exitMotionInactiveEventHandler(evt) {
 
 
 def emswd1N2aboEventHandler(evt) {
-    mainAction()
+def child = getChildDevice(getArea())
+    def areaState = child.getAreaState()
+    if (!['vacant'].contains(areaState)) {
+           log.trace "Re-Evaluation Caused By A D1&D2 (BOTH OPEN) Exit Motion Sensor Being 'INACTIVE'"
+           mainAction()
+           }
+}
+def emswd1N2abcEventHandler(evt) {
+def child = getChildDevice(getArea())
+    def areaState = child.getAreaState()
+    if (!['vacant'].contains(areaState)) {
+           log.trace "Re-Evaluation Caused By A D1&D2 (BOTH COSED) Exit Motion Sensor Being 'INACTIVE'"
+           mainAction()
+           }
+}
+def emswd1o2cEventHandler(evt)  {
+def child = getChildDevice(getArea())
+    def areaState = child.getAreaState()
+    if (!['vacant'].contains(areaState)) {
+           log.trace "Re-Evaluation Caused By A D1 (OPEN) & D2 (CLOSED) Exit Motion Sensor Being 'INACTIVE'"
+           mainAction()
+           }
+}
+def emswd2o1cEventHandler(evt) {
+def child = getChildDevice(getArea())
+    def areaState = child.getAreaState()
+    if (!['vacant'].contains(areaState)) {
+           log.trace "Re-Evaluation Caused By A D2 (OPEN) & D1 (CLOSED) Exit Motion Sensor Being 'INACTIVE'"
+           mainAction()
+           }
 }
 
 
@@ -849,13 +885,13 @@ def exitMotionSensorsWhenDoorIsOpenInactiveEventHandler(evt) {
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
     if (!['vacant'].contains(areaState)) {
-        if (adjacentDoor1) {
-            def adjacentDoor1State = adjacentDoor1.currentValue("contact")
-            if (adjacentDoor1State.contains("open")) {
+       // if (adjacentDoor1) {
+           // def adjacentDoor1State = adjacentDoor1.currentValue("contact")
+           // if (adjacentDoor1State.contains("open")) {
                 log.trace "Re-Evaluation Caused By An (OPEN) Exit Motion Sensor Being 'INACTIVE'"
                 mainAction()
-            }
-        }
+         //   }
+       // }
     }
 }
 
@@ -864,13 +900,13 @@ def exitMotionSensorsWhenDoorIsClosedInactiveEventHandler(evt) {
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
     if (!['vacant'].contains(areaState)) {
-        if (adjacentDoor1) {
-            def adjacentDoor1State = adjacentDoor1.currentValue("contact")
-            if (!adjacentDoor1State.contains("open")) {
+      //  if (adjacentDoor1) {
+          //  def adjacentDoor1State = adjacentDoor1.currentValue("contact")
+           // if (!adjacentDoor1State.contains("open")) {
                 log.trace "Re-Evaluation Caused By A (CLOSED) Exit Motion Sensor Being 'INACTIVE'"
                 mainAction()
-            }
-        }
+         //   }
+       // }
     }
 }
 
