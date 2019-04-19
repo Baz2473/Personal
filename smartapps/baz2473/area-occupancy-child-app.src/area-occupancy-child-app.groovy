@@ -5,7 +5,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v5.1.0.3"
+    return "v5.1.0.6"
 }
 
 definition    (
@@ -687,26 +687,6 @@ def setVacantDimmed() {
     child.generateEvent('vacantdimmed')
 }
 
-def dimmableSwitches1OnEventHandler(evt) {
-    log.trace "Re-Evaluated by Dimmable Switches1 On"
-    mainAction()
-}
-
-def dimmableSwitches1OffEventHandler(evt) {
-    log.trace "Re-Evaluated by Dimmable Switches1 Off"
-    mainAction()
-}
-
-def dimmableSwitches2OnEventHandler(evt) {
-    log.trace "Re-Evaluated by Dimmable Switches2 On"
-    mainAction()
-}
-
-def dimmableSwitches2OffEventHandler(evt) {
-    log.trace "Re-Evaluated by Dimmable Switches2 Off"
-    mainAction()
-}
-
 def donotdisturb() {
     def child = getChildDevice(getArea())
     if (checkableLights) {
@@ -803,7 +783,6 @@ def entryMotionActiveEventHandler(evt) {
 def entryMotionInactiveEventHandler(evt) {
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
-    //if (!numberOfSensorsToMonitor == 1 || !numberOfSensorsToMonotor == 2) {
     def entryMotionState = entryMotionSensors.currentState("motion")
     if (['occupiedonmotion'].contains(areaState) && !entryMotionState.value.contains("active")) {
         child.generateEvent('occupiedon')
@@ -851,33 +830,52 @@ def emswd1N2aboEventHandler(evt) {
 def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
     if (!['vacant'].contains(areaState)) {
-           log.trace "Re-Evaluation Caused By A D1&D2 (BOTH OPEN) Exit Motion Sensor Being 'INACTIVE'"
-           mainAction()
-           }
+           def ad1State = adjacentDoor1.currentValue("contact")
+           def ad2State = adjacentDoor2.currentValue("contact")
+           if (ad1State.contains("open") && ad2State.contains("open")) {
+               log.trace "Re-Evaluation Caused By A D1&D2 (BOTH OPEN) Exit Motion Sensor Being 'INACTIVE'"
+               mainAction()
+               }
+    }
 }
+
 def emswd1N2abcEventHandler(evt) {
 def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
     if (!['vacant'].contains(areaState)) {
-           log.trace "Re-Evaluation Caused By A D1&D2 (BOTH COSED) Exit Motion Sensor Being 'INACTIVE'"
-           mainAction()
-           }
+           def ad1State = adjacentDoor1.currentValue("contact")
+           def ad2State = adjacentDoor2.currentValue("contact")
+           if (!ad1State.contains("open") && !ad2State.contains("open")) {           
+                log.trace "Re-Evaluation Caused By A D1&D2 (BOTH COSED) Exit Motion Sensor Being 'INACTIVE'"
+                mainAction()
+                }
+    }
 }
+
 def emswd1o2cEventHandler(evt)  {
 def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
     if (!['vacant'].contains(areaState)) {
-           log.trace "Re-Evaluation Caused By A D1 (OPEN) & D2 (CLOSED) Exit Motion Sensor Being 'INACTIVE'"
-           mainAction()
+           def ad1State = adjacentDoor1.currentValue("contact")
+           def ad2State = adjacentDoor2.currentValue("contact")
+           if (ad1State.contains("open") && !ad2State.contains("open")) {
+                log.trace "Re-Evaluation Caused By A D1 (OPEN) & D2 (CLOSED) Exit Motion Sensor Being 'INACTIVE'"
+                mainAction()
            }
+    }
 }
+
 def emswd2o1cEventHandler(evt) {
 def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
     if (!['vacant'].contains(areaState)) {
-           log.trace "Re-Evaluation Caused By A D2 (OPEN) & D1 (CLOSED) Exit Motion Sensor Being 'INACTIVE'"
-           mainAction()
-           }
+           def ad1State = adjacentDoor1.currentValue("contact")
+           def ad2State = adjacentDoor2.currentValue("contact")
+           if (!ad1State.contains("open") && ad2State.contains("open")) {
+                log.trace "Re-Evaluation Caused By A D2 (OPEN) & D1 (CLOSED) Exit Motion Sensor Being 'INACTIVE'"
+                mainAction()
+                }
+    }
 }
 
 
@@ -885,13 +883,13 @@ def exitMotionSensorsWhenDoorIsOpenInactiveEventHandler(evt) {
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
     if (!['vacant'].contains(areaState)) {
-       // if (adjacentDoor1) {
-           // def adjacentDoor1State = adjacentDoor1.currentValue("contact")
-           // if (adjacentDoor1State.contains("open")) {
+        if (adjacentDoor1) {
+            def adjacentDoor1State = adjacentDoor1.currentValue("contact")
+            if (adjacentDoor1State.contains("open")) {
                 log.trace "Re-Evaluation Caused By An (OPEN) Exit Motion Sensor Being 'INACTIVE'"
                 mainAction()
-         //   }
-       // }
+            }
+        }
     }
 }
 
@@ -900,13 +898,13 @@ def exitMotionSensorsWhenDoorIsClosedInactiveEventHandler(evt) {
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
     if (!['vacant'].contains(areaState)) {
-      //  if (adjacentDoor1) {
-          //  def adjacentDoor1State = adjacentDoor1.currentValue("contact")
-           // if (!adjacentDoor1State.contains("open")) {
+        if (adjacentDoor1) {
+            def adjacentDoor1State = adjacentDoor1.currentValue("contact")
+            if (!adjacentDoor1State.contains("open")) {
                 log.trace "Re-Evaluation Caused By A (CLOSED) Exit Motion Sensor Being 'INACTIVE'"
                 mainAction()
-         //   }
-       // }
+            }
+        }
     }
 }
 
@@ -954,7 +952,7 @@ def leftHome() {
     }
 }
 
-def    modeEventHandler(evt) {
+def modeEventHandler(evt) {
     def child = getChildDevice(getArea())
     def automationState = child.getAutomationState()
     if (resetAutomation && resetAutomationMode && resetAutomationMode.contains(evt.value) && ['automationoff'].contains(automationState)) {
@@ -1213,16 +1211,6 @@ def sunsetHandler(evt) {
     }
 }
 
-def switches2OnEventHandler(evt) {
-    log.trace "Re-Evaluated by Switches2 On"
-    mainAction()
-}
-
-def switches2OffEventHandler(evt) {
-    log.trace "Re-Evaluated by Switches2 Off"
-    mainAction()
-}
-
 def switches2Off() {
     atomicState.socis = false
     def entryMotionState = entryMotionSensors.currentState("motion")
@@ -1246,16 +1234,6 @@ def switches2OffNow() {
         it.setLevel(0)
         log.trace "The $it are now off"
     }
-}
-
-def switches3OnEventHandler(evt) {
-    log.trace "Re-Evaluated by Switches3 On"
-    mainAction()
-}
-
-def switches3OffEventHandler(evt) {
-    log.trace "Re-Evaluated by Switches3 Off"
-    mainAction()
 }
 
 def turnOffAtThisTime() {
