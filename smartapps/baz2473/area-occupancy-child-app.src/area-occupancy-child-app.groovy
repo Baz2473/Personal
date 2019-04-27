@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v5.1.1.1"
+    return "v5.1.1.2"
 }
 
 definition    (
@@ -501,8 +501,10 @@ def mainAction() {
             }
             if (['checking','checkingon'].contains(areaState)) {
                 if (entryMotionState.value.contains("active")) {
+                log.trace "doing engaged because the sensor was reporting active on the inactive section"
                 	engaged()
                 } else {
+                        log.trace "doing vacant because the sensor was reporting inactive on the inactive section"
                         vacant()
                 	    }
             } else {
@@ -655,14 +657,14 @@ def checking() {
         def lightsState = checkableLights.currentState("switch")
         if (lightsState.value.contains("on")) {
             child.generateEvent('checkingon')
-           // runIn(actualEntrySensorsTimeout, engaged, [overwrite: false])
+            runIn(actualEntrySensorsTimeout, engaged)
         } else {
             child.generateEvent('checking')
-           // runIn(actualEntrySensorsTimeout, engaged, [overwrite: false])
+            runIn(actualEntrySensorsTimeout, engaged)
         }
     } else {
         child.generateEvent('checking')
-       // runIn(actualEntrySensorsTimeout, engaged, [overwrite: false])
+        runIn(actualEntrySensorsTimeout, engaged)
     }
 } 
 
