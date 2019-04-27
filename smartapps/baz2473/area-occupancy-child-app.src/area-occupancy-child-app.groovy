@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v5.1.0.7"
+    return "v5.1.1.0"
 }
 
 definition    (
@@ -417,15 +417,14 @@ def mainAction() {
               def doorsState = doors.currentState("contact")
               if (!doorsState.value.contains("open") && ['occupiedmotion','occupiedonmotion'].contains(areaState)) {
                    checking()
-                   runIn(actualEntrySensorsTimeout, engaged, [overwrite: false])
               } else if (doorsState.value.contains("open") && ['checking','checkingon','engaged','engagedmotion','engagedon','engagedonmotion','donotdisturb','donotdisturbon'].contains(areaState)) {
                          occupied()
                          } else if (['vacant','vacantdimmed','vacanton'].contains(areaState)) {
                                       occupied()
                                       }
-                                      } else if (['vacant','vacantdimmed','vacanton'].contains(areaState)) {
-                                                   occupied()
-                                                   }
+          } else if (['vacant','vacantdimmed','vacanton'].contains(areaState)) {
+                       occupied()
+                     }
             
  //-----------------------------------------------------------------------INACTIVE FROM HERE DOWN---------------------------------------------------------------------------------------------
             
@@ -635,11 +634,14 @@ def checking() {
         def lightsState = checkableLights.currentState("switch")
         if (lightsState.value.contains("on")) {
             child.generateEvent('checkingon')
+            runIn(actualEntrySensorsTimeout, engaged, [overwrite: false])
         } else {
             child.generateEvent('checking')
+            runIn(actualEntrySensorsTimeout, engaged, [overwrite: false])
         }
     } else {
         child.generateEvent('checking')
+        runIn(actualEntrySensorsTimeout, engaged, [overwrite: false])
     }
 } 
 
