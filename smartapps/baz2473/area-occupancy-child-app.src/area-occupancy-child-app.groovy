@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v5.1.1.0"
+    return "v5.1.1.1"
 }
 
 definition    (
@@ -62,56 +62,71 @@ def areaName() {
         if (monitoredDoor2) {
             section("How many doors are in $app.label ?") {
                 input name: "numberOfMonitoredDoors", type: "enum", title: "Number of monitored doors", options: ["1","2"], defaultValue: "null", required: true, submitOnChange: true
-            }}
+            	}
+            }
         if (numberOfMonitoredDoors == "1" || numberOfMonitoredDoors == "2") {
             section("Select the first door\nTo be monitored in '$app.label'?") {
                 input "adjacentDoor1", "capability.contactSensor", title: "Which door?", multiple: false, required: true, submitOnChange: true
-            }}
+            	}
+            }
         if (numberOfMonitoredDoors == "1" && adjacentDoor1) {
             section("Motion sensors when $adjacentDoor1 is 'Open'\n'Outside' of $app.label") {
                 input "exitMotionSensorsWhenDoorIsOpen", "capability.motionSensor", title: "'$adjacentDoor1 'OPEN' exit sensors?", required: true, multiple: true, submitOnChange: true
-            }}
+            	}
+            }
         if (numberOfMonitoredDoors == "1" && adjacentDoor1 && exitMotionSensorsWhenDoorIsOpen) {
             section("Motion sensors when $adjacentDoor1 is 'Closed'\n'Outside' of $app.label") {
                 input "exitMotionSensorsWhenDoorIsClosed", "capability.motionSensor", title: "'$adjacentDoor1 'CLOSED' exit sensors?", required: true, multiple: true, submitOnChange: true
-            }}
+            	}
+            }
         if (numberOfMonitoredDoors == "2") {
             section("Select the second door\nTo be monitored in '$app.label'?") {
                 input "adjacentDoor2", "capability.contactSensor", title: "Which door?", multiple: false, required: true, submitOnChange: true
-            }}
+            	}
+            }
             if (adjacentDoor2) {
                 if (numberOfMonitoredDoors == "2") {
                     section("Motion sensors when $adjacentDoor1 & $adjacentDoor2 are both 'Open'\n'Outside' of $app.label") {
                         input "exitMotionSensorsWhenDoor1N2AreOpen", "capability.motionSensor", title: "'$adjacentDoor1 & $adjacentDoor2 'OPEN' exit sensors?", required: true, multiple: true, submitOnChange: true
-                    }}
+                    	}
+                    }
                 if (numberOfMonitoredDoors == "2" && exitMotionSensorsWhenDoor1N2AreOpen) {
                     section("Motion sensors when $adjacentDoor1 & $adjacentDoor2 are both 'Closed'\n'Outside' of $app.label") {
                         input "exitMotionSensorsWhenDoor1N2AreClosed", "capability.motionSensor", title: "'$adjacentDoor1 & $adjacentDoor2 'CLOSED' exit sensors?", required: true, multiple: true, submitOnChange: true
-                    }}
+                    	}
+                    }
                 if (numberOfMonitoredDoors == "2" && exitMotionSensorsWhenDoor1N2AreOpen && exitMotionSensorsWhenDoor1N2AreClosed) {
                     section("Motion sensors when $adjacentDoor1 is 'OPEN' & $adjacentDoor2 Is 'Closed'\n'Outside' of $app.label") {
                         input "exitMotionSensorsWhenDoor1IsOpen2IsClosed", "capability.motionSensor", title: "'$adjacentDoor1 'OPEN' $adjacentDoor2 'CLOSED' exit sensors?", required: true, multiple: true, submitOnChange: true
-                    }}
+                    	}
+                    }
                 if (numberOfMonitoredDoors == "2" && exitMotionSensorsWhenDoor1N2AreOpen && exitMotionSensorsWhenDoor1N2AreClosed && exitMotionSensorsWhenDoor1IsOpen2IsClosed) {
                     section("Motion sensors when $adjacentDoor2 is 'OPEN' & $adjacentDoor1 is 'Closed'\n'Outside' of $app.label") {
                         input "exitMotionSensorsWhenDoor2IsOpen1IsClosed", "capability.motionSensor", title: "'$adjacentDoor2 'OPEN' $adjacentDoor1 'CLOSED' exit sensors?", required: true, multiple: true, submitOnChange: true
-                    }}}
+                    	}
+                    }
+                }
             if (entryMotionSensors && !doors2 && !monitoredDoor2) {
                 section("Select the motion sensors 'Outside' $app.label") {
                     input "exitMotionSensors", "capability.motionSensor", title: "Exit sensors?", required: true, multiple: true, submitOnChange: true
-                }}
+               	    }
+                }
             if (entryMotionSensors) {
                 section("Use the status change of another area to force a check on $app.label's State?") {
                     input "otherAreaCheck", "bool", title: "Other area occupancy changes?", defaultValue: false, submitOnChange: true
                     if (otherAreaCheck) {
                         input "otherArea", "capability.estimatedTimeOfArrival", title: "Subscribe to this area's occupancy change?", required: true, multiple: true, submitOnChange: true
-                    }}}
+                    	}
+                    }
+                }
             if (entryMotionSensors) {
                 section("Perform another vacancy check if $app.label is 'Occupied' and motionless?") {
                     input "anotherVacancyCheck", "bool", title: "Another vacancy check?", defaultValue: false, submitOnChange: true
                     if (anotherVacancyCheck) {
                         input "anotherCheckIn", "number", title: "How many seconds 'After' inactivity\n(Only checks when $app.label is 'Occupied')", required: true, submitOnChange: true, range: "actualEntrySensorsTimeout..99999"
-                    }}}
+                    	}
+                    }
+                }
             if (exitMotionSensors || monitoredDoor2) {
                 section("Select if $app.label has a door to monitor?") {
                     input "monitoredDoor", "bool", title: "Monitor a door?", defaultValue: false, submitOnChange: true
@@ -129,40 +144,40 @@ def areaName() {
                                     if (onlyDuringCertainTimes) {
                                         if (!onlyDuringNighttime && !fromTime) {
                                             input "onlyDuringDaytime", "bool", title: "Only during the daytime", defaultValue: false, submitOnChange: true
-                                        }
+                                        	}
                                         if (!onlyDuringDaytime && !fromTime) {
                                             input "onlyDuringNighttime", "bool", title: "Only during the nighttime", defaultValue: false, submitOnChange: true
-                                        }
+                                        	}
                                         if (!onlyDuringDaytime && !onlyDuringNighttime) {
                                             input "fromTime", "time", title: "From?", required: true, submitOnChange: true
                                             input "toTime", "time", title: "Until?", required: true
-                                        }
+                                        	}
                                         input "anotherAction", "bool", title: "Another time schedule?", defaultValue: false, submitOnChange: true
                                         if (anotherAction) {
                                             input "onlyIfASensorIsActive", "bool", title: "But only if a sensor is active?", defaultValue: false, submitOnChange: true
                                             if (onlyIfASensorIsActive) {
                                                 input "onlyIfThisSensorIsActive", "capability.motionSensor", title: "Only if this sensor is active!", multiple: true, required: true
-                                            }
+                                            	}
                                             input "onlyIfAreaVacant2", "bool", title: "But only if $app.label is vacant", defaultValue: false, submitOnChnage: true
                                             input "doorOpeningAction2", "capability.switchLevel", title: "Turn on?", multiple: true, required: true, submitOnChange: true
                                             input "setLevelAt2", "number", title: "Set Level To? %", required: true, multiple: false, range: "1..100", submitOnChange: true
                                             if (!onlyDuringNighttime2 && !fromTime2) {
                                                 input "onlyDuringDaytime2", "bool", title: "Only during the daytime", defaultValue: false, submitOnChange: true
-                                            }
+                                            	}
                                             if (!onlyDuringDaytime2 && !fromTime2) {
                                                 input "onlyDuringNighttime2", "bool", title: "Only during the nighttime", defaultValue: false, submitOnChange: true
-                                            }
+                                            	}
                                             if (!onlyDuringDaytime2 && !onlyDuringNighttime2) {
                                                 input "fromTime2", "time", title: "From?", required: true, submitOnChange: true
                                                 input "toTime2", "time", title: "Until?", required: true
-                                            }
+                                            	}
                                             input "turnOffAfter", "bool", title: "Turn off after set time?", defaultValue: false, submitOnChange: true
                                             if (turnOffAfter) {
                                                 input "offAfter", "number", title: "Turn off after?", required: true, submitOnChange: true, defaultValue: null
-                                            }
-                                        }
-                                    }
-                                }
+                                            	}
+                                        	}
+                                   	 	}
+                                	}
                                 input "actionOnDoorClosing", "bool", title: "Turn off when\n$doors closes?", defaultValue: false, submitOnChange: true    
                             	}
                             }
@@ -249,7 +264,7 @@ def areaName() {
                     if (donotdisturbControl) {
                         paragraph "How Many Minutes Must $app.label\nStay Motionless While 'Engaged'\nBefore Activating 'Do Not Disturb'?"
                         input "dndCountdown", "number", title: "How Many Minutes?", required: true, submitOnChange: true
-                    }
+                    	}
                 } else {
                     paragraph "Do Not Disturb Is Only Accessable In Conjunction With Entry Motion Sensors & A Monitored Door!"
                 	}
@@ -259,19 +274,19 @@ def areaName() {
                     input "actionOnEngaged", "bool", title: "Turn ON Something When\n$app.label Changes To Engaged?", defaultValue: false, submitOnChange: true
                     if (actionOnEngaged) {
                         input "engagedAction", "capability.switch", title: "Turn On?", multiple: true, required: true, submitOnChange: true
-                    }
-                }
-            }
+                    	}
+                	}
+            	}
             if (entryMotionSensors) {
                 section("Action On Vacant") {
                     input "actionOnVacant", "bool", title: "Turn OFF Something When\n$app.label Changes To Vacant?", defaultValue: false, submitOnChange: true
                     if (actionOnVacant) {
                         input "vacantAction", "capability.switch", title: "Turn Off?", multiple: true, required: true, submitOnChange: true
-                    }
-                }
+                    	}
+                	}
                 section("Reset Entire Room On SHM Setting To Away?") {
                     input "resetOnSHMChangingToAway", "bool", title: "Reset Entire Area When SHM Sets To AWAY?", required: false, submitOnChange: false
-                }
+                	}
                 section("Turn Something 'ON' or 'OFF' In $app.label\nAt A Certain Time!") {
                     input "timedControl", "bool", title: "Perform Timed Actions?", required: false, defualtValue: false, submitOnChange: true
                     if (timedControl) {
@@ -280,33 +295,35 @@ def areaName() {
                             input "switchToTurnOnAtThisTime", "capability.switch", title: "Switchs?", required: true, multiple: true
                             if (!onAtSunsetChosen && !onAtThisTime) {
                                 input "onAtSunriseChosen", "bool", title: "At Sunrise?", required: false, multiple: false, submitOnChange: true
-                            }
+                            	}
                             if (!onAtSunriseChosen && !onAtThisTime) {
                                 input "onAtSunsetChosen", "bool", title: "At Sunset?", required: false, multiple: false, submitOnChange: true
-                            }
+                            	}
                             if (!onAtSunriseChosen && !onAtSunsetChosen) {
                                 input "onAtThisTime", "time", title: "Time?", required: true, submitOnChange: true
-                            }}
+                            	}
+                            }
                         input "timedTurnOffControl", "bool", title: "Turn OFF?", required: false, defualtValue: false, submitOnChange: true
                         if (timedTurnOffControl && timedControl) {
                             input "switchToTurnOffAtThisTime", "capability.switch", title: "Switchs?", required: true, multiple: true
                             if (!offAtSunriseChosen && !offAtThisTime) {
                                 input "offAtSunsetChosen", "bool", title: "At Sunset?", required: false, multiple: false, submitOnChange: true
-                            }
+                            	}
                             if (!offAtSunsetChosen && !offAtThisTime) {
                                 input "offAtSunriseChosen", "bool", title: "At Sunrise?", required: false, multiple: false, submitOnChange: true
-                            }
+                            	}
                             if (!offAtSunsetChosen && !offAtSunriseChosen) {
                                 input "offAtThisTime", "time", title: "Time?", required: true, submitOnChange: true
-                            }}
-                    } 
-                } 
+                            	}
+                            }
+                    	} 
+                	} 
                 section("Select ALL Of The Lights That Are In $app.label?") {
                     input "checkableLights", "capability.switch", title: "Lights?", required: true, multiple: true
-                }
-            }
-        }
-    }
+                	}
+            	}
+        	}
+    	}
 
 def installed() {}
 def updated() {
@@ -315,41 +332,41 @@ def updated() {
     
     if (!childCreated()) {
         spawnChildDevice(app.label)
-    }
+    	}
     if (awayModes && noAwayMode || resetAutomationMode && resetAutomation) {
         subscribe(location, modeEventHandler)
-    }
+    	}
     if (checkableLights) {
         subscribe(checkableLights, "switch.on", checkableLightsSwitchedOnEventHandler)
         subscribe(checkableLights, "switch.off", checkableLightsSwitchedOffEventHandler)
-    }
+    	}
     if (doors) {
         subscribe(doors, "contact.open", monitoredDoorOpenedEventHandler)
         subscribe(doors, "contact.closed", monitoredDoorClosedEventHandler)
-    }
+    	}
     if (entryMotionSensors) { 
         subscribe(entryMotionSensors, "motion.active", entryMotionActiveEventHandler)
         subscribe(entryMotionSensors, "motion.inactive", entryMotionInactiveEventHandler)
-    }
+    	}
     if (exitMotionSensors) { 
         subscribe(exitMotionSensors, "motion.inactive", exitMotionInactiveEventHandler)
-    }
+    	}
     if (numberOfMonitoredDoors == "1") {
         subscribe(exitMotionSensorsWhenDoorIsOpen, "motion.inactive", exitMotionSensorsWhenDoorIsOpenInactiveEventHandler)
         subscribe(exitMotionSensorsWhenDoorIsClosed, "motion.inactive", exitMotionSensorsWhenDoorIsClosedInactiveEventHandler)
-    }
+    	}
     if (numberOfMonitoredDoors == "2") {
         subscribe(exitMotionSensorsWhenDoor1N2AreOpen, "motion.inactive", emswd1N2aboEventHandler)
         subscribe(exitMotionSensorsWhenDoor1N2AreClosed, "motion.inactive", emswd1N2abcEventHandler)
         subscribe(exitMotionSensorsWhenDoor1IsOpen2IsClosed, "motion.inactive", emswd1o2cEventHandler)
         subscribe(exitMotionSensorsWhenDoor2IsOpen1IsClosed, "motion.inactive", emswd2o1cEventHandler)
-    }
+    	}
     if (onlyIfDisarmed) {
         subscribe(location, "alarmSystemStatus", shmStatusEventHandler)
-    }
+    	}
     if (otherArea && otherAreaCheck) { 
         subscribe(otherArea, "occupancyStatus.vacant", otherAreaOccupancyStatusEventHandler)
-    }
+    	}
     if (presenceSensors && presence) {
         subscribe(presenceSensors, "presence.not present", presenceAwayEventHandler)
    	    }
@@ -359,29 +376,29 @@ def initialize() {
     
     if (onAtThisTime && timedTurnOnControl && timedControl) {
         schedule(onAtThisTime, turnOnAtThisTime)
-    }
+    	}
     if (offAtThisTime && timedTurnOffControl && timedControl) {
         schedule(offAtThisTime, turnOffAtThisTime)
-    }
+    	}
     if (onAtSunriseChosen || offAtSunriseChosen) {
         subscribe(location, "sunrise", sunriseHandler)
-    }
+    	}
     if (onAtSunsetChosen || offAtSunsetChosen) {
         subscribe(location, "sunset", sunsetHandler)
     	}
     }
 def uninstalled() {
     getChildDevices().each {
-        deleteChildDevice(it.deviceNetworkId)
-    }
-}
+        					deleteChildDevice(it.deviceNetworkId)
+    					    }
+	}
 def areaOccupancyVersion() {
     parent.areaOccupancyVersion()
-}
+	}
 def areaOccupancyDTHVersion() {
     def child = getChildDevice(getArea())
     child.DTHVersion()
-}
+	}
 
 //88888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
 def mainAction() {
@@ -483,7 +500,11 @@ def mainAction() {
                }
             }
             if (['checking','checkingon'].contains(areaState)) {
-                  vacant()
+                if (entryMotionState.value.contains("active")) {
+                	engaged()
+                } else {
+                        vacant()
+                	    }
             } else {
                     if (anotherVacancyCheck && anotherCheckIn && ['occupied','occupiedon'].contains(areaState)) {
                         if (!atomicState.ffi) {
@@ -634,14 +655,14 @@ def checking() {
         def lightsState = checkableLights.currentState("switch")
         if (lightsState.value.contains("on")) {
             child.generateEvent('checkingon')
-            runIn(actualEntrySensorsTimeout, engaged, [overwrite: false])
+           // runIn(actualEntrySensorsTimeout, engaged, [overwrite: false])
         } else {
             child.generateEvent('checking')
-            runIn(actualEntrySensorsTimeout, engaged, [overwrite: false])
+           // runIn(actualEntrySensorsTimeout, engaged, [overwrite: false])
         }
     } else {
         child.generateEvent('checking')
-        runIn(actualEntrySensorsTimeout, engaged, [overwrite: false])
+       // runIn(actualEntrySensorsTimeout, engaged, [overwrite: false])
     }
 } 
 
