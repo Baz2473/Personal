@@ -1,4 +1,3 @@
-
 /*
  Copyright (C) 2017 Baz2473
  Name: Area Occupancy Child App
@@ -356,7 +355,7 @@ def updated() {
    	    }
     }
     
-def    initialize() {
+def initialize() {
     
     if (onAtThisTime && timedTurnOnControl && timedControl) {
         schedule(onAtThisTime, turnOnAtThisTime)
