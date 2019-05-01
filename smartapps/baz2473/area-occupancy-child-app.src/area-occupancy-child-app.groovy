@@ -708,6 +708,7 @@ def entryMotionActiveEventHandler(evt) {
     if (anotherVacancyCheck) {
         atomicState.ffi = false
         unschedule(forceVacantIf)
+        unschedule(switches2Off)
     }
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
@@ -909,6 +910,7 @@ def forceVacantIf() {
     def entryMotionState = entryMotionSensors.currentState("motion")
     if (!['vacant'].contains(areaState) && !entryMotionState.value.contains("active")) {
         vacant()
+        runIn(anotherCheckIn, switches2Off)
     } else {
         log.trace "Vacant check returned '$app.label is NOT vacant!'"
     }
