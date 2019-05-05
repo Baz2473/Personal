@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v6.0.0.0"
+    return "v6.0.0.2"
 }
 
 definition    (
@@ -578,12 +578,19 @@ def entryMotionInactiveEventHandler(evt) {
     def ems = exitMotionSensors.currentState("motion")
     def entryMotionState = entryMotionSensors.currentState("motion")
     if (!entryMotionState.value.contains("active")) {
-         if (['occupiedmotion','occupiedonmotion'].contains(areaState)) {
+         if (['occupiedmotion'].contains(areaState)) {
             if (ems.value.contains("active")) {
-                vacant()
+                child.generateEvent('vacant')
                 return
             }
          }
+            if (['occupiedonmotion'].contains(areaState)) {
+               if (ems.value.contains("active")) {
+                   child.generateEvent('vacanton')
+                   inactiveAction()
+                   return
+               }
+            }
          if (['occupiedonmotion'].contains(areaState)) {
                child.generateEvent('occupiedon')
          }
@@ -591,9 +598,15 @@ def entryMotionInactiveEventHandler(evt) {
                child.generateEvent('occupied')
          }
          if (doors) {
-             if (['checking','checkingon'].contains(areaState)) {
+             if (['checkingon'].contains(areaState)) {
                   unschedule(engaged)
-                  vacant()
+                  child.generateEvent('vacanton')
+                  inactiveAction()
+                  return
+             }
+             if (['checking'].contains(areaState)) {
+                  unschedule(engaged)
+                  child.generateEvent('vacant')
                   return
              }
              if (['engagedonmotion'].contains(areaState)) {
@@ -816,8 +829,20 @@ def monitoredDoorClosedEventHandler(evt) {
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
     if (['occupiedmotion','occupiedonmotion'].contains(areaState)) {
-          checking()
-       }
+          if (checkableLights) {
+              def lightsState = checkableLights.currentState("switch")
+        	  if (lightsState.value.contains("on")) {
+            	  child.generateEvent('checkingon')
+           		  runIn(actualEntrySensorsTimeout, engaged)
+        	  } else {
+                      child.generateEvent('checking')
+           		      runIn(actualEntrySensorsTimeout, engaged)
+        			 }
+    	  } else {
+       		     child.generateEvent('checking')
+       			 runIn(actualEntrySensorsTimeout, engaged)
+    			}
+    }
     if (turnOffAfter) {
         log.trace "Turn Off After Was True So The Lights Should Go Off In $offAfter Seconds"
         runIn(offAfter, doaoff, [overwrite: false])
