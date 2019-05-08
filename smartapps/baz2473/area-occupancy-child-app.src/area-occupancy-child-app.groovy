@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v6.1.1.1"
+    return "v6.1.1.4"
 }
 
 definition    (
@@ -507,7 +507,9 @@ def entryMotionInactiveEventHandler(evt) {
            													  log.trace "The $it have been dimmed to $newLevel %"
         												  }
     									   }   
-    									}
+    									} else {
+                                                child.generateEvent('vacanton')   
+                                        }
                                    } else {
                                           child.generateEvent('vacantdimmed')
 									      switches2.each {
@@ -538,7 +540,9 @@ def entryMotionInactiveEventHandler(evt) {
             											   log.trace "The $it have been dimmed to $newLevel %"
         											   }
     									}  
-    								}
+    								} else {
+                                            child.generateEvent('vacanton')
+                                    }
                                } else {
                                       child.generateEvent('vacantdimmed')
 									  switches2.each {
@@ -583,7 +587,9 @@ def entryMotionInactiveEventHandler(evt) {
             												   log.trace "The $it have been dimmed to $newLevel %"
         												   }
     									   }   
-    								   }
+    								   } else {
+                                               child.generateEvent('vacanton')
+                                       }
                                    } else {
                                            child.generateEvent('vacantdimmed')
 										   switches2.each {
@@ -612,7 +618,9 @@ def entryMotionInactiveEventHandler(evt) {
            													    log.trace "The $it have been dimmed to $newLevel %"
         													}
    				 							}  
-    									}
+    									} else {
+                                                child.generateEvent('vacanton')
+                                        }
                             		} else {
                                             child.generateEvent('vacantdimmed')
 											switches2.each {
