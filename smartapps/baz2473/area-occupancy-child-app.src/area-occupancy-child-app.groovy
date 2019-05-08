@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v6.1.1.0"
+    return "v6.1.1.1"
 }
 
 definition    (
@@ -363,7 +363,7 @@ def checkableLightsSwitchedOffEventHandler(evt) {
    																					    }
 }
 
-
+/////////////////////////////////////////// THESE DEF'S ARE USED IN THE runIn() FUNCTION //////////////////////////////////////////////
 
 def donotdisturb() {
     def child = getChildDevice(getArea())
@@ -422,6 +422,7 @@ def engaged() {
         engagedAction.on()
     }
 } 
+/////////////////////////////////////////// END OF THE DEF'S USED IN THE runIn() FUNCTION //////////////////////////////////////////////
 
 def entryMotionActiveEventHandler(evt) {
     def child = getChildDevice(getArea())
@@ -470,10 +471,10 @@ def entryMotionActiveEventHandler(evt) {
 }
 
 def entryMotionInactiveEventHandler(evt) {
+	def ems = exitMotionSensors.currentState("motion")
+    def entryMotionState = entryMotionSensors.currentState("motion")
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
-    def ems = exitMotionSensors.currentState("motion")
-    def entryMotionState = entryMotionSensors.currentState("motion")
     def automationState = child.getAutomationState()
     if (!entryMotionState.value.contains("active")) {
          if (['occupiedmotion'].contains(areaState)) {
@@ -632,7 +633,6 @@ def entryMotionInactiveEventHandler(evt) {
              if (['checking'].contains(areaState)) {
                   unschedule(engaged)
                   child.generateEvent('vacant')
-                  return
              }
              if (['engagedonmotion'].contains(areaState)) {
                    child.generateEvent('engagedon')
@@ -963,19 +963,7 @@ def turnOnAtThisTime() {
 
 def turnalloff() {
     def child = getChildDevice(getArea())
-    if (!entryMotionSensors && checkableLights) {
-        log.trace "You Have Told Me That $app.label Is Vacant Turning Off All Lights!"
-        checkableLights.each {
-            if (it.hasCommand("setLevel")) {
-                it.setLevel(0)
-            } else {
-                it.off()
-            }
-        }
-        child.generateEvent('vacant')
-        log.trace "All Scheduled Jobs Have Been Cancelled!"
-    }
-    if (entryMotionSensors && checkableLights) {
+    if (checkableLights) {
         def entryMotionState = entryMotionSensors.currentState("motion")
         if (!entryMotionState.value.contains("active")) {
             log.trace "You Have Told Me That $app.label Is Vacant Turning Off All Lights!"
