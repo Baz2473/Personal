@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v6.1.1.4"
+    return "v6.1.1.6"
 }
 
 definition    (
@@ -247,7 +247,7 @@ def updated() {
     if (!childCreated()) {
         spawnChildDevice(app.label)
     	}
-    if (awayModes && noAwayMode || resetAutomationMode && resetAutomation) {
+    if (noAwayMode || resetAutomation) {
         subscribe(location, modeEventHandler)
     	}
     if (checkableLights) {
@@ -271,10 +271,10 @@ def updated() {
     }
     
 def initialize() {
-    if (onAtThisTime && timedTurnOnControl && timedControl) {
+    if (timedTurnOnControl) {
         schedule(onAtThisTime, turnOnAtThisTime)
     	}
-    if (offAtThisTime && timedTurnOffControl && timedControl) {
+    if (timedTurnOffControl) {
         schedule(offAtThisTime, turnOffAtThisTime)
     	}
     if (onAtSunriseChosen || offAtSunriseChosen) {
@@ -363,7 +363,7 @@ def checkableLightsSwitchedOffEventHandler(evt) {
    																					    }
 }
 
-/////////////////////////////////////////// THESE DEF'S ARE USED IN THE runIn() FUNCTION //////////////////////////////////////////////
+/////////////////////////////////////////// THESE DEF'S ARE USED IN runIn() FUNCTIONS //////////////////////////////////////////////
 
 def donotdisturb() {
     def child = getChildDevice(getArea())
@@ -390,6 +390,7 @@ def engaged() {
     def child = getChildDevice(getArea())
     if (checkableLights) {
         def lightsState = checkableLights.currentState("switch")
+        def automationState = child.getAutomationState()
         if (lightsState.value.contains("on")) {
             child.generateEvent('engagedonmotion')
         } else {
@@ -422,7 +423,7 @@ def engaged() {
         engagedAction.on()
     }
 } 
-/////////////////////////////////////////// END OF THE DEF'S USED IN THE runIn() FUNCTION //////////////////////////////////////////////
+/////////////////////////////////////////// END OF THE DEF'S USED IN runIn() FUNCTIONS //////////////////////////////////////////////
 
 def entryMotionActiveEventHandler(evt) {
     def child = getChildDevice(getArea())
@@ -555,6 +556,8 @@ def entryMotionInactiveEventHandler(evt) {
     								  }       
     						   }
                         }
+                    } else {
+                            child.generateEvent('vacanton')
                     }
                  } else {
                          child.generateEvent('vacanton')
@@ -601,7 +604,9 @@ def entryMotionInactiveEventHandler(evt) {
         												   }
     									   }     
     								}
-                            	}
+                            	} else {
+                                        child.generateEvent('vacanton')
+                                }
                         	} else {
                             		if (onlyDuringDaytime9) {
                                		    def s = getSunriseAndSunset()
@@ -633,7 +638,9 @@ def entryMotionInactiveEventHandler(evt) {
     										}   
     								 }
                         		}
-                    		}
+                    		} else {
+                                    child.generateEvent('vacanton')
+                            }
                     	} else {
                                 child.generateEvent('vacanton')
                     	}
@@ -720,12 +727,13 @@ def leftHome() {
     def child = getChildDevice(getArea())
     def automationState = child.getAutomationState()
     if (['automationon'].contains(automationState)) {
-        log.trace "$app.label was set to 'VACANT' because the mode changed to away or Heavy Use Was Disabled!"
+        log.trace "$app.label was set to 'VACANT' because the mode changed to away"
         child.generateEvent('vacant')
 		switches2.each {
        				    it.setLevel(0)
        				    log.trace "The $it are now off"
-    	}    				}
+    	}    				
+    }
 }
 
 def modeEventHandler(evt) {
@@ -742,7 +750,6 @@ def modeEventHandler(evt) {
 }
 
 def monitoredDoorOpenedAction() {
-    def lightStateForDoorAction = doorOpeningAction.currentState("switch")
     doorOpeningAction.each {
         it.setLevel(setLevelAt)
         log.trace "Setting level of $it to $setLevelAt %"
@@ -750,7 +757,6 @@ def monitoredDoorOpenedAction() {
 } 
 
 def monitoredDoorOpenedAction2() {
-    def lightStateForDoorAction2 = doorOpeningAction2.currentState("switch")
     doorOpeningAction2.each {
         it.setLevel(setLevelAt2)
         log.trace "Setting level of $it to $setLevelAt2 %"
@@ -963,9 +969,9 @@ def turnOnAtThisTime() {
     def child = getChildDevice(getArea())
     def automationState = child.getAutomationState()
     switchOnAtThisTime.each {
-        if (['automationon'].contains(automationState)) {
-            it.on()
-        }
+        					 if (['automationon'].contains(automationState)) {
+            					   it.on()
+        					 }
     }
 }
 
@@ -999,7 +1005,5 @@ def turnon() {
                 it.on()
             }
         }
-        child.generateEvent('vacanton')
     }
-    
 }
