@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v6.1.1.6"
+    return "v6.1.1.7"
 }
 
 definition    (
@@ -172,7 +172,15 @@ def areaName() {
                     	}
                     }
                 }
-            section("Do Not Disturb Control") {
+			if (exitMotionSensors) {
+                section("Do You Require Switching $app.label To 'VACANT'\nIf Any Persons Presence Changes To Away?") {
+                    input "presence", "bool", title: "Auto Vacate On\nAny Presence Change?", defaultValue: false, submitOnChange: true
+                    if (presence) {
+                        input "presenceSensors", "capability.presenceSensor", title: "Select Who? Leaving\nWill Activate 'VACANT'", required: true, multiple: true, submitOnChange: true
+                    	}
+                    }
+                }
+                section("Do Not Disturb Control") {
                 if (entryMotionSensors && monitoredDoor && doors) {
                     input "donotdisturbControl", "bool", title: "Do Not Disturb Control?", submitOnChange: true
                     if (donotdisturbControl) {
@@ -268,6 +276,9 @@ def updated() {
     if (onlyIfDisarmed) {
         subscribe(location, "alarmSystemStatus", shmStatusEventHandler)
     	}
+    if (presence) {
+        subscribe(presenceSensors, "presence.not present", presenceAwayEventHandler)
+   	    }    
     }
     
 def initialize() {
@@ -925,6 +936,22 @@ def occupied() {
     } else {
         child.generateEvent('occupiedmotion')
     }
+}
+
+def presenceAwayEventHandler(evt) {
+    def child = getChildDevice(getArea())
+    def areaState = child.getAreaState()
+    def entryMotionState = entryMotionSensors.currentState("motion")
+    if (!['vacant'].contains(areaState) && !entryMotionState.value.contains("active")) {
+    	   checkableLights.each {
+       						     if (it.hasCommand("setLevel")) {
+           						     it.setLevel(0)
+        						 } else {
+           							     it.off()
+        						 }
+    		}
+    child.generateEvent('vacant')
+    } 
 }
 
 def shmStatusEventHandler(evt) {
