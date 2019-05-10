@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v6.2.0.1"
+    return "v6.2.0.3"
 }
 
 definition    (
@@ -282,10 +282,10 @@ def updated() {
     }
     
 def initialize() {
-    if (timedTurnOnControl) {
+    if (onAtThisTime) {
         schedule(onAtThisTime, turnOnAtThisTime)
     	}
-    if (timedTurnOffControl) {
+    if (offAtThisTime) {
         schedule(offAtThisTime, turnOffAtThisTime)
     	}
     if (onAtSunriseChosen || offAtSunriseChosen) {
@@ -586,7 +586,6 @@ def entryMotionInactiveEventHandler(evt) {
                               		    def sunset = s.sunset.time
                                		    def timenow = now()
                                		    if (timenow > sunrise && timenow < sunset) {
-                                            //child.generateEvent('vacantdimmed')
                                             child.generateEvent('vacantdimmedclosed')
 											switches2.each {
        													    def currentLevel = it.currentValue("level")
@@ -597,11 +596,9 @@ def entryMotionInactiveEventHandler(evt) {
         													}
    				 							}  
     									} else {
-                                                //child.generateEvent('vacanton')
                                                 child.generateEvent('vacantonclosed')
                                         }
                             		} else {
-                                            //child.generateEvent('vacantdimmed')
                                             child.generateEvent('vacantdimmedclosed')
 											switches2.each {
         													def currentLevel = it.currentValue("level")
@@ -613,13 +610,11 @@ def entryMotionInactiveEventHandler(evt) {
     										}   
     								 }
                     		} else {
-                                    //child.generateEvent('vacanton')
                                     child.generateEvent('vacantonclosed')
                             }
              }
              if (['checking'].contains(areaState)) {
                   unschedule(engaged)
-                  //child.generateEvent('vacant')
                   child.generateEvent('vacantclosed')
              }
              if (['engagedonmotion'].contains(areaState)) {
@@ -657,16 +652,22 @@ def exitMotionInactiveEventHandler(evt) {
                		}
            		}
         }
-    } else if (!['vacant'].contains(areaState)) {
-      	   if (offRequired && ['vacantdimmed'].contains(areaState) && ['automationon'].contains(automationState)) {
+    } else if (offRequired && ['vacantdimmed'].contains(areaState) && ['automationon'].contains(automationState)) {
           	   if (!exitMotionState.value.contains("active")) {
 					switches2.each {
        		   	    it.setLevel(0)
        		        log.trace "The $it are now off"
    			   	    }
                }
+           } else if (offRequired && !['vacant'].contains(areaState) && ['automationon'].contains(automationState)) {
+           			  def entryMotionState = entryMotionSensors.currentState("motion")
+    				  if (!entryMotionState.value.contains("active") && !exitMotionState.value.contains("active")) {
+                      	   switches2.each {
+       		   	    	   it.setLevel(0)
+       		        	   log.trace "The $it have now been switches off via the last resort method"
+   			   	    	   }
+					  }
            }
-    }
 }
 
 def forceTurnAllOff() {
