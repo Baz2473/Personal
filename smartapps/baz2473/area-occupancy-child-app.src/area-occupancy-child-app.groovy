@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v6.2.0.0"
+    return "v6.2.0.1"
 }
 
 definition    (
@@ -645,7 +645,7 @@ def exitMotionInactiveEventHandler(evt) {
     def automationState = child.getAutomationState()
     if (doors) {
         def monitoredDoorState = doors.currentValue("contact")
-        if (!monitoredDoorState.contains("open") && !['vacantdimmed','vacanton'].contains(areaState)) {
+        if (!monitoredDoorState.contains("open") && !['vacantdimmedclosed','vacantonclosed'].contains(areaState)) {
             log.trace "Exit motion is INACTIVE but the $app.label door is closed so this will be ignored!!!"
         } else {
            	   if (offRequired && ['vacantdimmed','vacantdimmedclosed'].contains(areaState) && ['automationon'].contains(automationState)) {
@@ -855,11 +855,12 @@ def monitoredDoorClosedEventHandler(evt) {
     }
     if (['occupiedmotion'].contains(areaState)) {
     	  child.generateEvent('checking')
+    	  runIn(actualEntrySensorsTimeout, engaged)
     }
     if (['occupiedonmotion'].contains(areaState)) {
     	  child.generateEvent('checkingon')
+    	  runIn(actualEntrySensorsTimeout, engaged)
     }
-    runIn(actualEntrySensorsTimeout, engaged)
     if (turnOffAfter) {
         log.trace "Turn Off After Was True So The Lights Should Go Off In $offAfter Seconds"
         runIn(offAfter, doaoff, [overwrite: false])
@@ -969,11 +970,22 @@ def turnalloff() {
                     it.off()
                 }
             }
-            child.generateEvent('vacant')
+            if (doors) {
+                def doorsState = doors.currentState("contact")
+                if (!doorsState.value.contains("open")) {
+                	 child.generateEvent('vacantclosed')
+                } else {
+                        child.generateEvent('vacant')
+                }
+
+            }
+            //child.generateEvent('vacant')
             log.trace "All Scheduled Jobs Have Been Cancelled!"
+        } else {
+                child.generateEvent('vacant')
         }
     }
-} 
+}
 
 def turnon() {
     def child = getChildDevice(getArea())
