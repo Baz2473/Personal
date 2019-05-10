@@ -2,7 +2,7 @@
   Copyright (C) 2017 Baz2473
   Name: Area Occupancy Status 
 */
-public static String DTHVersion() { return "v3.1.0.5" }
+public static String DTHVersion() { return "v3.1.1.0" }
 
 metadata {
 	      definition (
@@ -17,8 +17,11 @@ metadata {
                                           command "turnalloff"
                                           command "turnon"
 		                                  command "vacant"
+                                          command "vacantclosed"
                                           command "vacantdimmed"
+                                          command "vacantdimmedclosed"
                                           command "vacanton"
+                                          command "vacantonclosed"
                                           command "occupied"
                                           command "occupiedmotion"
                                           command "occupiedon"
@@ -44,8 +47,11 @@ metadata {
     	multiAttributeTile(name: "occupancyStatus", type: "generic", width: 2, height: 2, canChangeBackground: false) {
 			tileAttribute ("device.occupancyStatus", key: "PRIMARY_CONTROL") {
 				attributeState "vacant", label: 'vacant', action: "turnon", icon:"st.Home.home18", backgroundColor:"#606060"
+				attributeState "vacantclosed", label: 'vacant', action: "turnon", icon:"st.Home.home18", backgroundColor:"#606060"
                 attributeState "vacantdimmed", label: 'vacant', action: "turnalloff", icon:"st.Home.home18", backgroundColor:"#cdc8a3"
+                attributeState "vacantdimmedclosed", label: 'vacant', action: "turnalloff", icon:"st.Home.home18", backgroundColor:"#cdc8a3"
                 attributeState "vacanton", label: 'vacant', action: "turnalloff", icon:"st.Home.home18", backgroundColor:"#c1b419"
+                attributeState "vacantonclosed", label: 'vacant', action: "turnalloff", icon:"st.Home.home18", backgroundColor:"#c1b419"
                 attributeState "occupied", label: 'occupied', action: "vacant", icon:"st.Home.home4", backgroundColor:"#156700"
                 attributeState "occupiedmotion", label: 'motion', action: "vacant", icon:"st.Health & Wellness.health12", backgroundColor:"#156700"
                 attributeState "occupiedon", label: 'occupied', action: "vacanton", icon:"st.Home.home4", backgroundColor:"#32cd32"
@@ -90,11 +96,20 @@ def initialize() {
 def vacant() {
     stateUpdate('vacant')		
     }
+def vacantclosed() {
+	stateUpdate('vacantclosed')
+    }
 def vacantdimmed() {
     stateUpdate('vacantdimmed')
     }
+def vacantdimmedclosed() {
+    stateUpdate('vacantdimmedclosed')
+    }
 def vacanton() {	
     stateUpdate('vacanton')		
+    }
+def vacantonclosed() {	
+    stateUpdate('vacantonclosed')		
     }
 def occupied() {
     stateUpdate('occupied')
@@ -150,9 +165,9 @@ private	automationStateUpdate(automationState) {
             }
 private updateOccupancyStatus(occupancyStatus = null) {
 	    occupancyStatus = occupancyStatus?.toLowerCase()
-	    def msgTextMap = ['vacant':'Vacant Since: ','vacantdimmed':'Vacant & Dimmed Since: ','vacanton':'Vacant & On Since: ', 'occupied':'Occupied Since: ', 'occupiedmotion':'Occupied & Motion Since: ', 'occupiedon':'Occupied & On Since: ', 'occupiedonmotion':'Occupied & Motion Since: ','checking':'Checking Status: ','checkingon':'Checking Status Since: ','engaged':'Engaged Since: ', 'engagedmotion':'Engaged & Motion Since: ','engagedon':'Engaged & On Since: ','engagedonmotion':'Engaged & Motion Since: ' ,'donotdisturb':'DND Since: ','donotdisturbon':'DND & On Since: ']
+	    def msgTextMap = ['vacant':'Vacant Since: ','vacantdimmed':'Vacant & Dimmed Since: ','vacanton':'Vacant & On Since: ','vacantclosed':'Vacant & Closed Since: ','vacantdimmedclosed':'Vacant, Closed & Dimmed Since: ','vacantonclosed':'Vacant, Closed & On Since: ', 'occupied':'Occupied Since: ', 'occupiedmotion':'Occupied & Motion Since: ', 'occupiedon':'Occupied & On Since: ', 'occupiedonmotion':'Occupied & Motion Since: ','checking':'Checking Status: ','checkingon':'Checking Status Since: ','engaged':'Engaged Since: ', 'engagedmotion':'Engaged & Motion Since: ','engagedon':'Engaged & On Since: ','engagedonmotion':'Engaged & Motion Since: ' ,'donotdisturb':'DND Since: ','donotdisturbon':'DND & On Since: ']
         if (!occupancyStatus || !(msgTextMap.containsKey(occupancyStatus))) {
-    	     log.debug "${device.displayName}: Missing or invalid parameter Occupancy Status. Allowed values are: vacant, vacantdimmed, occupied, occupiedonmotion, checking, engaged, engagedonmotion, donotdisturb, vacanton, occupiedon, checkingon, engagedon or donotdisturbon."
+    	     log.debug "${device.displayName}: Missing or invalid parameter Occupancy Status. Allowed values are: vacant, vacantclosed, vacantdimmed, vacantdimmedclosed, occupied, occupiedonmotion, checking, engaged, engagedonmotion, donotdisturb, vacanton, vacantonclosed, occupiedon, checkingon, engagedon or donotdisturbon."
              return
              }
 	    sendEvent(name: "occupancyStatus", value: occupancyStatus, descriptionText: "${device.displayName} changed to ${occupancyStatus}", isStateChange: true, displayed: true)
