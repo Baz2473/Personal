@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v6.2.0.3"
+    return "v6.2.0.5"
 }
 
 definition    (
@@ -659,12 +659,13 @@ def exitMotionInactiveEventHandler(evt) {
        		        log.trace "The $it are now off"
    			   	    }
                }
-           } else if (offRequired && !['vacant'].contains(areaState) && ['automationon'].contains(automationState)) {
+           } else if (offRequired && ['vacanton','occupiedon'].contains(areaState) && ['automationon'].contains(automationState)) {
            			  def entryMotionState = entryMotionSensors.currentState("motion")
     				  if (!entryMotionState.value.contains("active") && !exitMotionState.value.contains("active")) {
-                      	   switches2.each {
+                      	   child.generateEvent('vacant')
+                           switches2.each {
        		   	    	   it.setLevel(0)
-       		        	   log.trace "The $it have now been switches off via the last resort method"
+       		        	   log.trace "The $it have now been switched off via the last resort method"
    			   	    	   }
 					  }
            }
