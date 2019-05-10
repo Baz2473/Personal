@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v6.1.2.0"
+    return "v6.2.0.0"
 }
 
 definition    (
@@ -338,19 +338,21 @@ def checkableLightsSwitchedOnEventHandler(evt) {
     def areaState = child.getAreaState()
     if (['vacant','vacantdimmed'].contains(areaState)) {
           child.generateEvent('vacanton')
-          } else if (['occupied'].contains(areaState)) {
-                       child.generateEvent('occupiedon')
-                       } else if (['occupiedmotion'].contains(areaState)) {
-                                    child.generateEvent('occupiedonmotion')
-   								    }  else if (['engaged'].contains(areaState)) {
-       											  child.generateEvent('engagedon')
-   												  } else if (['engagedmotion'].contains(areaState)) {
-     														   child.generateEvent('engagedonmotion')
-   															   } else if (['checking'].contains(areaState)) {
-       																	    child.generateEvent('checkingon')
-   																		    } else if (['donotdisturb'].contains(areaState)) {
-       																					 child.generateEvent('donotdisturbon')
-    																					 }
+          } else if (['vacantclosed','vacantdimmedclosed'].contains(areaState)) {
+          			   child.generateEvent('vacantonclosed')
+          			   } else if (['occupied'].contains(areaState)) {
+                       			    child.generateEvent('occupiedon')
+                       				} else if (['occupiedmotion'].contains(areaState)) {
+                                   			     child.generateEvent('occupiedonmotion')
+   								    			 } else if (['engaged'].contains(areaState)) {
+       											 			  child.generateEvent('engagedon')
+   												  			  } else if (['engagedmotion'].contains(areaState)) {
+     														  			   child.generateEvent('engagedonmotion')
+   															  			   } else if (['checking'].contains(areaState)) {
+       																	    			child.generateEvent('checkingon')
+   																		    			} else if (['donotdisturb'].contains(areaState)) {
+       																								 child.generateEvent('donotdisturbon')
+    																					 			 }
 }
 
 def checkableLightsSwitchedOffEventHandler(evt) {
@@ -359,19 +361,21 @@ def checkableLightsSwitchedOffEventHandler(evt) {
     def checkableLightsState = checkableLights.currentState("switch")
     if (['vacanton','vacantdimmed'].contains(areaState) && !checkableLightsState.value.contains("on")) {
        	  child.generateEvent('vacant')
-    	  } else if (['occupiedon'].contains(areaState) && !checkableLightsState.value.contains("on")) {
-        			   child.generateEvent('occupied')
-   					   } else if (['occupiedonmotion'].contains(areaState) && !checkableLightsState.value.contains("on")) {
-       							    child.generateEvent('occupiedmotion')
-    							    } else if (['engagedon'].contains(areaState) && !checkableLightsState.value.contains("on")) {
-       										     child.generateEvent('engaged')
-   											     } else if (['engagedonmotion'].contains(areaState) && !checkableLightsState.value.contains("on")) {
-      													      child.generateEvent('engagedmotion')
-    														  } else if (['checkingon'].contains(areaState) && !checkableLightsState.value.contains("on")) {
-       																	   child.generateEvent('checking')
-   																		   } else if (['donotdisturbon'].contains(areaState) && !checkableLightsState.value.contains("on")) {
-       																		   		    child.generateEvent('donotdisturb')
-   																					    }
+    	  } else if (['vacantonclosed','vacantdimmedclosed'].contains(areaState) && !checkableLightsState.value.contains("on")) {
+       	  			   child.generateEvent('vacantclosed')
+    	 			   } else if (['occupiedon'].contains(areaState) && !checkableLightsState.value.contains("on")) {
+        			  			    child.generateEvent('occupied')
+   					  			    } else if (['occupiedonmotion'].contains(areaState) && !checkableLightsState.value.contains("on")) {
+       							  			     child.generateEvent('occupiedmotion')
+    							   			     } else if (['engagedon'].contains(areaState) && !checkableLightsState.value.contains("on")) {
+       										 			      child.generateEvent('engaged')
+   											     			  } else if (['engagedonmotion'].contains(areaState) && !checkableLightsState.value.contains("on")) {
+      													   			       child.generateEvent('engagedmotion')
+    																	   } else if (['checkingon'].contains(areaState) && !checkableLightsState.value.contains("on")) {
+       																			    	child.generateEvent('checking')
+   																		  			    } else if (['donotdisturbon'].contains(areaState) && !checkableLightsState.value.contains("on")) {
+       																		   		   			     child.generateEvent('donotdisturb')
+   																					    			 }
 }
 
 /////////////////////////////////////////// THESE DEF'S ARE USED IN runIn() FUNCTIONS //////////////////////////////////////////////
@@ -582,8 +586,8 @@ def entryMotionInactiveEventHandler(evt) {
                               		    def sunset = s.sunset.time
                                		    def timenow = now()
                                		    if (timenow > sunrise && timenow < sunset) {
-                                            child.generateEvent('vacantdimmed')
-                                            //child.generateEvent('vacantdimmedclosed')
+                                            //child.generateEvent('vacantdimmed')
+                                            child.generateEvent('vacantdimmedclosed')
 											switches2.each {
        													    def currentLevel = it.currentValue("level")
       													    if (currentLevel > dimByLevel) {
@@ -593,12 +597,12 @@ def entryMotionInactiveEventHandler(evt) {
         													}
    				 							}  
     									} else {
-                                                child.generateEvent('vacanton')
-                                                //child.generateEvent('vacantonclosed')
+                                                //child.generateEvent('vacanton')
+                                                child.generateEvent('vacantonclosed')
                                         }
                             		} else {
-                                            child.generateEvent('vacantdimmed')
-                                            //child.generateEvent('vacantdimmedclosed')
+                                            //child.generateEvent('vacantdimmed')
+                                            child.generateEvent('vacantdimmedclosed')
 											switches2.each {
         													def currentLevel = it.currentValue("level")
         													if (currentLevel > dimByLevel) {
@@ -608,16 +612,15 @@ def entryMotionInactiveEventHandler(evt) {
         													}
     										}   
     								 }
-                        		//}
                     		} else {
-                                    child.generateEvent('vacanton')
-                                    //child.generateEvent('vacantonclosed')
+                                    //child.generateEvent('vacanton')
+                                    child.generateEvent('vacantonclosed')
                             }
              }
              if (['checking'].contains(areaState)) {
                   unschedule(engaged)
-                  child.generateEvent('vacant')
-                  //child.generateEvent('vacantclosed')
+                  //child.generateEvent('vacant')
+                  child.generateEvent('vacantclosed')
              }
              if (['engagedonmotion'].contains(areaState)) {
                    child.generateEvent('engagedon')
@@ -645,7 +648,7 @@ def exitMotionInactiveEventHandler(evt) {
         if (!monitoredDoorState.contains("open") && !['vacantdimmed','vacanton'].contains(areaState)) {
             log.trace "Exit motion is INACTIVE but the $app.label door is closed so this will be ignored!!!"
         } else {
-           	   if (offRequired && ['vacantdimmed'].contains(areaState) && ['automationon'].contains(automationState)) {
+           	   if (offRequired && ['vacantdimmed','vacantdimmedclosed'].contains(areaState) && ['automationon'].contains(automationState)) {
                	   if (!exitMotionState.value.contains("active")) {
 						switches2.each {
      			    	it.setLevel(0)
@@ -731,6 +734,10 @@ def monitoredDoorOpenedEventHandler(evt) {
     unschedule(donotdisturb)
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
+    if (['vacantclosed'].contains(areaState)) {
+    	  child.generateEvent('vacant')
+    }
+
     if (['checking','checkingon','engaged','engagedmotion','engagedon','engagedonmotion','donotdisturb','donotdisturbon'].contains(areaState)) {
         occupied()
     }
@@ -746,7 +753,7 @@ def monitoredDoorOpenedEventHandler(evt) {
             if (onlyDuringDaytime) {
                 if (timenow > sunrise && timenow < sunset) {
                     if (onlyIfAreaVacant) {
-                        if (['vacant'].contains(areaState)) {
+                        if (['vacant','vacantclosed'].contains(areaState)) {
                             log.trace "The Light Was Turned ON To $setLevelAt % Because The Door Was Opened & $app.label Was VACANT & The Time Selection Matched!"
                             monitoredDoorOpenedAction()
                         }
@@ -758,7 +765,7 @@ def monitoredDoorOpenedEventHandler(evt) {
             if (onlyDuringNighttime) {
                 if (timenow > sunset || timenow < sunrise) {
                     if (onlyIfAreaVacant) {
-                        if (['vacant'].contains(areaState)) {
+                        if (['vacant','vacantclosed'].contains(areaState)) {
                             log.trace "The Light Was Turned ON To $setLevelAt % Because The Door Was Opened & $app.label Was VACANT & The Time Selection Matched!"
                             monitoredDoorOpenedAction()
                         }
@@ -770,7 +777,7 @@ def monitoredDoorOpenedEventHandler(evt) {
             if (onlyDuringDaytime2) {
                 if (timenow > sunrise && timenow < sunset) {
                     if (onlyIfAreaVacant2) {
-                        if (['vacant'].contains(areaState)) {
+                        if (['vacant','vacantclosed'].contains(areaState)) {
                             log.trace "The Light Was Turned ON To $setLevelAt % Because The Door Was Opened & $app.label Was VACANT & The Time Selection Matched!"
                             monitoredDoorOpenedAction2()
                         }
@@ -782,7 +789,7 @@ def monitoredDoorOpenedEventHandler(evt) {
             if (onlyDuringNighttime2) {
                 if (timenow > sunset || timenow < sunrise) {
                     if (onlyIfAreaVacant2) {
-                        if (['vacant'].contains(areaState)) {
+                        if (['vacant','vacantclosed'].contains(areaState)) {
                             log.trace "The Light Was Turned ON To $setLevelAt % Because The Door Was Opened & $app.label Was VACANT & The Time Selection Matched!"
                             monitoredDoorOpenedAction2()
                         }
@@ -800,7 +807,7 @@ def monitoredDoorOpenedEventHandler(evt) {
             log.trace "Between2 = $between2"
             if (between) {
                 if (onlyIfAreaVacant) {
-                    if (['vacant'].contains(areaState)) {
+                    if (['vacant','vacantclosed'].contains(areaState)) {
                         log.trace "The Light Was Turned ON To $setLevelAt % Because The Door Was Opened & $app.label Was VACANT & The Time Selection Matched!"
                         monitoredDoorOpenedAction()
                     }
@@ -814,7 +821,7 @@ def monitoredDoorOpenedEventHandler(evt) {
                     def theMotionState = onlyIfThisSensorIsActive.currentState("motion")
                     if (theMotionState.value.contains("active")) {
                         if (onlyIfAreaVacant2) {
-                            if (['vacant'].contains(areaState)) {
+                            if (['vacant','vacantclosed'].contains(areaState)) {
                                 log.trace "The Light Was Turned ON To $setLevelAt % Because The Door Was Opened & $app.label Was VACANT & The Time Selection Matched!"
                                 monitoredDoorOpenedAction2()
                             }
@@ -824,7 +831,7 @@ def monitoredDoorOpenedEventHandler(evt) {
                     }
                 } else {
                     if (onlyIfAreaVacant2) {
-                        if (['vacant'].contains(areaState)) {
+                        if (['vacant','vacantclosed'].contains(areaState)) {
                             log.trace "The Light Was Turned ON To $setLevelAt % Because The Door Was Opened & $app.label Was VACANT & The Time Selection Matched!"
                             monitoredDoorOpenedAction2()
                         }
@@ -843,6 +850,9 @@ def monitoredDoorOpenedEventHandler(evt) {
 def monitoredDoorClosedEventHandler(evt) {
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
+    if (['vacant'].contains(areaState)) {
+    	  child.generateEvent('vacantclosed')
+    }
     if (['occupiedmotion'].contains(areaState)) {
     	  child.generateEvent('checking')
     }
