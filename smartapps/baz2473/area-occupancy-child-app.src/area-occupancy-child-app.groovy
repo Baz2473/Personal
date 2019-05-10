@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v6.1.1.7"
+    return "v6.1.1.9"
 }
 
 definition    (
@@ -407,7 +407,7 @@ def engaged() {
         } else {
             child.generateEvent('engagedmotion')
         }
-        if (dimmableSwitches1 && switchOnControl && ['automationon'].contains(automationState)) {
+        if (switchOnControl && ['automationon'].contains(automationState)) {
             dimmableSwitches1.each {
                 def currentLevel = it.currentValue("level")
                 if (currentLevel < setLevelTo) {
@@ -446,7 +446,7 @@ def entryMotionActiveEventHandler(evt) {
         child.generateEvent('occupiedmotion')
     }
     def automationState = child.getAutomationState()
-    if (dimmableSwitches1 && switchOnControl && ['automationon'].contains(automationState)) {
+    if (switchOnControl && ['automationon'].contains(automationState)) {
         dimmableSwitches1.each {
         def currentLevel = it.currentValue("level")
         if (currentLevel < setLevelTo) {
@@ -484,10 +484,10 @@ def entryMotionActiveEventHandler(evt) {
 
 def entryMotionInactiveEventHandler(evt) {
 	def ems = exitMotionSensors.currentState("motion")
-    def entryMotionState = entryMotionSensors.currentState("motion")
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
     def automationState = child.getAutomationState()
+    def entryMotionState = entryMotionSensors.currentState("motion")
     if (!entryMotionState.value.contains("active")) {
          if (['occupiedmotion'].contains(areaState)) {
             if (ems.value.contains("active")) {
@@ -498,9 +498,7 @@ def entryMotionInactiveEventHandler(evt) {
          }
             if (['occupiedonmotion'].contains(areaState)) {
                if (ems.value.contains("active")) {
-                   if (switches2 && delayedOff && offRequired) {
-                       def switches2State = switches2.currentState("switch")
-                       if (switches2State.value.contains("on") && ['automationon'].contains(automationState)) {
+                       if (offRequired && ['automationon'].contains(automationState)) {
                            if (thisAreaMustBeVacant) {
                                def thisAreaState = thisAreaMustBeVacant.currentState("occupancyStatus")
                                if (thisAreaState.value.contains("vacant") || thisAreaState.value.contains("vacanton") || thisAreaState.value.contains("vacantdimmed")) {
@@ -570,9 +568,6 @@ def entryMotionInactiveEventHandler(evt) {
                     } else {
                             child.generateEvent('vacanton')
                     }
-                 } else {
-                         child.generateEvent('vacanton')
-                 }
                } else {
                        child.generateEvent('occupiedon')
                }
@@ -580,9 +575,7 @@ def entryMotionInactiveEventHandler(evt) {
          if (doors) {
              if (['checkingon'].contains(areaState)) {
                   unschedule(engaged)
-                   if (switches2 && delayedOff && offRequired) {
-                   	   def switches2State = switches2.currentState("switch")
-                       if (switches2State.value.contains("on") && ['automationon'].contains(automationState)) {
+                       if (offRequired && ['automationon'].contains(automationState)) {
                        	   if (thisAreaMustBeVacant) {
                                def thisAreaState = thisAreaMustBeVacant.currentState("occupancyStatus")
                                if (thisAreaState.value.contains("vacant") || thisAreaState.value.contains("vacanton") || thisAreaState.value.contains("vacantdimmed")) {
@@ -652,9 +645,6 @@ def entryMotionInactiveEventHandler(evt) {
                     		} else {
                                     child.generateEvent('vacanton')
                             }
-                    	} else {
-                                child.generateEvent('vacanton')
-                    	}
              }
              if (['checking'].contains(areaState)) {
                   unschedule(engaged)
@@ -677,6 +667,7 @@ def entryMotionInactiveEventHandler(evt) {
 }
 
 def exitMotionInactiveEventHandler(evt) {
+    def exitMotionState = exitMotionSensors.currentState("motion")
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
     def automationState = child.getAutomationState()
@@ -685,10 +676,7 @@ def exitMotionInactiveEventHandler(evt) {
         if (!monitoredDoorState.contains("open") && !['vacantdimmed','vacanton'].contains(areaState)) {
             log.trace "Exit motion is INACTIVE but the $app.label door is closed so this will be ignored!!!"
         } else {
-           if (switches2 && delayedOff && offRequired) {
-               def switches2State = switches2.currentState("switch")
-           	   if (switches2State.value.contains("on") && ['vacantdimmed'].contains(areaState) && ['automationon'].contains(automationState)) {
-               	   def exitMotionState = exitMotionSensors.currentState("motion")
+           	   if (offRequired && ['vacantdimmed'].contains(areaState) && ['automationon'].contains(automationState)) {
                	   if (!exitMotionState.value.contains("active")) {
 						switches2.each {
      			    	it.setLevel(0)
@@ -696,13 +684,9 @@ def exitMotionInactiveEventHandler(evt) {
     					}
                		}
            		}
-           }
         }
     } else if (!['vacant'].contains(areaState)) {
-       if (switches2 && delayedOff && offRequired) {
-           def switches2State = switches2.currentState("switch")
-      	   if (switches2State.value.contains("on") && ['vacantdimmed'].contains(areaState) && ['automationon'].contains(automationState)) {
-         	   def exitMotionState = exitMotionSensors.currentState("motion")
+      	   if (offRequired && ['vacantdimmed'].contains(areaState) && ['automationon'].contains(automationState)) {
           	   if (!exitMotionState.value.contains("active")) {
 					switches2.each {
        		   	    it.setLevel(0)
@@ -710,7 +694,6 @@ def exitMotionInactiveEventHandler(evt) {
    			   	    }
                }
            }
-       }
     }
 }
 
@@ -891,21 +874,13 @@ def monitoredDoorOpenedEventHandler(evt) {
 def monitoredDoorClosedEventHandler(evt) {
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
-    if (['occupiedmotion','occupiedonmotion'].contains(areaState)) {
-          if (checkableLights) {
-              def lightsState = checkableLights.currentState("switch")
-        	  if (lightsState.value.contains("on")) {
-            	  child.generateEvent('checkingon')
-           		  runIn(actualEntrySensorsTimeout, engaged)
-        	  } else {
-                      child.generateEvent('checking')
-           		      runIn(actualEntrySensorsTimeout, engaged)
-        			 }
-    	  } else {
-       		     child.generateEvent('checking')
-       			 runIn(actualEntrySensorsTimeout, engaged)
-    			}
+    if (['occupiedmotion'].contains(areaState)) {
+    	  child.generateEvent('checking')
     }
+    if (['occupiedonmotion'].contains(areaState)) {
+    	  child.generateEvent('checkingon')
+    }
+    runIn(actualEntrySensorsTimeout, engaged)
     if (turnOffAfter) {
         log.trace "Turn Off After Was True So The Lights Should Go Off In $offAfter Seconds"
         runIn(offAfter, doaoff, [overwrite: false])
