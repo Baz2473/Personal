@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v6.1.1.9"
+    return "v6.1.2.0"
 }
 
 definition    (
@@ -576,42 +576,6 @@ def entryMotionInactiveEventHandler(evt) {
              if (['checkingon'].contains(areaState)) {
                   unschedule(engaged)
                        if (offRequired && ['automationon'].contains(automationState)) {
-                       	   if (thisAreaMustBeVacant) {
-                               def thisAreaState = thisAreaMustBeVacant.currentState("occupancyStatus")
-                               if (thisAreaState.value.contains("vacant") || thisAreaState.value.contains("vacanton") || thisAreaState.value.contains("vacantdimmed")) {
-                                   if (onlyDuringDaytime9) {
-                                       def s = getSunriseAndSunset()
-                                       def sunrise = s.sunrise.time
-                                       def sunset = s.sunset.time
-                                       def timenow = now()
-                                       if (timenow > sunrise && timenow < sunset) {
-                                           child.generateEvent('vacantdimmed')
-									       switches2.each {
-        												   def currentLevel = it.currentValue("level")
-       													   if (currentLevel > dimByLevel) {
-           													   def newLevel = (currentLevel - dimByLevel)
-            												   it.setLevel(newLevel)
-            												   log.trace "The $it have been dimmed to $newLevel %"
-        												   }
-    									   }   
-    								   } else {
-                                               child.generateEvent('vacanton')
-                                       }
-                                   } else {
-                                           child.generateEvent('vacantdimmed')
-										   switches2.each {
-       													   def currentLevel = it.currentValue("level")
-        												   if (currentLevel > dimByLevel) {
-            												   def newLevel = (currentLevel - dimByLevel)
-            												   it.setLevel(newLevel)
-            												   log.trace "The $it have been dimmed to $newLevel %"
-        												   }
-    									   }     
-    								}
-                            	} else {
-                                        child.generateEvent('vacanton')
-                                }
-                        	} else {
                             		if (onlyDuringDaytime9) {
                                		    def s = getSunriseAndSunset()
                                		    def sunrise = s.sunrise.time
@@ -619,6 +583,7 @@ def entryMotionInactiveEventHandler(evt) {
                                		    def timenow = now()
                                		    if (timenow > sunrise && timenow < sunset) {
                                             child.generateEvent('vacantdimmed')
+                                            //child.generateEvent('vacantdimmedclosed')
 											switches2.each {
        													    def currentLevel = it.currentValue("level")
       													    if (currentLevel > dimByLevel) {
@@ -629,9 +594,11 @@ def entryMotionInactiveEventHandler(evt) {
    				 							}  
     									} else {
                                                 child.generateEvent('vacanton')
+                                                //child.generateEvent('vacantonclosed')
                                         }
                             		} else {
                                             child.generateEvent('vacantdimmed')
+                                            //child.generateEvent('vacantdimmedclosed')
 											switches2.each {
         													def currentLevel = it.currentValue("level")
         													if (currentLevel > dimByLevel) {
@@ -641,14 +608,16 @@ def entryMotionInactiveEventHandler(evt) {
         													}
     										}   
     								 }
-                        		}
+                        		//}
                     		} else {
                                     child.generateEvent('vacanton')
+                                    //child.generateEvent('vacantonclosed')
                             }
              }
              if (['checking'].contains(areaState)) {
                   unschedule(engaged)
                   child.generateEvent('vacant')
+                  //child.generateEvent('vacantclosed')
              }
              if (['engagedonmotion'].contains(areaState)) {
                    child.generateEvent('engagedon')
