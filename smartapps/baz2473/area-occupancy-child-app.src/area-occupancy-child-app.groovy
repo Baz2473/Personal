@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v6.2.0.5"
+    return "v6.2.0.7"
 }
 
 definition    (
@@ -659,7 +659,7 @@ def exitMotionInactiveEventHandler(evt) {
        		        log.trace "The $it are now off"
    			   	    }
                }
-           } else if (offRequired && ['vacanton','occupiedon'].contains(areaState) && ['automationon'].contains(automationState)) {
+           } /*else if (offRequired && ['vacanton','occupiedon'].contains(areaState) && ['automationon'].contains(automationState) && !thisAreaMustBeVacant) {
            			  def entryMotionState = entryMotionSensors.currentState("motion")
     				  if (!entryMotionState.value.contains("active") && !exitMotionState.value.contains("active")) {
                       	   child.generateEvent('vacant')
@@ -668,7 +668,7 @@ def exitMotionInactiveEventHandler(evt) {
        		        	   log.trace "The $it have now been switched off via the last resort method"
    			   	    	   }
 					  }
-           }
+           } */
 }
 
 def forceTurnAllOff() {
@@ -852,27 +852,30 @@ def monitoredDoorOpenedEventHandler(evt) {
 def monitoredDoorClosedEventHandler(evt) {
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
-    if (['vacant'].contains(areaState)) {
-    	  child.generateEvent('vacantclosed')
+    def doorsState = doors.currentState("contact")
+    if (!doorsState.value.contains("open")) {
+   		 if (['vacant'].contains(areaState)) {
+    	       child.generateEvent('vacantclosed')
+         }
+    	 if (['occupiedmotion'].contains(areaState)) {
+    		   child.generateEvent('checking')
+    		   runIn(actualEntrySensorsTimeout, engaged)
+   	 	 }
+   		 if (['occupiedonmotion'].contains(areaState)) {
+    		   child.generateEvent('checkingon')
+    		   runIn(actualEntrySensorsTimeout, engaged)
+         }
+         if (turnOffAfter) {
+             log.trace "Turn Off After Was True So The Lights Should Go Off In $offAfter Seconds"
+             runIn(offAfter, doaoff, [overwrite: false])
+         }
+         if (actionOnDoorClosing) {
+             log.trace "The Light Was Turned OFF Because The Door Was Closed"
+             doorOpeningAction.each {
+                 			        it.setLevel(0)
+            			       	    }
+    	 }
     }
-    if (['occupiedmotion'].contains(areaState)) {
-    	  child.generateEvent('checking')
-    	  runIn(actualEntrySensorsTimeout, engaged)
-    }
-    if (['occupiedonmotion'].contains(areaState)) {
-    	  child.generateEvent('checkingon')
-    	  runIn(actualEntrySensorsTimeout, engaged)
-    }
-    if (turnOffAfter) {
-        log.trace "Turn Off After Was True So The Lights Should Go Off In $offAfter Seconds"
-        runIn(offAfter, doaoff, [overwrite: false])
-    }
-    if (actionOnDoorClosing) {
-        log.trace "The Light Was Turned OFF Because The Door Was Closed"
-        doorOpeningAction.each {
-            			        it.setLevel(0)
-            				   }
-    	} 
 }
 
 def occupied() {
@@ -981,7 +984,6 @@ def turnalloff() {
                 }
 
             }
-            //child.generateEvent('vacant')
             log.trace "All Scheduled Jobs Have Been Cancelled!"
         } else {
                 child.generateEvent('vacant')
