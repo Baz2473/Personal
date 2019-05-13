@@ -2,7 +2,7 @@
   Copyright (C) 2017 Baz2473
   Name: Area Occupancy Status 
 */
-public static String DTHVersion() { return "v3.1.1.0" }
+public static String DTHVersion() { return "v3.1.1.1" }
 
 metadata {
 	      definition (
@@ -47,23 +47,23 @@ metadata {
     	multiAttributeTile(name: "occupancyStatus", type: "generic", width: 2, height: 2, canChangeBackground: false) {
 			tileAttribute ("device.occupancyStatus", key: "PRIMARY_CONTROL") {
 				attributeState "vacant", label: 'vacant', action: "turnon", icon:"st.Home.home18", backgroundColor:"#606060"
-				attributeState "vacantclosed", label: 'vacant', action: "turnon", icon:"st.Home.home18", backgroundColor:"#606060"
+				attributeState "vacantclosed", label: 'vacant', action: "turnon", icon:"st.Home.home18", backgroundColor:"#000000"
                 attributeState "vacantdimmed", label: 'vacant', action: "turnalloff", icon:"st.Home.home18", backgroundColor:"#cdc8a3"
-                attributeState "vacantdimmedclosed", label: 'vacant', action: "turnalloff", icon:"st.Home.home18", backgroundColor:"#cdc8a3"
+                attributeState "vacantdimmedclosed", label: 'v d', action: "turnalloff", icon:"st.Home.home18", backgroundColor:"#cdc8a3"
                 attributeState "vacanton", label: 'vacant', action: "turnalloff", icon:"st.Home.home18", backgroundColor:"#c1b419"
-                attributeState "vacantonclosed", label: 'vacant', action: "turnalloff", icon:"st.Home.home18", backgroundColor:"#c1b419"
-                attributeState "occupied", label: 'occupied', action: "vacant", icon:"st.Home.home4", backgroundColor:"#156700"
-                attributeState "occupiedmotion", label: 'motion', action: "vacant", icon:"st.Health & Wellness.health12", backgroundColor:"#156700"
-                attributeState "occupiedon", label: 'occupied', action: "vacanton", icon:"st.Home.home4", backgroundColor:"#32cd32"
-                attributeState "occupiedonmotion", label: 'motion', action: "vacanton", icon:"st.Health & Wellness.health12", backgroundColor:"#32cd32"
-                attributeState "checking", label: 'checking', action: "vacant", icon:"st.Health & Wellness.health9", backgroundColor:"#bf6700"
-                attributeState "checkingon", label: 'checking', action: "vacanton", icon:"st.Health & Wellness.health9", backgroundColor:"#ff8a00"
-				attributeState "engaged", label: 'engaged', action: "vacant", icon:"st.locks.lock.locked", backgroundColor:"#af0000"
-				attributeState "engagedmotion", label: 'motion', action: "vacant", icon:"st.Health & Wellness.health12", backgroundColor:"#af0000"
-                attributeState "engagedon", label: 'engaged', action: "vacanton", icon:"st.locks.lock.locked", backgroundColor:"#ff0000"
-                attributeState "engagedonmotion", label: 'motion', action: "vacanton", icon:"st.Health & Wellness.health12", backgroundColor:"#ff0000"
-                attributeState "donotdisturb", label: 'dnd', action: "vacant", icon:"st.Office.office6", backgroundColor:"#410099"
-                attributeState "donotdisturbon", label: 'dnd', action: "vacanton", icon:"st.Office.office6", backgroundColor:"#6d00ff"
+                attributeState "vacantonclosed", label: 'v o', action: "turnalloff", icon:"st.Home.home18", backgroundColor:"#c1b419"
+                attributeState "occupied", label: 'occupied', action: "turnalloff", icon:"st.Home.home4", backgroundColor:"#156700"
+                attributeState "occupiedmotion", label: 'motion', action: "turnalloff", icon:"st.Health & Wellness.health12", backgroundColor:"#156700"
+                attributeState "occupiedon", label: 'occupied', action: "turnalloff", icon:"st.Home.home4", backgroundColor:"#32cd32"
+                attributeState "occupiedonmotion", label: 'motion', action: "turnalloff", icon:"st.Health & Wellness.health12", backgroundColor:"#32cd32"
+                attributeState "checking", label: 'checking', action: "turnalloff", icon:"st.Health & Wellness.health9", backgroundColor:"#bf6700"
+                attributeState "checkingon", label: 'checking', action: "turnalloff", icon:"st.Health & Wellness.health9", backgroundColor:"#ff8a00"
+				attributeState "engaged", label: 'engaged', action: "turnalloff", icon:"st.locks.lock.locked", backgroundColor:"#af0000"
+				attributeState "engagedmotion", label: 'motion', action: "turnalloff", icon:"st.Health & Wellness.health12", backgroundColor:"#af0000"
+                attributeState "engagedon", label: 'engaged', action: "turnalloff", icon:"st.locks.lock.locked", backgroundColor:"#ff0000"
+                attributeState "engagedonmotion", label: 'motion', action: "turnalloff", icon:"st.Health & Wellness.health12", backgroundColor:"#ff0000"
+                attributeState "donotdisturb", label: 'dnd', action: "turnalloff", icon:"st.Office.office6", backgroundColor:"#410099"
+                attributeState "donotdisturbon", label: 'dnd', action: "turnalloff", icon:"st.Office.office6", backgroundColor:"#6d00ff"
                 }
        		tileAttribute ("device.status", key: "SECONDARY_CONTROL") {
 				attributeState "default", label:'${currentValue}'
