@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v6.2.0.7"
+    return "v6.2.0.8"
 }
 
 definition    (
@@ -967,7 +967,6 @@ def turnalloff() {
     if (checkableLights) {
         def entryMotionState = entryMotionSensors.currentState("motion")
         if (!entryMotionState.value.contains("active")) {
-            log.trace "You Have Told Me That $app.label Is Vacant Turning Off All Lights!"
             checkableLights.each {
                 if (it.hasCommand("setLevel")) {
                     it.setLevel(0)
@@ -982,13 +981,11 @@ def turnalloff() {
                 } else {
                         child.generateEvent('vacant')
                 }
-
-            }
-            log.trace "All Scheduled Jobs Have Been Cancelled!"
         } else {
                 child.generateEvent('vacant')
         }
     }
+}
 }
 
 def turnon() {
