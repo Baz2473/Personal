@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v6.2.1.0"
+    return "v6.2.1.1"
 }
 
 definition    (
@@ -498,6 +498,25 @@ def entryMotionInactiveEventHandler(evt) {
                       return
               }
          }
+         if (['checking'].contains(areaState)) {
+                  unschedule(engaged)
+                  child.generateEvent('vacantclosed')
+                  return
+             }
+             if (['engagedonmotion'].contains(areaState)) {
+                   child.generateEvent('engagedon')
+                   if (donotdisturbControl) {
+                       runIn(dndCountdown * 60, donotdisturb)
+                   }
+                   return
+             }
+             if (['engagedmotion'].contains(areaState)) {
+                   child.generateEvent('engaged')
+                   if (donotdisturbControl) {
+                       runIn(dndCountdown * 60, donotdisturb)
+                   }
+                   return
+             }
          if (['occupiedonmotion'].contains(areaState)) {
                if (ems.value.contains("active")) {
                    if (offRequired && ['automationon'].contains(automationState)) {
@@ -574,7 +593,7 @@ def entryMotionInactiveEventHandler(evt) {
                        child.generateEvent('occupiedon')
                }
             }
-         if (doors) {
+        
              if (['checkingon'].contains(areaState)) {
                   unschedule(engaged)
                        if (offRequired && ['automationon'].contains(automationState)) {
@@ -611,25 +630,8 @@ def entryMotionInactiveEventHandler(evt) {
                                     child.generateEvent('vacantonclosed')
                             }
              }
-             if (['checking'].contains(areaState)) {
-                  unschedule(engaged)
-                  child.generateEvent('vacantclosed')
-                  return
-             }
-             if (['engagedonmotion'].contains(areaState)) {
-                   child.generateEvent('engagedon')
-                   if (donotdisturbControl) {
-                       runIn(dndCountdown * 60, donotdisturb)
-                   }
-                   return
-             }
-             if (['engagedmotion'].contains(areaState)) {
-                   child.generateEvent('engaged')
-                   if (donotdisturbControl) {
-                       runIn(dndCountdown * 60, donotdisturb)
-                   }
-             }
-         }
+             
+         
      }
 }
 
