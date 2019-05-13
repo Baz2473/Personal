@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v6.2.0.9"
+    return "v6.2.1.0"
 }
 
 definition    (
@@ -484,17 +484,19 @@ def entryMotionActiveEventHandler(evt) {
 
 def entryMotionInactiveEventHandler(evt) {
 	def ems = exitMotionSensors.currentState("motion")
-    def child = getChildDevice(getArea())
-    def areaState = child.getAreaState()
-    def automationState = child.getAutomationState()
     def entryMotionState = entryMotionSensors.currentState("motion")
     if (!entryMotionState.value.contains("active")) {
-         if (['occupiedmotion'].contains(areaState)) {
-               if (ems.value.contains("active")) {
-                   child.generateEvent('vacant')
-               } else {
-                       child.generateEvent('occupied')
-               }
+        def child = getChildDevice(getArea())
+        def areaState = child.getAreaState()
+        def automationState = child.getAutomationState()
+        if (['occupiedmotion'].contains(areaState)) {
+              if (ems.value.contains("active")) {
+                  child.generateEvent('vacant')
+                  return
+              } else {
+                      child.generateEvent('occupied')
+                      return
+              }
          }
          if (['occupiedonmotion'].contains(areaState)) {
                if (ems.value.contains("active")) {
@@ -612,12 +614,14 @@ def entryMotionInactiveEventHandler(evt) {
              if (['checking'].contains(areaState)) {
                   unschedule(engaged)
                   child.generateEvent('vacantclosed')
+                  return
              }
              if (['engagedonmotion'].contains(areaState)) {
                    child.generateEvent('engagedon')
                    if (donotdisturbControl) {
                        runIn(dndCountdown * 60, donotdisturb)
                    }
+                   return
              }
              if (['engagedmotion'].contains(areaState)) {
                    child.generateEvent('engaged')
