@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v6.2.1.3"
+    return "v6.2.1.4"
 }
 
 definition    (
@@ -725,7 +725,17 @@ def monitoredDoorOpenedEventHandler(evt) {
     	  child.generateEvent('vacant')
     }
     if (['checking','checkingon','engaged','engagedmotion','engagedon','engagedonmotion','donotdisturb','donotdisturbon'].contains(areaState)) {
-        occupied()
+    	if (actionOnVacant) {
+        	if (['engaged','engagedon','engagedmotion','engagedonmotion'].contains(areaState)) {
+            	vacantAction.off()
+        	}
+    	}
+    	def lightsState = checkableLights.currentState("switch")
+    	if (lightsState.value.contains("on")) {
+        	child.generateEvent('occupiedonmotion')
+    	} else {
+           	    child.generateEvent('occupiedmotion')
+    	}
     }
     if (actionOnDoorOpening) {
         if (!onlyDuringDaytime && !onlyDuringNighttime && !onlyDuringDaytime2 && !onlyDuringNighttime2 && !onlyDuringCertainTimes) {
@@ -857,22 +867,6 @@ def monitoredDoorClosedEventHandler(evt) {
                 			        it.setLevel(0)
             			       	    }
     	}
-    }
-}
-
-def occupied() {
-    def child = getChildDevice(getArea())
-    def areaState = child.getAreaState()
-    if (actionOnVacant) {
-        if (['engaged','engagedon','engagedmotion','engagedonmotion'].contains(areaState)) {
-            vacantAction.off()
-        }
-    }
-    def lightsState = checkableLights.currentState("switch")
-    if (lightsState.value.contains("on")) {
-        child.generateEvent('occupiedonmotion')
-    } else {
-            child.generateEvent('occupiedmotion')
     }
 }
 
