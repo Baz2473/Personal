@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v6.2.1.5"
+    return "v6.2.1.6"
 }
 
 definition    (
@@ -405,31 +405,12 @@ def engaged() {
     } else {
             child.generateEvent('engagedmotion')
     }
-    def automationState = child.getAutomationState()
-    if (switchOnControl && ['automationon'].contains(automationState)) {
-        dimmableSwitches1.each {
-        						def currentLevel = it.currentValue("level")
-        						if (currentLevel < setLevelTo) {
-            						if (onlyIfDisarmed) {
-                						def shmStatus = location.currentState("alarmSystemStatus")?.value
-                						if (shmStatus == "off") {
-                   						    it.setLevel(setLevelTo)
-                    						log.trace "Setting level of $it to $setLevelTo %"
-                						}
-            						} else {
-                    						it.setLevel(setLevelTo)
-                    						log.trace "Setting level of $it to $setLevelTo %"
-            						}
-        						} else if (it.currentValue("switch") == 'off') {
-                   						   it.on()
-                   						   log.trace "Level previously set... Switching on $it"
-        						}
-        }
-    }
     if (actionOnEngaged) {
         engagedAction.on()
     }
+    switchOnTheLights()
 } 
+
 /////////////////////////////////////////// END OF THE DEF'S USED IN runIn() FUNCTIONS //////////////////////////////////////////////
 
 def entryMotionActiveEventHandler(evt) {
@@ -437,17 +418,21 @@ def entryMotionActiveEventHandler(evt) {
     def areaState = child.getAreaState()
     if (['occupiedon','vacanton','vacantdimmed'].contains(areaState)) {
         child.generateEvent('occupiedonmotion')
+        switchOnTheLights()
     }
     if (['occupied','vacant'].contains(areaState)) {
         child.generateEvent('occupiedmotion')
+        switchOnTheLights()
     }
     if (['engagedon'].contains(areaState)) {
         child.generateEvent('engagedonmotion')
         unschedule(donotdusturb)
+        switchOnTheLights()
     }
     if (['engaged'].contains(areaState)) {
         child.generateEvent('engagedmotion')
         unschedule(donotdusturb)
+        switchOnTheLights()
     }
     if (doors) {
         def doorsState = doors.currentState("contact")
@@ -459,6 +444,10 @@ def entryMotionActiveEventHandler(evt) {
             }
     	}
     }
+}
+
+def switchOnTheLights() {
+    def child = getChildDevice(getArea())
     def automationState = child.getAutomationState()
     if (switchOnControl && ['automationon'].contains(automationState)) {
         dimmableSwitches1.each {
@@ -938,6 +927,14 @@ def turnOnAtThisTime() {
     }
 }
 
+
+
+/////////////////////////////////////////// THESE DEF'S ARE CONTROLLED FROM THE CHILD APP //////////////////////////////////////////////
+
+def stateChanged() {
+	state.stateChangedAt = now()
+}
+
 def turnalloff() {
     def child = getChildDevice(getArea())
     def entryMotionState = entryMotionSensors.currentState("motion")
@@ -973,6 +970,6 @@ def turnon() {
     }
 }
 
-def stateChanged() {
-	state.stateChangedAt = now()
-}
+
+
+/////////////////////////////////////////// END OF THE DEF'S THAT ARE CONTROLLED FROM THE CHILD APP //////////////////////////////////////////////
