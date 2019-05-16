@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v6.2.1.4"
+    return "v6.2.1.5"
 }
 
 definition    (
@@ -452,8 +452,12 @@ def entryMotionActiveEventHandler(evt) {
     if (doors) {
         def doorsState = doors.currentState("contact")
         if (!doorsState.value.contains("open") && !['engaged','engagedon','engagedonmotion'].contains(areaState)) {
-            engaged()
-        }
+        	if (now() < (state.stateChangedAt + 10000)) {
+            	engaged()
+        	} else {
+            		log.debug("now is ${now()} but last state change + 10000 was at ${state.stateChangedAt + 10000}")
+            }
+    	}
     }
     def automationState = child.getAutomationState()
     if (switchOnControl && ['automationon'].contains(automationState)) {
@@ -967,4 +971,8 @@ def turnon() {
                 				 it.on()
             			 }
     }
+}
+
+def stateChanged() {
+	state.stateChangedAt = now()
 }
