@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v6.2.1.6"
+    return "v6.2.2.0"
 }
 
 definition    (
@@ -405,49 +405,57 @@ def engaged() {
     } else {
             child.generateEvent('engagedmotion')
     }
+    def automationState = child.getAutomationState()
+    if (switchOnControl && ['automationon'].contains(automationState)) {
+        dimmableSwitches1.each {
+        						def currentLevel = it.currentValue("level")
+        						if (currentLevel < setLevelTo) {
+            						if (onlyIfDisarmed) {
+                						def shmStatus = location.currentState("alarmSystemStatus")?.value
+                						if (shmStatus == "off") {
+                   						    it.setLevel(setLevelTo)
+                    						log.trace "Setting level of $it to $setLevelTo %"
+                						}
+            						} else {
+                    						it.setLevel(setLevelTo)
+                    						log.trace "Setting level of $it to $setLevelTo %"
+            						}
+        						} else if (it.currentValue("switch") == 'off') {
+                   						   it.on()
+                   						   log.trace "Level previously set... Switching on $it"
+        						}
+        }
+    }
     if (actionOnEngaged) {
         engagedAction.on()
     }
-    switchOnTheLights()
 } 
-
 /////////////////////////////////////////// END OF THE DEF'S USED IN runIn() FUNCTIONS //////////////////////////////////////////////
 
 def entryMotionActiveEventHandler(evt) {
+    //atomicState.emii = false
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
     if (['occupiedon','vacanton','vacantdimmed'].contains(areaState)) {
         child.generateEvent('occupiedonmotion')
-        switchOnTheLights()
     }
     if (['occupied','vacant'].contains(areaState)) {
         child.generateEvent('occupiedmotion')
-        switchOnTheLights()
     }
     if (['engagedon'].contains(areaState)) {
         child.generateEvent('engagedonmotion')
         unschedule(donotdusturb)
-        switchOnTheLights()
     }
     if (['engaged'].contains(areaState)) {
         child.generateEvent('engagedmotion')
         unschedule(donotdusturb)
-        switchOnTheLights()
     }
     if (doors) {
         def doorsState = doors.currentState("contact")
         if (!doorsState.value.contains("open") && !['engaged','engagedon','engagedonmotion'].contains(areaState)) {
-        	if (now() < (state.stateChangedAt + 10000)) {
-            	engaged()
-        	} else {
-            		log.debug("now is ${now()} but last state change + 10000 was at ${state.stateChangedAt + 10000}")
-            }
-    	}
+            engaged()
+        }
     }
-}
-
-def switchOnTheLights() {
-    def child = getChildDevice(getArea())
     def automationState = child.getAutomationState()
     if (switchOnControl && ['automationon'].contains(automationState)) {
         dimmableSwitches1.each {
@@ -472,6 +480,7 @@ def switchOnTheLights() {
 }
 
 def entryMotionInactiveEventHandler(evt) {
+  //atomicState.emii = true
 	def exitMotionState = exitMotionSensors.currentState("motion")
     def entryMotionState = entryMotionSensors.currentState("motion")
     if (!entryMotionState.value.contains("active")) {
@@ -479,9 +488,11 @@ def entryMotionInactiveEventHandler(evt) {
         def areaState = child.getAreaState()
         if (['occupiedmotion'].contains(areaState)) {
         	  if (exitMotionState.value.contains("active")) {
+                //atomicState.emii = false
                   child.generateEvent('vacant')
                   return
               } else {
+                    //atomicState.emii = false
                       child.generateEvent('occupied')
                       return
               }
@@ -518,6 +529,7 @@ def entryMotionInactiveEventHandler(evt) {
                                    def sunset = s.sunset.time
                                    def timenow = now()
                                    if (timenow > sunrise && timenow < sunset) {
+                                     //atomicState.emii = false
                                        child.generateEvent('vacantdimmed')
 									   switches2.each {
        												  def currentLevel = it.currentValue("level")
@@ -531,6 +543,7 @@ def entryMotionInactiveEventHandler(evt) {
                                             child.generateEvent('vacanton')   
                                     }
                                } else {
+                                   //atomicState.emii = false
                                        child.generateEvent('vacantdimmed')
 						  		       switches2.each {
        								   			      def currentLevel = it.currentValue("level")
@@ -551,6 +564,7 @@ def entryMotionInactiveEventHandler(evt) {
                                 	def sunset = s.sunset.time
                                 	def timenow = now()
                                 	if (timenow > sunrise && timenow < sunset) {
+                                      //atomicState.emii = false
                                         child.generateEvent('vacantdimmed')
 										switches2.each {
        												   def currentLevel = it.currentValue("level")
@@ -564,6 +578,7 @@ def entryMotionInactiveEventHandler(evt) {
                                             child.generateEvent('vacanton')
                                     }
                                 } else {
+                                     //atomicState.emii = false
                                        child.generateEvent('vacantdimmed')
 									   switches2.each {
         											  def currentLevel = it.currentValue("level")
@@ -625,6 +640,9 @@ def entryMotionInactiveEventHandler(evt) {
 def exitMotionInactiveEventHandler(evt) {
     def exitMotionState = exitMotionSensors.currentState("motion")
     if (!exitMotionState.value.contains("active")) {
+    // if (atomicState.emii) {
+//    ## do off action and vacant action here  
+//}
     	def child = getChildDevice(getArea())
     	def areaState = child.getAreaState()
    	    def automationState = child.getAutomationState()
@@ -927,14 +945,6 @@ def turnOnAtThisTime() {
     }
 }
 
-
-
-/////////////////////////////////////////// THESE DEF'S ARE CONTROLLED FROM THE CHILD APP //////////////////////////////////////////////
-
-def stateChanged() {
-	state.stateChangedAt = now()
-}
-
 def turnalloff() {
     def child = getChildDevice(getArea())
     def entryMotionState = entryMotionSensors.currentState("motion")
@@ -969,7 +979,3 @@ def turnon() {
             			 }
     }
 }
-
-
-
-/////////////////////////////////////////// END OF THE DEF'S THAT ARE CONTROLLED FROM THE CHILD APP //////////////////////////////////////////////
