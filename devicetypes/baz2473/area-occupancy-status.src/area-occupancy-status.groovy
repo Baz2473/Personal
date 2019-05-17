@@ -2,7 +2,7 @@
   Copyright (C) 2017 Baz2473
   Name: Area Occupancy Status 
 */
-public static String DTHVersion() { return "v3.1.1.2" }
+public static String DTHVersion() { return "v3.1.1.4" }
 
 metadata {
 	      definition (
@@ -199,7 +199,6 @@ private	resetAutomationTile(automationStatus) {
 def generateEvent(state = null)	{
     if (state)
 	    stateUpdate(state)
-        parent.stateChanged()
         return null
         }
 def generateAutomationEvent(automationState = null)	{
