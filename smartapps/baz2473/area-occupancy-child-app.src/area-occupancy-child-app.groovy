@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v6.2.4.0"
+    return "v6.2.4.1"
 }
 
 definition    (
@@ -659,8 +659,9 @@ def exitMotionInactiveEventHandler(evt) {
 				   		switches2.each {
        		   	   		it.setLevel(0)
                         }
+                        motionCheckAfterDimLights()
            			} else if (offRequired && atomicState.emii) {
-    					turnAllOff()
+    					       turnAllOff()
                     } 
         	}
     	} else {
@@ -668,8 +669,9 @@ def exitMotionInactiveEventHandler(evt) {
 				   switches2.each {
        		   	   it.setLevel(0)
    			   	   }
+                   motionCheckAfterDimLights()
         		} else if (offRequired && atomicState.emii)  {
-    					turnAllOff()
+    					   turnAllOff()
                 } 
         }
     }
@@ -943,6 +945,7 @@ def turnalloff() {
       	 } else {
                	 child.generateEvent('vacant')
 		 }
+         motionCheckAfterDimLights()
      }
 }
 
