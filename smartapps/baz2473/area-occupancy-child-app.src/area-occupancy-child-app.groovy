@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v6.2.2.2"
+    return "v6.2.2.6"
 }
 
 definition    (
@@ -684,39 +684,6 @@ def exitMotionInactiveEventHandler(evt) {
     }
 }
 
-def forceTurnAllOff() {
-    log.trace "The Alarm Is Now Set So Performing All Full Reset Of $app.label!"
-    checkableLights.each {
-        if (it.hasCommand("setLevel")) {
-            it.setLevel(0)
-        } else {
-            it.off()
-        }
-    }
-    log.trace "Generating VACANT Event!"
-    def child = getChildDevice(getArea())
-    child.generateEvent('vacant')
-    unschedule()
-    log.trace "All Scheduled Jobs Have Been Cancelled!"
-    log.trace "Generating AUTOMATION ON Event!"
-    child.generateAutomationEvent('automationon')
-}
-
-
-
-def leftHome() {
-    def child = getChildDevice(getArea())
-    def automationState = child.getAutomationState()
-    if (['automationon'].contains(automationState)) {
-        log.trace "$app.label was set to 'VACANT' because the mode changed to away"
-        child.generateEvent('vacant')
-		switches2.each {
-       				    it.setLevel(0)
-       				    log.trace "The $it are now off"
-    	}    				
-    }
-}
-
 def modeEventHandler(evt) {
     def child = getChildDevice(getArea())
     def automationState = child.getAutomationState()
@@ -726,7 +693,7 @@ def modeEventHandler(evt) {
     }
     if (awayModes && awayModes.contains(evt.value) && noAwayMode) {
         log.trace "$app.label Was Set To 'VACANT' Because Your Away Mode Was 'ACTIVATED'!"
-        leftHome()
+        turnAllOff()
     }
 }
 
@@ -899,27 +866,14 @@ def monitoredDoorClosedEventHandler(evt) {
 }
 
 def presenceAwayEventHandler(evt) {
-    def child = getChildDevice(getArea())
-    def areaState = child.getAreaState()
-    def entryMotionState = entryMotionSensors.currentState("motion")
-    if (!['vacant'].contains(areaState) && !entryMotionState.value.contains("active")) {
-    	   checkableLights.each {
-       						     if (it.hasCommand("setLevel")) {
-           						     it.setLevel(0)
-        						 } else {
-           							     it.off()
-        						 }
-    	   }
-    child.generateEvent('vacant')
-    } 
+	turnAllOff()
 }
 
 def shmStatusEventHandler(evt) {
     def shmStatus = location.currentState("alarmSystemStatus")?.value
     if (shmStatus == "away") {
         if (resetOnSHMChangingToAway) {
-            log.trace "The Alarm Is Now ARMED AWAY! & You Requested A Full Reset..."
-            forceTurnAllOff()
+            turnAllOff()
         }
     }
 }
@@ -969,6 +923,13 @@ def turnalloff() {
     def child = getChildDevice(getArea())
     def entryMotionState = entryMotionSensors.currentState("motion")
     if (!entryMotionState.value.contains("active")) {
+     	 checkableLights.each {
+                			  if (it.hasCommand("setLevel")) {
+                    			  it.setLevel(0)
+                			  } else {
+                    				  it.off()
+                			  }
+         } 
          if (doors) {
              def doorsState = doors.currentState("contact")
              if (!doorsState.value.contains("open")) {
@@ -978,14 +939,9 @@ def turnalloff() {
              }
       	 } else {
                	 child.generateEvent('vacant')
-         }
-         checkableLights.each {
-                			  if (it.hasCommand("setLevel")) {
-                    			  it.setLevel(0)
-                			  } else {
-                    				  it.off()
-                			  }
-         }
+		 }
+         unschedule()
+    	 child.generateAutomationEvent('automationon')
      }
 }
 
