@@ -2,7 +2,7 @@
   Copyright (C) 2017 Baz2473
   Name: Area Occupancy Status 
 */
-public static String DTHVersion() { return "v3.1.1.4" }
+public static String DTHVersion() { return "v3.1.1.6" }
 
 metadata {
 	      definition (
