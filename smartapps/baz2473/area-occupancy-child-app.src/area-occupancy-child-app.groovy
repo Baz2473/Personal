@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v6.2.3.0"
+    return "v6.2.4.0"
 }
 
 definition    (
@@ -543,6 +543,7 @@ def entryMotionInactiveEventHandler(evt) {
            												  it.setLevel(newLevel)
         											  }
     								   }
+									   motionCheckAfterDimLights()
     								} else {
                                             child.generateEvent('vacanton')   
                                     }
@@ -556,7 +557,8 @@ def entryMotionInactiveEventHandler(evt) {
             								  		 	  it.setLevel(newLevel)
         								  			  }
     								   } 
-    						   }
+                                       motionCheckAfterDimLights()
+                               }
                             } else {
                                     child.generateEvent('vacanton')
                             }
@@ -576,6 +578,7 @@ def entryMotionInactiveEventHandler(evt) {
             											   it.setLevel(newLevel)
         											   }
     									}  
+                                        motionCheckAfterDimLights()
     								} else {
                                             child.generateEvent('vacanton')
                                     }
@@ -588,7 +591,8 @@ def entryMotionInactiveEventHandler(evt) {
            												  def newLevel = (currentLevel - dimByLevel)
            												  it.setLevel(newLevel)
        					 							  }
-    								  }       
+    								  } 
+                                      motionCheckAfterDimLights()
     						   }
                         }
                     } else {
@@ -637,6 +641,8 @@ def entryMotionInactiveEventHandler(evt) {
          }
      }
 }
+
+
 
 def exitMotionInactiveEventHandler(evt) {
     def exitMotionState = exitMotionSensors.currentState("motion")
@@ -803,11 +809,8 @@ def monitoredDoorOpenedEventHandler(evt) {
                     }
                 }
             }
-            
         }
-        
     }
-    
 } 
 
 def monitoredDoorClosedEventHandler(evt) {
@@ -834,6 +837,30 @@ def monitoredDoorClosedEventHandler(evt) {
                 			        it.setLevel(0)
             			       	    }
     	}
+    }
+}
+
+def motionCheckAfterDimLights() {
+    def entryMotionState = entryMotionSensors.currentState("motion")
+	if (entryMotionState.value.contains("active")) {
+        def automationState = child.getAutomationState()
+    	if (switchOnControl && ['automationon'].contains(automationState)) {
+        	dimmableSwitches1.each {
+        							def currentLevel = it.currentValue("level")
+        							if (currentLevel < setLevelTo) {
+            							if (onlyIfDisarmed) {
+                							def shmStatus = location.currentState("alarmSystemStatus")?.value
+                							if (shmStatus == "off") {
+                    							it.setLevel(setLevelTo)
+                							}
+            							} else {
+                   								it.setLevel(setLevelTo)
+                   						}
+        							} else if (it.currentValue("switch") == 'off') {
+                   						   	   it.on()    
+                					}
+         	}
+     	}
     }
 }
 
