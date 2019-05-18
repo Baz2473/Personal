@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v6.2.2.7"
+    return "v6.2.3.0"
 }
 
 definition    (
@@ -444,6 +444,7 @@ def engaged() {
                           /////////////////////////////////////////// END OF THE DEF'S USED IN runIn() FUNCTIONS //////////////////////////////////////////////
 
 def entryMotionActiveEventHandler(evt) {
+    atomicState.emii = false
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
     if (['occupiedon','vacanton','vacantdimmed'].contains(areaState)) {
@@ -522,19 +523,18 @@ def entryMotionInactiveEventHandler(evt) {
         }
         if (['occupiedonmotion'].contains(areaState)) {
                if (exitMotionState.value.contains("active")) {
-                 //atomicState.emii = true
                    def automationState = child.getAutomationState()
                    if (offRequired && ['automationon'].contains(automationState)) {
-                     //atomicState.emii = true
                        if (thisAreaMustBeVacant) {
                            def thisAreaState = thisAreaMustBeVacant.currentState("occupancyStatus")
-                           if (thisAreaState.value.contains("vacant") || thisAreaState.value.contains("vacantclosed") || thisAreaState.value.contains("vacanton") || thisAreaState.value.contains("vacantonclosed") || thisAreaState.value.contains("vacantdimmed") || thisAreaState.value.contains("vacantdimmedclosed")) {
+                           if (thisAreaState.value.contains("vacantdimmed") || thisAreaState.value.contains("vacantdimmedclosed") || thisAreaState.value.contains("vacanton") || thisAreaState.value.contains("vacantonclosed") || thisAreaState.value.contains("vacant") || thisAreaState.value.contains("vacantclosed")) {
                                if (onlyDuringDaytime9) {
                                    def s = getSunriseAndSunset()
                                    def sunrise = s.sunrise.time
                                    def sunset = s.sunset.time
                                    def timenow = now()
                                    if (timenow > sunrise && timenow < sunset) {
+                                       atomicState.emii = true
                                        child.generateEvent('vacantdimmed')
 									   switches2.each {
        												  def currentLevel = it.currentValue("level")
@@ -547,6 +547,7 @@ def entryMotionInactiveEventHandler(evt) {
                                             child.generateEvent('vacanton')   
                                     }
                                } else {
+                                       atomicState.emii = true
                                        child.generateEvent('vacantdimmed')
 						  		       switches2.each {
        								   			      def currentLevel = it.currentValue("level")
@@ -566,6 +567,7 @@ def entryMotionInactiveEventHandler(evt) {
                                 	def sunset = s.sunset.time
                                 	def timenow = now()
                                 	if (timenow > sunrise && timenow < sunset) {
+                                        atomicState.emii = true
                                         child.generateEvent('vacantdimmed')
 										switches2.each {
        												   def currentLevel = it.currentValue("level")
@@ -578,6 +580,7 @@ def entryMotionInactiveEventHandler(evt) {
                                             child.generateEvent('vacanton')
                                     }
                                 } else {
+                                       atomicState.emii = true
                                        child.generateEvent('vacantdimmed')
 									   switches2.each {
         											  def currentLevel = it.currentValue("level")
@@ -605,6 +608,7 @@ def entryMotionInactiveEventHandler(evt) {
                       def sunset = s.sunset.time
                       def timenow = now()
                       if (timenow > sunrise && timenow < sunset) {
+                          atomicState.emii = true
                           child.generateEvent('vacantdimmedclosed')
 						  switches2.each {
        									 def currentLevel = it.currentValue("level")
@@ -617,6 +621,7 @@ def entryMotionInactiveEventHandler(evt) {
                                child.generateEvent('vacantonclosed')
                        }
                   } else {
+                          atomicState.emii = true
                           child.generateEvent('vacantdimmedclosed')
 						  switches2.each {
         								 def currentLevel = it.currentValue("level")
@@ -635,37 +640,31 @@ def entryMotionInactiveEventHandler(evt) {
 
 def exitMotionInactiveEventHandler(evt) {
     def exitMotionState = exitMotionSensors.currentState("motion")
-    if (!exitMotionState.value.contains("active")) {
-    	def child = getChildDevice(getArea())
-   	    def automationState = child.getAutomationState()
+    def child = getChildDevice(getArea())
+   	def automationState = child.getAutomationState()
+    if (!exitMotionState.value.contains("active") && ['automationon'].contains(automationState)) {
     	def areaState = child.getAreaState()
     	if (doors) {
         	def doorsState = doors.currentState("contact")
         	if (!doorsState.value.contains("open") && !['vacantdimmedclosed','vacantonclosed'].contains(areaState)) {
 				 return
 			} else {
-           	  	    if (offRequired && ['vacantdimmed','vacantdimmedclosed'].contains(areaState) && ['automationon'].contains(automationState)) {
-						switches2.each {
-     			    	it.setLevel(0)
-    					}
-           			} /*else if (offRequired && atomicState.emii && ['automationon'].contains(automationState)) {
-						switches2.each {
-     			    	it.setLevel(0)
-       			    	log.trace "The $it are now off due to the atomicState being true!!!"
-    					}
-                    } */
+           	  	    if (offRequired && ['vacantdimmed','vacantdimmedclosed'].contains(areaState)) {
+				   		switches2.each {
+       		   	   		it.setLevel(0)
+                        }
+           			} else if (offRequired && atomicState.emii) {
+    					turnAllOff()
+                    } 
         	}
     	} else {
-       		    if (offRequired && ['vacantdimmed'].contains(areaState) && ['automationon'].contains(automationState))  {
+       		    if (offRequired && ['vacantdimmed'].contains(areaState))  {
 				   switches2.each {
        		   	   it.setLevel(0)
    			   	   }
-        		} /*else if (offRequired && atomicState.emii && ['automationon'].contains(automationState))  {
-				   switches2.each {
-       		   	   it.setLevel(0)
-       			   log.trace "The $it are now off due to the atomicState being true!!!"
-   			   	   }
-               } */
+        		} else if (offRequired && atomicState.emii)  {
+    					turnAllOff()
+                } 
         }
     }
 }
@@ -840,6 +839,9 @@ def monitoredDoorClosedEventHandler(evt) {
 
 def presenceAwayEventHandler(evt) {
 	turnAllOff()
+    unschedule()
+    def child = getChildDevice(getArea())
+    child.generateAutomationEvent('automationon')
 }
 
 def shmStatusEventHandler(evt) {
@@ -847,6 +849,9 @@ def shmStatusEventHandler(evt) {
     if (shmStatus == "away") {
         if (resetOnSHMChangingToAway) {
             turnAllOff()
+            unschedule()
+            def child = getChildDevice(getArea())
+    	    child.generateAutomationEvent('automationon')
         }
     }
 }
@@ -911,8 +916,6 @@ def turnalloff() {
       	 } else {
                	 child.generateEvent('vacant')
 		 }
-         unschedule()
-    	 child.generateAutomationEvent('automationon')
      }
 }
 
