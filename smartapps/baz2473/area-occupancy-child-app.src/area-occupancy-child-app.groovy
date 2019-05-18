@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v6.2.4.4"
+    return "v6.2.4.5"
 }
 
 definition    (
@@ -528,37 +528,16 @@ def entryMotionInactiveEventHandler(evt) {
                        if (thisAreaMustBeVacant) {
                            def thisAreaState = thisAreaMustBeVacant.currentState("occupancyStatus")
                            if (thisAreaState.value.contains("vacantdimmed") || thisAreaState.value.contains("vacantdimmedclosed") || thisAreaState.value.contains("vacanton") || thisAreaState.value.contains("vacantonclosed") || thisAreaState.value.contains("vacant") || thisAreaState.value.contains("vacantclosed")) {
-                               if (onlyDuringDaytime9) {
-                                   def s = getSunriseAndSunset()
-                                   def sunrise = s.sunrise.time
-                                   def sunset = s.sunset.time
-                                   def timenow = now()
-                                   if (timenow > sunrise && timenow < sunset) {
-                                       atomicState.emii = true
-                                       child.generateEvent('vacantdimmed')
-									   switches2.each {
-       												  def currentLevel = it.currentValue("level")
-       												  if (currentLevel > dimByLevel) {
-            											  def newLevel = (currentLevel - dimByLevel)
-           												  it.setLevel(newLevel)
-									   					  motionCheckAfterDimLights()
-        											  }
-    								   }
-    								} else {
-                                            child.generateEvent('vacanton')   
-                                    }
-                               } else {
-                                       atomicState.emii = true
-                                       child.generateEvent('vacantdimmed')
-						  		       switches2.each {
-       								   			      def currentLevel = it.currentValue("level")
-        								  		   	  if (currentLevel > dimByLevel) {
-            								 	 	 	  def newLevel = (currentLevel - dimByLevel)
-            								  		 	  it.setLevel(newLevel)
-                                                          motionCheckAfterDimLights()
-        								  			  }
-    								   } 
-                               }
+                               atomicState.emii = true
+                               child.generateEvent('vacantdimmed')
+				  		       switches2.each {
+       						   			      def currentLevel = it.currentValue("level")
+      								  		  if (currentLevel > dimByLevel) {
+            							 	 	  def newLevel = (currentLevel - dimByLevel)
+            						  		 	  it.setLevel(newLevel)
+                                                  motionCheckAfterDimLights()
+        						  			  }
+    						   } 
                             } else {
                                     child.generateEvent('vacanton')
                             }
