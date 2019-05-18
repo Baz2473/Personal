@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v6.2.2.6"
+    return "v6.2.2.7"
 }
 
 definition    (
@@ -428,15 +428,12 @@ def engaged() {
                 						def shmStatus = location.currentState("alarmSystemStatus")?.value
                 						if (shmStatus == "off") {
                    						    it.setLevel(setLevelTo)
-                    						log.trace "Setting level of $it to $setLevelTo %"
                 						}
             						} else {
                     						it.setLevel(setLevelTo)
-                    						log.trace "Setting level of $it to $setLevelTo %"
             						}
         						} else if (it.currentValue("switch") == 'off') {
                    						   it.on()
-                   						   log.trace "Level previously set... Switching on $it"
         						}
         }
     }
@@ -478,15 +475,12 @@ def entryMotionActiveEventHandler(evt) {
                 						def shmStatus = location.currentState("alarmSystemStatus")?.value
                 						if (shmStatus == "off") {
                     						it.setLevel(setLevelTo)
-                    						log.trace "Setting level of $it to $setLevelTo %"
                 						}
             						} else {
                    							it.setLevel(setLevelTo)
-                   							log.trace "Setting level of $it to $setLevelTo %"
                    					}
         						} else if (it.currentValue("switch") == 'off') {
                    						   it.on()    
-                   						   log.trace "Level previously set... Switching on $it"                    
                 				}
          }
      }
@@ -547,7 +541,6 @@ def entryMotionInactiveEventHandler(evt) {
        												  if (currentLevel > dimByLevel) {
             											  def newLevel = (currentLevel - dimByLevel)
            												  it.setLevel(newLevel)
-           												  log.trace "The $it have been dimmed to $newLevel %"
         											  }
     								   }
     								} else {
@@ -560,7 +553,6 @@ def entryMotionInactiveEventHandler(evt) {
         								  		   	  if (currentLevel > dimByLevel) {
             								 	 	 	  def newLevel = (currentLevel - dimByLevel)
             								  		 	  it.setLevel(newLevel)
-           									  			  log.trace "The $it have been dimmed to $newLevel %"
         								  			  }
     								   } 
     						   }
@@ -580,7 +572,6 @@ def entryMotionInactiveEventHandler(evt) {
         											   if (currentLevel > dimByLevel) {
            												   def newLevel = (currentLevel - dimByLevel)
             											   it.setLevel(newLevel)
-            											   log.trace "The $it have been dimmed to $newLevel %"
         											   }
     									}  
     								} else {
@@ -593,7 +584,6 @@ def entryMotionInactiveEventHandler(evt) {
       												  if (currentLevel > dimByLevel) {
            												  def newLevel = (currentLevel - dimByLevel)
            												  it.setLevel(newLevel)
-           												  log.trace "The $it have been dimmed to $newLevel %"
        					 							  }
     								  }       
     						   }
@@ -621,7 +611,6 @@ def entryMotionInactiveEventHandler(evt) {
       									 if (currentLevel > dimByLevel) {
             								 def newLevel = (currentLevel - dimByLevel)
            									 it.setLevel(newLevel)
-           									 log.trace "The $it have been dimmed to $newLevel %"
         								 }
    				 		  }  
     				   } else {
@@ -634,7 +623,6 @@ def entryMotionInactiveEventHandler(evt) {
         								 if (currentLevel > dimByLevel) {
           									 def newLevel = (currentLevel - dimByLevel)
             								 it.setLevel(newLevel)
-           									 log.trace "The $it have been dimmed to $newLevel %"
         								 }
     					  }   
     			  }
@@ -659,7 +647,6 @@ def exitMotionInactiveEventHandler(evt) {
            	  	    if (offRequired && ['vacantdimmed','vacantdimmedclosed'].contains(areaState) && ['automationon'].contains(automationState)) {
 						switches2.each {
      			    	it.setLevel(0)
-       			    	log.trace "The $it are now off"
     					}
            			} /*else if (offRequired && atomicState.emii && ['automationon'].contains(automationState)) {
 						switches2.each {
@@ -672,7 +659,6 @@ def exitMotionInactiveEventHandler(evt) {
        		    if (offRequired && ['vacantdimmed'].contains(areaState) && ['automationon'].contains(automationState))  {
 				   switches2.each {
        		   	   it.setLevel(0)
-       		       log.trace "The $it are now off"
    			   	   }
         		} /*else if (offRequired && atomicState.emii && ['automationon'].contains(automationState))  {
 				   switches2.each {
@@ -688,11 +674,9 @@ def modeEventHandler(evt) {
     def child = getChildDevice(getArea())
     def automationState = child.getAutomationState()
     if (resetAutomation && resetAutomationMode && resetAutomationMode.contains(evt.value) && ['automationoff'].contains(automationState)) {
-        log.trace "$app.label's Automation Has Been Enabled Because Your Reset Mode Was ACTIVATED!"
         child.generateAutomationEvent('automationon')
     }
     if (awayModes && awayModes.contains(evt.value) && noAwayMode) {
-        log.trace "$app.label Was Set To 'VACANT' Because Your Away Mode Was 'ACTIVATED'!"
         turnAllOff()
     }
 }
@@ -700,14 +684,12 @@ def modeEventHandler(evt) {
 def monitoredDoorOpenedAction() {
     doorOpeningAction.each {
         it.setLevel(setLevelAt)
-        log.trace "Setting level of $it to $setLevelAt %"
     }
 } 
 
 def monitoredDoorOpenedAction2() {
     doorOpeningAction2.each {
         it.setLevel(setLevelAt2)
-        log.trace "Setting level of $it to $setLevelAt2 %"
     }
 }
 
@@ -745,7 +727,6 @@ def monitoredDoorOpenedEventHandler(evt) {
                 if (timenow > sunrise && timenow < sunset) {
                     if (onlyIfAreaVacant) {
                         if (['vacant','vacantclosed'].contains(areaState)) {
-                            log.trace "The Light Was Turned ON To $setLevelAt % Because The Door Was Opened & $app.label Was VACANT & The Time Selection Matched!"
                             monitoredDoorOpenedAction()
                         }
                     } else {
@@ -757,7 +738,6 @@ def monitoredDoorOpenedEventHandler(evt) {
                 if (timenow > sunset || timenow < sunrise) {
                     if (onlyIfAreaVacant) {
                         if (['vacant','vacantclosed'].contains(areaState)) {
-                            log.trace "The Light Was Turned ON To $setLevelAt % Because The Door Was Opened & $app.label Was VACANT & The Time Selection Matched!"
                             monitoredDoorOpenedAction()
                         }
                     } else {
@@ -769,7 +749,6 @@ def monitoredDoorOpenedEventHandler(evt) {
                 if (timenow > sunrise && timenow < sunset) {
                     if (onlyIfAreaVacant2) {
                         if (['vacant','vacantclosed'].contains(areaState)) {
-                            log.trace "The Light Was Turned ON To $setLevelAt % Because The Door Was Opened & $app.label Was VACANT & The Time Selection Matched!"
                             monitoredDoorOpenedAction2()
                         }
                     } else {
@@ -781,7 +760,6 @@ def monitoredDoorOpenedEventHandler(evt) {
                 if (timenow > sunset || timenow < sunrise) {
                     if (onlyIfAreaVacant2) {
                         if (['vacant','vacantclosed'].contains(areaState)) {
-                            log.trace "The Light Was Turned ON To $setLevelAt % Because The Door Was Opened & $app.label Was VACANT & The Time Selection Matched!"
                             monitoredDoorOpenedAction2()
                         }
                     } else {
@@ -798,7 +776,6 @@ def monitoredDoorOpenedEventHandler(evt) {
             if (between) {
                 if (onlyIfAreaVacant) {
                     if (['vacant','vacantclosed'].contains(areaState)) {
-                        log.trace "The Light Was Turned ON To $setLevelAt % Because The Door Was Opened & $app.label Was VACANT & The Time Selection Matched!"
                         monitoredDoorOpenedAction()
                     }
                 } else {
@@ -811,7 +788,6 @@ def monitoredDoorOpenedEventHandler(evt) {
                     if (theMotionState.value.contains("active")) {
                         if (onlyIfAreaVacant2) {
                             if (['vacant','vacantclosed'].contains(areaState)) {
-                                log.trace "The Light Was Turned ON To $setLevelAt % Because The Door Was Opened & $app.label Was VACANT & The Time Selection Matched!"
                                 monitoredDoorOpenedAction2()
                             }
                         } else {
@@ -821,7 +797,6 @@ def monitoredDoorOpenedEventHandler(evt) {
                 } else {
                     if (onlyIfAreaVacant2) {
                         if (['vacant','vacantclosed'].contains(areaState)) {
-                            log.trace "The Light Was Turned ON To $setLevelAt % Because The Door Was Opened & $app.label Was VACANT & The Time Selection Matched!"
                             monitoredDoorOpenedAction2()
                         }
                     } else {
@@ -853,11 +828,9 @@ def monitoredDoorClosedEventHandler(evt) {
     	      runIn(actualEntrySensorsTimeout, engaged)
         }
         if (turnOffAfter) {
-            log.trace "Turn Off After Was True So The Lights Should Go Off In $offAfter Seconds"
             runIn(offAfter, doaoff, [overwrite: false])
         }
         if (actionOnDoorClosing) {
-            log.trace "The Light Was Turned OFF Because The Door Was Closed"
             doorOpeningAction.each {
                 			        it.setLevel(0)
             			       	    }
@@ -881,7 +854,6 @@ def shmStatusEventHandler(evt) {
 
 
 def sunriseHandler(evt) {
-    log.trace "The Sun has risen! Performing Any Sunrise Actions"
     if (onAtSunriseChosen) {
         switchToTurnOnAtThisTime.on()
     }
@@ -891,7 +863,6 @@ def sunriseHandler(evt) {
 }
 
 def sunsetHandler(evt) {
-    log.trace "The Sun has set! Performing Any Sunset Actions"
     if (onAtSunsetChosen) {
         switchToTurnOnAtThisTime.on()
     }
@@ -946,7 +917,6 @@ def turnalloff() {
 }
 
 def turnon() {
-    log.trace "You Have Told Me To Turn On All Lights in $app.label"
     checkableLights.each {
       			         if (it.hasCommand("setLevel")) {
                 			 it.setLevel(75)
