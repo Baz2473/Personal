@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v6.2.4.1"
+    return "v6.2.4.4"
 }
 
 definition    (
@@ -541,9 +541,9 @@ def entryMotionInactiveEventHandler(evt) {
        												  if (currentLevel > dimByLevel) {
             											  def newLevel = (currentLevel - dimByLevel)
            												  it.setLevel(newLevel)
+									   					  motionCheckAfterDimLights()
         											  }
     								   }
-									   motionCheckAfterDimLights()
     								} else {
                                             child.generateEvent('vacanton')   
                                     }
@@ -555,9 +555,9 @@ def entryMotionInactiveEventHandler(evt) {
         								  		   	  if (currentLevel > dimByLevel) {
             								 	 	 	  def newLevel = (currentLevel - dimByLevel)
             								  		 	  it.setLevel(newLevel)
+                                                          motionCheckAfterDimLights()
         								  			  }
     								   } 
-                                       motionCheckAfterDimLights()
                                }
                             } else {
                                     child.generateEvent('vacanton')
@@ -576,9 +576,9 @@ def entryMotionInactiveEventHandler(evt) {
         											   if (currentLevel > dimByLevel) {
            												   def newLevel = (currentLevel - dimByLevel)
             											   it.setLevel(newLevel)
+                                                           motionCheckAfterDimLights()
         											   }
     									}  
-                                        motionCheckAfterDimLights()
     								} else {
                                             child.generateEvent('vacanton')
                                     }
@@ -590,9 +590,9 @@ def entryMotionInactiveEventHandler(evt) {
       												  if (currentLevel > dimByLevel) {
            												  def newLevel = (currentLevel - dimByLevel)
            												  it.setLevel(newLevel)
+                                                          motionCheckAfterDimLights()
        					 							  }
     								  } 
-                                      motionCheckAfterDimLights()
     						   }
                         }
                     } else {
@@ -619,6 +619,7 @@ def entryMotionInactiveEventHandler(evt) {
       									 if (currentLevel > dimByLevel) {
             								 def newLevel = (currentLevel - dimByLevel)
            									 it.setLevel(newLevel)
+                                             motionCheckAfterDimLights()
         								 }
    				 		  }  
     				   } else {
@@ -632,6 +633,7 @@ def entryMotionInactiveEventHandler(evt) {
         								 if (currentLevel > dimByLevel) {
           									 def newLevel = (currentLevel - dimByLevel)
             								 it.setLevel(newLevel)
+                                             motionCheckAfterDimLights()
         								 }
     					  }   
     			  }
@@ -658,8 +660,8 @@ def exitMotionInactiveEventHandler(evt) {
            	  	    if (offRequired && ['vacantdimmed','vacantdimmedclosed'].contains(areaState)) {
 				   		switches2.each {
        		   	   		it.setLevel(0)
-                        }
                         motionCheckAfterDimLights()
+                        }
            			} else if (offRequired && atomicState.emii) {
     					       turnAllOff()
                     } 
@@ -668,8 +670,8 @@ def exitMotionInactiveEventHandler(evt) {
        		    if (offRequired && ['vacantdimmed'].contains(areaState))  {
 				   switches2.each {
        		   	   it.setLevel(0)
-   			   	   }
                    motionCheckAfterDimLights()
+   			   	   }
         		} else if (offRequired && atomicState.emii)  {
     					   turnAllOff()
                 } 
@@ -845,24 +847,22 @@ def monitoredDoorClosedEventHandler(evt) {
 def motionCheckAfterDimLights() {
     def entryMotionState = entryMotionSensors.currentState("motion")
 	if (entryMotionState.value.contains("active")) {
-        def automationState = child.getAutomationState()
-    	if (switchOnControl && ['automationon'].contains(automationState)) {
-        	dimmableSwitches1.each {
-        							def currentLevel = it.currentValue("level")
-        							if (currentLevel < setLevelTo) {
-            							if (onlyIfDisarmed) {
-                							def shmStatus = location.currentState("alarmSystemStatus")?.value
-                							if (shmStatus == "off") {
-                    							it.setLevel(setLevelTo)
-                							}
-            							} else {
-                   								it.setLevel(setLevelTo)
-                   						}
-        							} else if (it.currentValue("switch") == 'off') {
-                   						   	   it.on()    
-                					}
-         	}
-     	}
+        dimmableSwitches1.each {
+           						if (onlyIfDisarmed) {
+               						def shmStatus = location.currentState("alarmSystemStatus")?.value
+               						if (shmStatus == "off") {
+                   						it.setLevel(setLevelTo)
+               						}
+                                    if (it.currentValue("switch") == 'off') {
+           						   	    it.on()    
+               						}
+           						} else {
+                   						it.setLevel(setLevelTo)
+                                        if (it.currentValue("switch") == 'off') {
+                   	 			   	        it.on()    
+                						}
+                   				}
+         }
     }
 }
 
@@ -931,8 +931,10 @@ def turnalloff() {
      	 checkableLights.each {
                 			  if (it.hasCommand("setLevel")) {
                     			  it.setLevel(0)
+                                  motionCheckAfterDimLights()
                 			  } else {
                     				  it.off()
+                                      motionCheckAfterDimLights()
                 			  }
          } 
          if (doors) {
@@ -945,7 +947,6 @@ def turnalloff() {
       	 } else {
                	 child.generateEvent('vacant')
 		 }
-         motionCheckAfterDimLights()
      }
 }
 
