@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v6.2.5.4"
+    return "v6.2.5.5"
 }
 
 definition    (
@@ -702,7 +702,42 @@ def monitoredDoorOpenedEventHandler(evt) {
             monitoredDoorOpenedAction()
             return
         }
-        if (onlyDuringCertainTimes && (onlyDuringDaytime || onlyDuringNighttime || onlyDuringDaytime2 || onlyDuringNighttime2)) {
+        if (!onlyDuringDaytime && !onlyDuringNighttime && !onlyDuringDaytime2 && !onlyDuringNighttime2 && onlyDuringCertainTimes) {
+            def between = timeOfDayIsBetween(fromTime, toTime, new Date(), location.timeZone)
+            def between2 = timeOfDayIsBetween(fromTime2, toTime2, new Date(), location.timeZone)
+            if (between) {
+                if (onlyIfAreaVacant) {
+                    if (['vacant','vacantclosed','vacantdimmed'].contains(areaState)) {
+                        monitoredDoorOpenedAction()
+                    } 
+                } else {
+                    monitoredDoorOpenedAction()
+                }
+            } 
+            if (between2) {
+                if (onlyIfASensorIsActive) {
+                    def theMotionState = onlyIfThisSensorIsActive.currentState("motion")
+                    if (theMotionState.value.contains("active")) {
+                        if (onlyIfAreaVacant2) {
+                    		if (['vacant','vacantclosed','vacantdimmed'].contains(areaState)) {
+                                monitoredDoorOpenedAction2()
+                            }
+                        } else {
+                            monitoredDoorOpenedAction2()
+                        }
+                    }
+                } else {
+                    if (onlyIfAreaVacant2) {
+                    	if (['vacant','vacantclosed','vacantdimmed'].contains(areaState)) {
+                            monitoredDoorOpenedAction2()
+                        }
+                    } else {
+                        monitoredDoorOpenedAction2()
+                    }
+                }
+            }
+            return
+        } else if (onlyDuringCertainTimes && (onlyDuringDaytime || onlyDuringNighttime || onlyDuringDaytime2 || onlyDuringNighttime2)) {
             def s = getSunriseAndSunset()
             def sunrise = s.sunrise.time
             def sunset = s.sunset.time
@@ -749,41 +784,7 @@ def monitoredDoorOpenedEventHandler(evt) {
                     }
                 }
             }
-        } else if (!onlyDuringDaytime && !onlyDuringNighttime && !onlyDuringDaytime2 && !onlyDuringNighttime2 && onlyDuringCertainTimes) {
-            def between = timeOfDayIsBetween(fromTime, toTime, new Date(), location.timeZone)
-            def between2 = timeOfDayIsBetween(fromTime2, toTime2, new Date(), location.timeZone)
-            if (between) {
-                if (onlyIfAreaVacant) {
-                    if (['vacant','vacantclosed','vacantdimmed'].contains(areaState)) {
-                        monitoredDoorOpenedAction()
-                    } 
-                } else {
-                    monitoredDoorOpenedAction()
-                }
-            } 
-            if (between2) {
-                if (onlyIfASensorIsActive) {
-                    def theMotionState = onlyIfThisSensorIsActive.currentState("motion")
-                    if (theMotionState.value.contains("active")) {
-                        if (onlyIfAreaVacant2) {
-                    		if (['vacant','vacantclosed','vacantdimmed'].contains(areaState)) {
-                                monitoredDoorOpenedAction2()
-                            }
-                        } else {
-                            monitoredDoorOpenedAction2()
-                        }
-                    }
-                } else {
-                    if (onlyIfAreaVacant2) {
-                    	if (['vacant','vacantclosed','vacantdimmed'].contains(areaState)) {
-                            monitoredDoorOpenedAction2()
-                        }
-                    } else {
-                        monitoredDoorOpenedAction2()
-                    }
-                }
-            }
-        }
+        } 
     }
 } 
 
