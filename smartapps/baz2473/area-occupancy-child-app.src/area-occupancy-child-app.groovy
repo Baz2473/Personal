@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v6.2.5.2"
+    return "v6.2.5.3"
 }
 
 definition    (
@@ -701,6 +701,7 @@ def monitoredDoorOpenedEventHandler(evt) {
     if (actionOnDoorOpening) {
         if (!onlyDuringDaytime && !onlyDuringNighttime && !onlyDuringDaytime2 && !onlyDuringNighttime2 && !onlyDuringCertainTimes) {
             monitoredDoorOpenedAction()
+            return
         }
         if (onlyDuringCertainTimes && (onlyDuringDaytime || onlyDuringNighttime || onlyDuringDaytime2 || onlyDuringNighttime2)) {
             def s = getSunriseAndSunset()
@@ -712,10 +713,14 @@ def monitoredDoorOpenedEventHandler(evt) {
                     if (onlyIfAreaVacant) {
                         if (['vacant','vacantclosed'].contains(areaState)) {
                             monitoredDoorOpenedAction()
+                            return
                         }
                     } else {
                         monitoredDoorOpenedAction()
+                        return
                     }
+                } else {
+                		return
                 }
             }
             if (onlyDuringNighttime) {
@@ -723,10 +728,14 @@ def monitoredDoorOpenedEventHandler(evt) {
                     if (onlyIfAreaVacant) {
                         if (['vacant','vacantclosed'].contains(areaState)) {
                             monitoredDoorOpenedAction()
+                            return
                         }
                     } else {
                         monitoredDoorOpenedAction()
+                        return
                     }
+                } else {
+                		return
                 }
             }
             if (onlyDuringDaytime2) {
@@ -734,10 +743,14 @@ def monitoredDoorOpenedEventHandler(evt) {
                     if (onlyIfAreaVacant2) {
                         if (['vacant','vacantclosed'].contains(areaState)) {
                             monitoredDoorOpenedAction2()
+                            return
                         }
                     } else {
                         monitoredDoorOpenedAction2()
+                        return
                     }
+                } else {
+                		return
                 }
             }
             if (onlyDuringNighttime2) {
@@ -745,25 +758,29 @@ def monitoredDoorOpenedEventHandler(evt) {
                     if (onlyIfAreaVacant2) {
                         if (['vacant','vacantclosed'].contains(areaState)) {
                             monitoredDoorOpenedAction2()
+                            return
                         }
                     } else {
                         monitoredDoorOpenedAction2()
+                        return
                     }
+                } else {
+                		return
                 }
             }
         } 
         if (!onlyDuringDaytime && !onlyDuringNighttime && !onlyDuringDaytime2 && !onlyDuringNighttime2 && onlyDuringCertainTimes) {
             def between = timeOfDayIsBetween(fromTime, toTime, new Date(), location.timeZone)
-            log.trace "Between = $between"
             def between2 = timeOfDayIsBetween(fromTime2, toTime2, new Date(), location.timeZone)
-            log.trace "Between2 = $between2"
             if (between) {
                 if (onlyIfAreaVacant) {
                     if (['vacant','vacantclosed'].contains(areaState)) {
                         monitoredDoorOpenedAction()
-                    }
+                        return
+                    } 
                 } else {
                     monitoredDoorOpenedAction()
+                    return
                 }
             } 
             if (between2) {
@@ -773,18 +790,22 @@ def monitoredDoorOpenedEventHandler(evt) {
                         if (onlyIfAreaVacant2) {
                             if (['vacant','vacantclosed'].contains(areaState)) {
                                 monitoredDoorOpenedAction2()
+                                return
                             }
                         } else {
                             monitoredDoorOpenedAction2()
+                            return
                         }
                     }
                 } else {
                     if (onlyIfAreaVacant2) {
                         if (['vacant','vacantclosed'].contains(areaState)) {
                             monitoredDoorOpenedAction2()
+                            return
                         }
                     } else {
                         monitoredDoorOpenedAction2()
+                        return
                     }
                 }
             }
