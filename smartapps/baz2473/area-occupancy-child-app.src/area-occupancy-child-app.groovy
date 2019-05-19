@@ -51,11 +51,11 @@ def areaName() {
         section("Only turn things 'ON' if the alarm is disarmed") {
             input "onlyIfDisarmed", "bool", title: "Only if disarmed?", defaultValue: false, submitOnChange: false
         }
-        section("Select the motion sensors in '$app.label'") {
-            input "entryMotionSensors", "capability.motionSensor", title: "Entry motion sensors?", required: true, multiple: true, submitOnChange: true
+        section("Select the Entry motion sensors in '$app.label'") {
+            input "entryMotionSensors", "capability.motionSensor", title: "Entry sensors?", required: true, multiple: true, submitOnChange: true
         }
             if (entryMotionSensors) {
-                section("Select the motion sensors 'Outside' $app.label") {
+                section("Select the Exit motion sensors 'Outside' $app.label") {
                     input "exitMotionSensors", "capability.motionSensor", title: "Exit sensors?", required: true, multiple: true, submitOnChange: true
                	    }
                 }
@@ -63,7 +63,7 @@ def areaName() {
                 section("Select if $app.label has a door to monitor?") {
                     input "monitoredDoor", "bool", title: "Monitor a door?", defaultValue: false, submitOnChange: true
                     if (monitoredDoor) {
-                        input "doors", "capability.contactSensor", title: "Doors?", multiple: true, required: true, submitOnChange: true
+                        input "doors", "capability.contactSensor", title: "Doors?", multiple: false, required: true, submitOnChange: true
                         if (doors) {
                             input "actualEntrySensorsTimeout", "number", title: "$app.label's timeout?",required: true, defaultValue: null, submitOnChange: true
                             input "actionOnDoorOpening", "bool", title: "Turn 'ON' something when\n$doors opens?", defaultValue: false, submitOnChange: true
@@ -145,8 +145,10 @@ def areaName() {
             if (offRequired) {
                 section("Do you want any lights\nto turn 'OFF'\nafter $app.label changes to 'VACANT'") {
                     input "delayedOff", "bool", title: "Delayed Off?", defaultValue: false, submitOnChange: true
-                    input "onlyDuringDaytime9", "bool", title: "Only during the daytime", defaultValue: false, submitOnChange: true
-                	}
+                    if (!otherAreaVacancyCheck) {
+                    	input "onlyDuringDaytime9", "bool", title: "Only during the daytime", defaultValue: false, submitOnChange: true
+                		}
+                    }
                 }
             if (delayedOff) {
                 section("Turn OFF which lights\nafter $app.label changes to 'VACANT'") {
