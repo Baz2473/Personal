@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v6.2.4.5"
+    return "v6.2.4.7"
 }
 
 definition    (
@@ -470,20 +470,15 @@ def entryMotionActiveEventHandler(evt) {
     def automationState = child.getAutomationState()
     if (switchOnControl && ['automationon'].contains(automationState)) {
         dimmableSwitches1.each {
-        						def currentLevel = it.currentValue("level")
-        						if (currentLevel < setLevelTo) {
-            						if (onlyIfDisarmed) {
-                						def shmStatus = location.currentState("alarmSystemStatus")?.value
-                						if (shmStatus == "off") {
-                    						it.setLevel(setLevelTo)
-                						}
-            						} else {
-                   							it.setLevel(setLevelTo)
-                   					}
-        						} else if (it.currentValue("switch") == 'off') {
-                   						   it.on()    
-                				}
-         }
+            					if (onlyIfDisarmed) {
+                					def shmStatus = location.currentState("alarmSystemStatus")?.value
+                					if (shmStatus == "off") {
+                    					it.setLevel(setLevelTo)
+                					}
+            					} else {
+                   						it.setLevel(setLevelTo)
+              					}
+        }
      }
 }
 
@@ -535,11 +530,11 @@ def entryMotionInactiveEventHandler(evt) {
       								  		  if (currentLevel > dimByLevel) {
             							 	 	  def newLevel = (currentLevel - dimByLevel)
             						  		 	  it.setLevel(newLevel)
-                                                  motionCheckAfterDimLights()
         						  			  }
     						   } 
                             } else {
                                     child.generateEvent('vacanton')
+                                    return
                             }
                         } else {
                             	if (onlyDuringDaytime9) {
@@ -555,11 +550,11 @@ def entryMotionInactiveEventHandler(evt) {
         											   if (currentLevel > dimByLevel) {
            												   def newLevel = (currentLevel - dimByLevel)
             											   it.setLevel(newLevel)
-                                                           motionCheckAfterDimLights()
         											   }
     									}  
     								} else {
                                             child.generateEvent('vacanton')
+                                            return
                                     }
                                 } else {
                                        atomicState.emii = true
@@ -569,16 +564,17 @@ def entryMotionInactiveEventHandler(evt) {
       												  if (currentLevel > dimByLevel) {
            												  def newLevel = (currentLevel - dimByLevel)
            												  it.setLevel(newLevel)
-                                                          motionCheckAfterDimLights()
        					 							  }
     								  } 
     						   }
                         }
                     } else {
                             child.generateEvent('vacanton')
+                            return
                     }
                } else {
                        child.generateEvent('occupiedon')
+                       return
                }
         }
         if (['checkingon'].contains(areaState)) {
@@ -598,11 +594,11 @@ def entryMotionInactiveEventHandler(evt) {
       									 if (currentLevel > dimByLevel) {
             								 def newLevel = (currentLevel - dimByLevel)
            									 it.setLevel(newLevel)
-                                             motionCheckAfterDimLights()
         								 }
    				 		  }  
     				   } else {
                                child.generateEvent('vacantonclosed')
+                               return
                        }
                   } else {
                           atomicState.emii = true
@@ -612,12 +608,12 @@ def entryMotionInactiveEventHandler(evt) {
         								 if (currentLevel > dimByLevel) {
           									 def newLevel = (currentLevel - dimByLevel)
             								 it.setLevel(newLevel)
-                                             motionCheckAfterDimLights()
         								 }
     					  }   
     			  }
               } else {
                       child.generateEvent('vacantonclosed')
+                      return
               }
          }
      }
@@ -639,7 +635,6 @@ def exitMotionInactiveEventHandler(evt) {
            	  	    if (offRequired && ['vacantdimmed','vacantdimmedclosed'].contains(areaState)) {
 				   		switches2.each {
        		   	   		it.setLevel(0)
-                        motionCheckAfterDimLights()
                         }
            			} else if (offRequired && atomicState.emii) {
     					       turnAllOff()
@@ -649,7 +644,6 @@ def exitMotionInactiveEventHandler(evt) {
        		    if (offRequired && ['vacantdimmed'].contains(areaState))  {
 				   switches2.each {
        		   	   it.setLevel(0)
-                   motionCheckAfterDimLights()
    			   	   }
         		} else if (offRequired && atomicState.emii)  {
     					   turnAllOff()
@@ -823,28 +817,6 @@ def monitoredDoorClosedEventHandler(evt) {
     }
 }
 
-def motionCheckAfterDimLights() {
-    def entryMotionState = entryMotionSensors.currentState("motion")
-	if (entryMotionState.value.contains("active")) {
-        dimmableSwitches1.each {
-           						if (onlyIfDisarmed) {
-               						def shmStatus = location.currentState("alarmSystemStatus")?.value
-               						if (shmStatus == "off") {
-                   						it.setLevel(setLevelTo)
-               						}
-                                    if (it.currentValue("switch") == 'off') {
-           						   	    it.on()    
-               						}
-           						} else {
-                   						it.setLevel(setLevelTo)
-                                        if (it.currentValue("switch") == 'off') {
-                   	 			   	        it.on()    
-                						}
-                   				}
-         }
-    }
-}
-
 def presenceAwayEventHandler(evt) {
 	turnAllOff()
     unschedule()
@@ -910,10 +882,8 @@ def turnalloff() {
      	 checkableLights.each {
                 			  if (it.hasCommand("setLevel")) {
                     			  it.setLevel(0)
-                                  motionCheckAfterDimLights()
                 			  } else {
                     				  it.off()
-                                      motionCheckAfterDimLights()
                 			  }
          } 
          if (doors) {
