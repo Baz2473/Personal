@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v6.2.5.3"
+    return "v6.2.5.4"
 }
 
 definition    (
@@ -696,8 +696,7 @@ def monitoredDoorOpenedEventHandler(evt) {
     	} else {
        		    child.generateEvent('occupiedmotion')
    		}
-    }
-
+    }    
     if (actionOnDoorOpening) {
         if (!onlyDuringDaytime && !onlyDuringNighttime && !onlyDuringDaytime2 && !onlyDuringNighttime2 && !onlyDuringCertainTimes) {
             monitoredDoorOpenedAction()
@@ -711,76 +710,55 @@ def monitoredDoorOpenedEventHandler(evt) {
             if (onlyDuringDaytime) {
                 if (timenow > sunrise && timenow < sunset) {
                     if (onlyIfAreaVacant) {
-                        if (['vacant','vacantclosed'].contains(areaState)) {
+                    	if (['vacant','vacantclosed','vacantdimmed'].contains(areaState)) {
                             monitoredDoorOpenedAction()
-                            return
                         }
                     } else {
                         monitoredDoorOpenedAction()
-                        return
                     }
-                } else {
-                		return
-                }
-            }
-            if (onlyDuringNighttime) {
+                } 
+            } else if (onlyDuringNighttime) {
                 if (timenow > sunset || timenow < sunrise) {
                     if (onlyIfAreaVacant) {
-                        if (['vacant','vacantclosed'].contains(areaState)) {
+                    	if (['vacant','vacantclosed','vacantdimmed'].contains(areaState)) {
                             monitoredDoorOpenedAction()
-                            return
                         }
                     } else {
                         monitoredDoorOpenedAction()
-                        return
                     }
-                } else {
-                		return
-                }
+                } 
             }
             if (onlyDuringDaytime2) {
                 if (timenow > sunrise && timenow < sunset) {
                     if (onlyIfAreaVacant2) {
-                        if (['vacant','vacantclosed'].contains(areaState)) {
+                   	 if (['vacant','vacantclosed','vacantdimmed'].contains(areaState)) {
                             monitoredDoorOpenedAction2()
-                            return
                         }
                     } else {
                         monitoredDoorOpenedAction2()
-                        return
                     }
-                } else {
-                		return
                 }
-            }
-            if (onlyDuringNighttime2) {
+            } else if (onlyDuringNighttime2) {
                 if (timenow > sunset || timenow < sunrise) {
                     if (onlyIfAreaVacant2) {
-                        if (['vacant','vacantclosed'].contains(areaState)) {
+                    	if (['vacant','vacantclosed','vacantdimmed'].contains(areaState)) {
                             monitoredDoorOpenedAction2()
-                            return
                         }
                     } else {
                         monitoredDoorOpenedAction2()
-                        return
                     }
-                } else {
-                		return
                 }
             }
-        } 
-        if (!onlyDuringDaytime && !onlyDuringNighttime && !onlyDuringDaytime2 && !onlyDuringNighttime2 && onlyDuringCertainTimes) {
+        } else if (!onlyDuringDaytime && !onlyDuringNighttime && !onlyDuringDaytime2 && !onlyDuringNighttime2 && onlyDuringCertainTimes) {
             def between = timeOfDayIsBetween(fromTime, toTime, new Date(), location.timeZone)
             def between2 = timeOfDayIsBetween(fromTime2, toTime2, new Date(), location.timeZone)
             if (between) {
                 if (onlyIfAreaVacant) {
-                    if (['vacant','vacantclosed'].contains(areaState)) {
+                    if (['vacant','vacantclosed','vacantdimmed'].contains(areaState)) {
                         monitoredDoorOpenedAction()
-                        return
                     } 
                 } else {
                     monitoredDoorOpenedAction()
-                    return
                 }
             } 
             if (between2) {
@@ -788,24 +766,20 @@ def monitoredDoorOpenedEventHandler(evt) {
                     def theMotionState = onlyIfThisSensorIsActive.currentState("motion")
                     if (theMotionState.value.contains("active")) {
                         if (onlyIfAreaVacant2) {
-                            if (['vacant','vacantclosed'].contains(areaState)) {
+                    		if (['vacant','vacantclosed','vacantdimmed'].contains(areaState)) {
                                 monitoredDoorOpenedAction2()
-                                return
                             }
                         } else {
                             monitoredDoorOpenedAction2()
-                            return
                         }
                     }
                 } else {
                     if (onlyIfAreaVacant2) {
-                        if (['vacant','vacantclosed'].contains(areaState)) {
+                    	if (['vacant','vacantclosed','vacantdimmed'].contains(areaState)) {
                             monitoredDoorOpenedAction2()
-                            return
                         }
                     } else {
                         monitoredDoorOpenedAction2()
-                        return
                     }
                 }
             }
