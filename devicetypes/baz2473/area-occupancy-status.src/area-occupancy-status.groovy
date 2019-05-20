@@ -2,7 +2,7 @@
   Copyright (C) 2017 Baz2473
   Name: Area Occupancy Status 
 */
-public static String DTHVersion() { return "v3.1.1.6" }
+public static String DTHVersion() { return "v4.0.0.0" }
 
 metadata {
 	      definition (
@@ -10,6 +10,8 @@ metadata {
                       namespace: "Baz2473", 
                       author: "Baz2473") { 
                                           capability "Actuator"
+                                          capability "Switch"
+                                          capability "Relay Switch"
                                           capability "Sensor"
                                           capability "estimatedTimeOfArrival"
 		                                  attribute "occupancyStatus", "string"
@@ -153,6 +155,13 @@ def automationon() {
 def automationoff() {
     automationStateUpdate('automationoff')
     }
+def on() {
+    sendEvent(name: "switch", value: "on")
+}
+def off() {
+    sendEvent(name: "switch", value: "off")
+    turnalloff()
+}
 private	stateUpdate(state) {
 	    if (device.currentValue('occupancyStatus') != state)
 		    updateOccupancyStatus(state)
