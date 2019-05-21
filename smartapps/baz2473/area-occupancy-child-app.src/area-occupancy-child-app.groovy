@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v6.2.5.6"
+    return "v6.2.5.7"
 }
 
 definition    (
@@ -654,7 +654,7 @@ def modeEventHandler(evt) {
         child.generateAutomationEvent('automationon')
     }
     if (awayModes && awayModes.contains(evt.value) && noAwayMode) {
-        turnAllOff()
+        turnalloff()
     }
 }
 
