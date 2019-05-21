@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v6.2.5.5"
+    return "v6.2.5.6"
 }
 
 definition    (
@@ -819,7 +819,7 @@ def monitoredDoorClosedEventHandler(evt) {
 }
 
 def presenceAwayEventHandler(evt) {
-	turnAllOff()
+	turnalloff()
     unschedule()
     def child = getChildDevice(getArea())
     child.generateAutomationEvent('automationon')
@@ -829,7 +829,7 @@ def shmStatusEventHandler(evt) {
     def shmStatus = location.currentState("alarmSystemStatus")?.value
     if (shmStatus == "away") {
         if (resetOnSHMChangingToAway) {
-            turnAllOff()
+            turnalloff()
             unschedule()
             def child = getChildDevice(getArea())
     	    child.generateAutomationEvent('automationon')
