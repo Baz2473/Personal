@@ -2,7 +2,7 @@
   Copyright (C) 2017 Baz2473
   Name: Area Occupancy Status 
 */
-public static String DTHVersion() { return "v4.0.0.0" }
+public static String DTHVersion() { return "v4.0.0.1" }
 
 metadata {
 	      definition (
@@ -67,18 +67,12 @@ metadata {
                 attributeState "donotdisturb", label: 'dnd', action: "turnalloff", icon:"st.Office.office6", backgroundColor:"#410099"
                 attributeState "donotdisturbon", label: 'dnd', action: "turnalloff", icon:"st.Office.office6", backgroundColor:"#6d00ff"
                 }
-       		tileAttribute ("device.status", key: "SECONDARY_CONTROL") {
-				attributeState "default", label:'${currentValue}'
-			    }
       }
        multiAttributeTile(name: "automationStatus", type: "generic", width: 2, height: 2, canChangeBackground: false) {
 			tileAttribute ("device.automationStatus", key: "PRIMARY_CONTROL") {
 				attributeState "automationon", label: 'Automation ON', action: "automationoff", icon:"st.samsung.da.RC_ic_power", backgroundColor:"#32CD32"
                 attributeState "automationoff", label: 'Automation OFF', action: "automationon", icon:"st.samsung.da.RC_ic_power", backgroundColor:"#FF0000"        
                 }
-       		tileAttribute ("device.automationstatus", key: "SECONDARY_CONTROL")	{
-				attributeState "default", label:'${currentValue}'
-			    }
        }
 		main (["occupancyStatus"])
 		details (["occupancyStatus","automationStatus"])
@@ -155,9 +149,6 @@ def automationon() {
 def automationoff() {
     automationStateUpdate('automationoff')
     }
-def on() {
-    sendEvent(name: "switch", value: "on")
-}
 def off() {
     sendEvent(name: "switch", value: "off")
     turnalloff()
@@ -174,30 +165,11 @@ private	automationStateUpdate(automationState) {
             }
 private updateOccupancyStatus(occupancyStatus = null) {
 	    occupancyStatus = occupancyStatus?.toLowerCase()
-	    def msgTextMap = ['vacant':'Vacant Since: ','vacantdimmed':'Vacant & Dimmed Since: ','vacanton':'Vacant & On Since: ','vacantclosed':'Vacant & Closed Since: ','vacantdimmedclosed':'Vacant, Closed & Dimmed Since: ','vacantonclosed':'Vacant, Closed & On Since: ', 'occupied':'Occupied Since: ', 'occupiedmotion':'Occupied & Motion Since: ', 'occupiedon':'Occupied & On Since: ', 'occupiedonmotion':'Occupied & Motion Since: ','checking':'Checking Status: ','checkingon':'Checking Status Since: ','engaged':'Engaged Since: ', 'engagedmotion':'Engaged & Motion Since: ','engagedon':'Engaged & On Since: ','engagedonmotion':'Engaged & Motion Since: ' ,'donotdisturb':'DND Since: ','donotdisturbon':'DND & On Since: ']
-        if (!occupancyStatus || !(msgTextMap.containsKey(occupancyStatus))) {
-    	     log.debug "${device.displayName}: Missing or invalid parameter Occupancy Status. Allowed values are: vacant, vacantclosed, vacantdimmed, vacantdimmedclosed, occupied, occupiedonmotion, checking, engaged, engagedonmotion, donotdisturb, vacanton, vacantonclosed, occupiedon, checkingon, engagedon or donotdisturbon."
-             return
-             }
 	    sendEvent(name: "occupancyStatus", value: occupancyStatus, descriptionText: "${device.displayName} changed to ${occupancyStatus}", isStateChange: true, displayed: true)
-        def statusMsg = msgTextMap[device.currentValue('occupancyStatus')] + formatLocalTime()
-        sendEvent(name: "status", value: statusMsg, isStateChange: true, displayed: false)
         }
 private updateAutomationStatus(automationStatus = null) {
 	    automationStatus = automationStatus?.toLowerCase()
-	    def msgTextMap = ['automationoff':'Off Since: ', 'automationon':'On Since: ']
-	    if (!automationStatus || !(msgTextMap.containsKey(automationStatus))) {
-    	     log.debug "${device.displayName}: Missing or invalid parameter Occupancy Status. Allowed values are: Automation Off or Automation On."
-             return
-             }
 	    sendEvent(name: "automationStatus", value: automationStatus, descriptionText: "${device.displayName} changed to ${automationStatus}", isStateChange: true, displayed: true)
-        def statusMsg = msgTextMap[device.currentValue('automationStatus')] + formatLocalTime()
-	    sendEvent(name: "automationstatus", value: statusMsg, isStateChange: true, displayed: false)
-        }
-private formatLocalTime(format = "h:mm:ss a 'on' EEE, d MMM yyyy", time = now()) {
-	    def formatter = new java.text.SimpleDateFormat(format)
-	    formatter.setTimeZone(location.timeZone)
-	    return formatter.format(time)
         }
 private	resetTile(occupancyStatus) {
         sendEvent(name: occupancyStatus, value: occupancyStatus, descriptionText: "reset tile ${occupancyStatus} to ${occupancyStatus}", isStateChange: true, displayed: false)

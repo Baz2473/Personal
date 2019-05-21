@@ -2,7 +2,7 @@
   Copyright (C) 2017 Baz2473
   Name: Area Occupancy Status 
 */
-public static String DTHVersion() { return "v1.0.0.0" }
+public static String DTHVersion() { return "v1.0.0.1" }
 
 metadata {
 	      definition (
@@ -50,20 +50,13 @@ def initialize() {
     }
 def no() {
     stateUpdate('no')	
-    off()
     }
 def greenbin() {
     stateUpdate('greenbin')
-    on()
     }
 def brownbin() {
     stateUpdate('brownbin')
-    on()
     }
-def on() {
-    sendEvent(name: "switch", value: "on")
-}
-
 def off() {
     sendEvent(name: "switch", value: "off")
     stateUpdate('no')
@@ -88,6 +81,3 @@ def generateEvent(state = null)	{
 def getBinState() {
     return device.currentValue('binStatus')
     }
-private getVersion() {
-    "PUBLISHED"
-}
