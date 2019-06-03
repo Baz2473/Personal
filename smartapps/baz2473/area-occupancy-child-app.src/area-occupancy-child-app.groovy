@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v6.2.6.0"
+    return "v6.2.6.1"
 }
 
 definition    (
@@ -65,7 +65,7 @@ def areaName() {
                     if (monitoredDoor) {
                         input "doors", "capability.contactSensor", title: "Doors?", multiple: false, required: true, submitOnChange: true
                         if (doors) {
-                            input "actualEntrySensorsTimeout", "number", title: "$app.label's timeout?",required: true, defaultValue: null, submitOnChange: true
+                            //input "actualEntrySensorsTimeout", "number", title: "$app.label's timeout?",required: true, defaultValue: null, submitOnChange: true
                             input "actionOnDoorOpening", "bool", title: "Turn 'ON' something when\n$doors opens?", defaultValue: false, submitOnChange: true
                             if (actionOnDoorOpening) {
                                 input "onlyIfAreaVacant", "bool", title: "But only if $app.label is vacant", defaultValue: true, submitOnChnage: true
