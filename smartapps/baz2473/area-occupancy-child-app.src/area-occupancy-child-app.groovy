@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v6.2.5.7"
+    return "v6.2.5.8"
 }
 
 definition    (
@@ -421,6 +421,9 @@ def engaged() {
     } else {
             child.generateEvent('engagedmotion')
     }
+    if (actionOnEngaged) {
+        engagedAction.on()
+    }
     def automationState = child.getAutomationState()
     if (switchOnControl && ['automationon'].contains(automationState)) {
         dimmableSwitches1.each {
@@ -433,9 +436,6 @@ def engaged() {
                    						it.setLevel(setLevelTo)
            						}                      
         }
-    }
-    if (actionOnEngaged) {
-        engagedAction.on()
     }
 } 
                           /////////////////////////////////////////// END OF THE DEF'S USED IN runIn() FUNCTIONS //////////////////////////////////////////////
@@ -802,11 +802,13 @@ def monitoredDoorClosedEventHandler(evt) {
     }
   	if (['occupiedmotion'].contains(areaState)) {
    	      child.generateEvent('checking')
-  		  runIn(actualEntrySensorsTimeout, engaged) 
+  		  //runIn(actualEntrySensorsTimeout, engaged, [overwrite: false]) 
+          runIn(actualEntrySensorsTimeout, "engaged", [overwrite: false]) 
     }
    	if (['occupiedonmotion'].contains(areaState)) {
    	      child.generateEvent('checkingon')
-   	      runIn(actualEntrySensorsTimeout, engaged)
+   	      //runIn(actualEntrySensorsTimeout, engaged, [overwrite: false])
+          runIn(actualEntrySensorsTimeout, "engaged", [overwrite: false]) 
     }
     if (turnOffAfter) {
         runIn(offAfter, doaoff, [overwrite: false])
