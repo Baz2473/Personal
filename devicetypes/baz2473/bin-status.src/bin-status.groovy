@@ -53,13 +53,18 @@ def no() {
     }
 def greenbin() {
     stateUpdate('greenbin')
+    on()
     }
 def brownbin() {
     stateUpdate('brownbin')
+    on()
     }
 def off() {
     sendEvent(name: "switch", value: "off")
     stateUpdate('no')
+}
+def on() {
+    sendEvent(name: "switch", value: "on")
 }
 private	stateUpdate(state) {
 	    if (device.currentValue('binStatus') != state)
