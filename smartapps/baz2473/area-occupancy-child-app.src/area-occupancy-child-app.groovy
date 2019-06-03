@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v6.2.5.8"
+    return "v6.2.6.0"
 }
 
 definition    (
@@ -495,7 +495,7 @@ def entryMotionInactiveEventHandler(evt) {
               }
         }
         if (['checking'].contains(areaState)) {
-              unschedule(engaged)
+              //unschedule(engaged)
               child.generateEvent('vacantclosed')
               return
         }
@@ -575,7 +575,7 @@ def entryMotionInactiveEventHandler(evt) {
                }
         }
         if (['checkingon'].contains(areaState)) {
-              unschedule(engaged)
+              //unschedule(engaged)
               def automationState = child.getAutomationState()
               if (offRequired && ['automationon'].contains(automationState)) {
                   if (onlyDuringDaytime9) {
@@ -671,7 +671,7 @@ def monitoredDoorOpenedAction2() {
 }
 
 def monitoredDoorOpenedEventHandler(evt) {
-    unschedule(engaged)
+    //unschedule(engaged)
     unschedule(donotdisturb)
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
@@ -802,13 +802,11 @@ def monitoredDoorClosedEventHandler(evt) {
     }
   	if (['occupiedmotion'].contains(areaState)) {
    	      child.generateEvent('checking')
-  		  //runIn(actualEntrySensorsTimeout, engaged, [overwrite: false]) 
-          runIn(actualEntrySensorsTimeout, "engaged", [overwrite: false]) 
+   	      //runIn(actualEntrySensorsTimeout, engaged, [overwrite: false])
     }
    	if (['occupiedonmotion'].contains(areaState)) {
    	      child.generateEvent('checkingon')
    	      //runIn(actualEntrySensorsTimeout, engaged, [overwrite: false])
-          runIn(actualEntrySensorsTimeout, "engaged", [overwrite: false]) 
     }
     if (turnOffAfter) {
         runIn(offAfter, doaoff, [overwrite: false])
@@ -822,7 +820,8 @@ def monitoredDoorClosedEventHandler(evt) {
 
 def presenceAwayEventHandler(evt) {
 	turnalloff()
-    unschedule()
+    //unschedule()
+    unschedule(donotdusturb)
     def child = getChildDevice(getArea())
     child.generateAutomationEvent('automationon')
 }
@@ -832,7 +831,8 @@ def shmStatusEventHandler(evt) {
     if (shmStatus == "away") {
         if (resetOnSHMChangingToAway) {
             turnalloff()
-            unschedule()
+            //unschedule()
+            unschedule(donotdusturb)
             def child = getChildDevice(getArea())
     	    child.generateAutomationEvent('automationon')
         }
