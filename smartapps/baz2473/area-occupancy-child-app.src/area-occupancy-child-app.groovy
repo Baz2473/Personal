@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v6.2.6.1"
+    return "v6.3.0.0"
 }
 
 definition    (
@@ -65,7 +65,7 @@ def areaName() {
                     if (monitoredDoor) {
                         input "doors", "capability.contactSensor", title: "Doors?", multiple: false, required: true, submitOnChange: true
                         if (doors) {
-                            //input "actualEntrySensorsTimeout", "number", title: "$app.label's timeout?",required: true, defaultValue: null, submitOnChange: true
+                            input "immediateExitSensor", "capability.motionSensor", title: "$app.label's immediate exit sensor", multiple: false, required: true, submitOnChange: true
                             input "actionOnDoorOpening", "bool", title: "Turn 'ON' something when\n$doors opens?", defaultValue: false, submitOnChange: true
                             if (actionOnDoorOpening) {
                                 input "onlyIfAreaVacant", "bool", title: "But only if $app.label is vacant", defaultValue: true, submitOnChnage: true
@@ -267,6 +267,7 @@ def updated() {
     if (doors) {
         subscribe(doors, "contact.open", monitoredDoorOpenedEventHandler)
         subscribe(doors, "contact.closed", monitoredDoorClosedEventHandler)
+        subscribe(immediateExitSensor, "motion.inactive", immediateExitMotionInactiveEventHandler)
     	}
     if (entryMotionSensors) { 
         subscribe(entryMotionSensors, "motion.active", entryMotionActiveEventHandler)
@@ -413,6 +414,19 @@ def doaoff() {
     }
 } 
 
+                          /////////////////////////////////////////// END OF THE DEF'S USED IN runIn() FUNCTIONS //////////////////////////////////////////////
+
+
+def immediateExitMotionInactiveEventHandler(evt) {
+    def entryMotionState = entryMotionSensors.currentState("motion")
+    def child = getChildDevice(getArea())
+    def areaState = child.getAreaState()
+    def doorsState = doors.currentState("contact")
+    if (!doorsState.value.contains("open") && ['checking','checkingon'].contains(areaState) && entryMotionState.value.contains("active")) {
+         engaged()
+        }
+}
+
 def engaged() {
     def child = getChildDevice(getArea())
     def lightsState = checkableLights.currentState("switch")
@@ -438,7 +452,6 @@ def engaged() {
         }
     }
 } 
-                          /////////////////////////////////////////// END OF THE DEF'S USED IN runIn() FUNCTIONS //////////////////////////////////////////////
 
 def entryMotionActiveEventHandler(evt) {
     atomicState.emii = false
