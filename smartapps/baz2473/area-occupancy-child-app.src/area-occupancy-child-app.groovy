@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v6.3.1.0"
+    return "v6.3.1.1"
 }
 
 definition    (
@@ -495,7 +495,7 @@ def entryMotionActiveEventHandler(evt) {
      }
      if (switchOnControl && ['automationon'].contains(automationState) && onlyIfDoorOpen) {
      	 def doorsState = doors.currentState("contact")
-       	 if (doorsState.value.contains("open") && ['vacant','occupied','occupiedmotion'].contains(areaState)) {
+       	 if (doorsState.value.contains("open") && ['vacant','vacantdimmed','occupied','occupiedmotion'].contains(areaState)) {
         	 dimmableSwitches1.each {
             						 if (onlyIfDisarmed) {
                 						 def shmStatus = location.currentState("alarmSystemStatus")?.value
