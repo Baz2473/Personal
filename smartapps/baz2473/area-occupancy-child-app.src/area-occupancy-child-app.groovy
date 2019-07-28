@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v6.3.0.2"
+    return "v6.3.1.0"
 }
 
 definition    (
@@ -111,7 +111,7 @@ def areaName() {
                                    	 	}
                                 	}
                                 input "actionOnDoorClosing", "bool", title: "Turn off when\n$doors closes?", defaultValue: false, submitOnChange: true    
-                            	}
+                            	}                                
                             }
                         }
                     }
@@ -122,6 +122,12 @@ def areaName() {
                 	}
                 }
             if (switchOnControl) {
+            	if (doors) {
+       			 section("Only turn the lights 'ON' if the door is open") {
+                     input "onlyIfDoorOpen", "bool", title: "Only turn on (via motion) if the door is open?", defaultValue: false, submitOnChange: true
+					 }
+                }
+            
                 section("Turn ON which lights\nwhen '$app.label' changes to 'OCCUPIED'") {
                     input "dimmableSwitches1", "capability.switchLevel", title: "Lights?", required: true, multiple: true, submitOnChange: true
                     if (dimmableSwitches1) {
@@ -475,7 +481,7 @@ def entryMotionActiveEventHandler(evt) {
         }
     }
     def automationState = child.getAutomationState()
-    if (switchOnControl && ['automationon'].contains(automationState)) {
+    if (switchOnControl && ['automationon'].contains(automationState) && !onlyIfDoorOpen) {
         dimmableSwitches1.each {
             					if (onlyIfDisarmed) {
                 					def shmStatus = location.currentState("alarmSystemStatus")?.value
@@ -487,6 +493,21 @@ def entryMotionActiveEventHandler(evt) {
               					}
         }
      }
+     if (switchOnControl && ['automationon'].contains(automationState) && onlyIfDoorOpen) {
+     	 def doorsState = doors.currentState("contact")
+       	 if (doorsState.value.contains("open") && ['vacant','occupied','occupiedmotion'].contains(areaState)) {
+        	 dimmableSwitches1.each {
+            						 if (onlyIfDisarmed) {
+                						 def shmStatus = location.currentState("alarmSystemStatus")?.value
+                						 if (shmStatus == "off") {
+                    						 it.setLevel(setLevelTo)
+                							 }
+            						 } else {
+                   						   	 it.setLevel(setLevelTo)
+              						 }
+        	}
+        }
+      }    
 }
 
 def entryMotionInactiveEventHandler(evt) {
