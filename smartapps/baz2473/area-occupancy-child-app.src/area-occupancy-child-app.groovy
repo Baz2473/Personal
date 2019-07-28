@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v6.3.0.1"
+    return "v6.3.0.2"
 }
 
 definition    (
@@ -432,9 +432,6 @@ def engaged() {
     } else {
             child.generateEvent('engagedmotion')
     }
-    if (actionOnEngaged) {
-        engagedAction.on()
-    }
     def automationState = child.getAutomationState()
     if (switchOnControl && ['automationon'].contains(automationState)) {
         dimmableSwitches1.each {
@@ -448,6 +445,9 @@ def engaged() {
            						}                      
         }
     }
+    if (actionOnEngaged) {
+        engagedAction.on()
+   }
 } 
 
 def entryMotionActiveEventHandler(evt) {
