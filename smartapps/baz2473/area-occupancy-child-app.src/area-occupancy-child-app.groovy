@@ -455,19 +455,17 @@ def engaged() {
     if (switchOnControl && ['automationon'].contains(automationState) && onlyIfDoorOpen) {
     def doorsState = doors.currentState("contact")
        	 if (!doorsState.value.contains("closed") && ['vacant'].contains(areaState)) {
-    
-    
-        dimmableSwitches1.each {
-            					if (onlyIfDisarmed) {
-                					def shmStatus = location.currentState("alarmSystemStatus")?.value
-                					if (shmStatus == "off") {
-                   					    it.setLevel(setLevelTo)
-                					}
-            					} else {
-                   						it.setLevel(setLevelTo)
-           						}                      
-        }
-    }
+       		  dimmableSwitches1.each {
+            					  	  if (onlyIfDisarmed) {
+                						  def shmStatus = location.currentState("alarmSystemStatus")?.value
+                						  if (shmStatus == "off") {
+                   					    	  it.setLevel(setLevelTo)
+                						  }
+            						  } else {
+                   							  it.setLevel(setLevelTo)
+           							  }                      
+        	}
+   	    }
     }
     
     if (actionOnEngaged) {
