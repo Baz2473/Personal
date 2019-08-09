@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v6.3.2.0"
+    return "v6.3.3.0"
 }
 
 definition    (
@@ -161,9 +161,13 @@ def areaName() {
                     input "switches2", "capability.switchLevel", title: "Lights?", required: true, multiple: true, submitOnChange: true
                     if (switches2) {
                         input "dimByLevel", "number", title: "Reduce level by %\nbefore turning off!", required: false, multiple: false, range: "1..99", submitOnChange: false, defaultValue: null
-                    	}
+                    }
+                    input "vacantDimmedOffCheck", "bool", title: "Double check the dimmed lights have gone off?", defaultValue: false, submitOnChange: true
+                    if (vacantDimmedOffCheck) {
+                        input "checkInThisAmountOfTime", "number", title: "Check in how many minutes?", required: true, range: "1..10", submitOnChange: true, defaultValue: null
                     }
                 }
+              }
             if (exitMotionSensors) {
                 section("Do You Want To Automatically Switch\n$app.label's Automation 'ON' If It Was Disabled\nWhen Activation Of Certain Modes Occur?") {
                     input "resetAutomation", "bool", title: "Reset Automation On Mode Selection?", defaultValue: false, submitOnChange: true
@@ -510,6 +514,7 @@ def entryMotionActiveEventHandler(evt) {
     }    
     if (['occupiedon','vacanton','vacantdimmed'].contains(areaState)) {
         child.generateEvent('occupiedonmotion')
+        unschedule(turnalloff)
     }
     if (['occupied','vacant'].contains(areaState)) {
         child.generateEvent('occupiedmotion')
@@ -581,6 +586,9 @@ def entryMotionInactiveEventHandler(evt) {
             						  		 	  it.setLevel(newLevel)
         						  			  }
     						   } 
+                               if (vacantDimmedOffCheck) {
+                               	   runIn(checkInThisAmountOfTime * 60, turnalloff)
+                               }
                             } else {
                                     child.generateEvent('vacanton')
                                     return
@@ -600,7 +608,10 @@ def entryMotionInactiveEventHandler(evt) {
            												   def newLevel = (currentLevel - dimByLevel)
             											   it.setLevel(newLevel)
         											   }
-    									}  
+    									} 
+                               		    if (vacantDimmedOffCheck) {
+                                            runIn(checkInThisAmountOfTime * 60, turnalloff)
+                                        }
     								} else {
                                             child.generateEvent('vacanton')
                                             return
@@ -615,6 +626,9 @@ def entryMotionInactiveEventHandler(evt) {
            												  it.setLevel(newLevel)
        					 							  }
     								  } 
+                              	      if (vacantDimmedOffCheck) {
+                                          runIn(checkInThisAmountOfTime * 60, turnalloff)
+                                      }
     						   }
                         }
                     } else {
@@ -643,7 +657,10 @@ def entryMotionInactiveEventHandler(evt) {
             								 def newLevel = (currentLevel - dimByLevel)
            									 it.setLevel(newLevel)
         								 }
-   				 		  }  
+   				 		  }
+                          if (vacantDimmedOffCheck) {
+                              runIn(checkInThisAmountOfTime * 60, turnalloff)
+                          }
     				   } else {
                                child.generateEvent('vacantonclosed')
                                return
@@ -657,7 +674,10 @@ def entryMotionInactiveEventHandler(evt) {
           									 def newLevel = (currentLevel - dimByLevel)
             								 it.setLevel(newLevel)
         								 }
-    					  }   
+    					  }
+                          if (vacantDimmedOffCheck) {
+                              runIn(checkInThisAmountOfTime * 60, turnalloff)
+                          }
     			  }
               } else {
                       child.generateEvent('vacantonclosed')
