@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v6.3.1.4"
+    return "v6.3.2.0"
 }
 
 definition    (
@@ -201,6 +201,7 @@ def areaName() {
                 } 
             if (entryMotionSensors && doors) {
                 section("Action On Engaged") {
+                	input "movementDetectedWhileDoorClosedActivatesEngaged", "bool", title: "Make $app.label ENGAGED\nif movement is detected while the door is closed?", defaultValue: false, submitOnChange: true
                     input "actionOnEngaged", "bool", title: "Turn ON Something When\n$app.label Changes To Engaged?", defaultValue: false, submitOnChange: true
                     if (actionOnEngaged) {
                         input "engagedAction", "capability.switch", title: "Turn On?", multiple: true, required: true, submitOnChange: true
@@ -423,10 +424,12 @@ def doaoff() {
 
 
 def immediateExitMotionInactiveEventHandler(evt) {
-    def entryMotionState = entryMotionSensors.currentState("motion")
-    def doorsState = doors.currentState("contact")
-    if (entryMotionState.value.contains("active") && !doorsState.value.contains("open")) {
-        engaged()
+    if (movementDetectedWhileDoorClosedActivatesEngaged) {
+   		def entryMotionState = entryMotionSensors.currentState("motion")
+   		def doorsState = doors.currentState("contact")
+    	if (entryMotionState.value.contains("active") && !doorsState.value.contains("open")) {
+            engaged()
+    	}
     }
 }
 
@@ -519,12 +522,14 @@ def entryMotionActiveEventHandler(evt) {
         child.generateEvent('engagedmotion')
         unschedule(donotdusturb)
     }
-    if (doors) {
-        def doorsState = doors.currentState("contact")
-        if (!doorsState.value.contains("open") && !['engaged','engagedon','engagedonmotion'].contains(areaState)) {
-            engaged()
-        }
-    }   
+    if (movementDetectedWhileDoorClosedActivatesEngaged) {
+    	if (doors) {
+        	def doorsState = doors.currentState("contact")
+        	if (!doorsState.value.contains("open") && !['engaged','engagedon','engagedonmotion'].contains(areaState)) {
+            	engaged()
+        	}
+    	}  
+    }
 }
 
 def entryMotionInactiveEventHandler(evt) {
