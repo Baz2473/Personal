@@ -150,7 +150,7 @@ def areaName() {
                 }
             if (offRequired) {
                 section("Do you want any lights\nto turn 'OFF'\nafter $app.label changes to 'VACANT'") {
-                    input "delayedOff", "bool", title: "Delayed Off?", defaultValue: false, submitOnChange: true
+                    input "delayedOff", "bool", title: "Dim Off?", defaultValue: false, submitOnChange: true
                     if (!otherAreaVacancyCheck) {
                     	input "onlyDuringDaytime9", "bool", title: "Only during the daytime", defaultValue: false, submitOnChange: true
                 		}
@@ -899,8 +899,12 @@ def sunsetHandler(evt) {
 }
 
 def turnOffAtThisTime() {
+    def child = getChildDevice(getArea())
+    def automationState = child.getAutomationState()
     switchOffAtThisTime.each {
-        					 it.off()
+     						  if (['automationon'].contains(automationState)) {
+        					        it.off()
+        					  }
     }
 }
 
@@ -914,7 +918,7 @@ def turnOnAtThisTime() {
     }
 }
 
-                          /////////////////////////////////////////// THESE DEF'S ARE CONTROLLED BY THE CHILD APP //////////////////////////////////////////////
+                          /////////////////////////////////////////// THESE DEF'S ARE ALSO CONTROLLED BY THE CHILD APP //////////////////////////////////////////////
 
 def turnalloff() {
     def child = getChildDevice(getArea())
