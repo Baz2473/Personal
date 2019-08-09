@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v6.3.1.1"
+    return "v6.3.1.2"
 }
 
 definition    (
@@ -480,6 +480,7 @@ def entryMotionActiveEventHandler(evt) {
     if (['occupiedon','vacanton','vacantdimmed'].contains(areaState)) {
         child.generateEvent('occupiedonmotion')
     }
+    def automationState = child.getAutomationState()
     if (switchOnControl && ['automationon'].contains(automationState) && onlyIfDoorOpen) {
      	 def doorsState = doors.currentState("contact")
        	 if (!doorsState.value.contains("closed") && ['vacant'].contains(areaState)) {
@@ -512,7 +513,7 @@ def entryMotionActiveEventHandler(evt) {
             engaged()
         }
     }
-    def automationState = child.getAutomationState()
+    
     if (switchOnControl && ['automationon'].contains(automationState) && !onlyIfDoorOpen) {
         dimmableSwitches1.each {
             					if (onlyIfDisarmed) {
