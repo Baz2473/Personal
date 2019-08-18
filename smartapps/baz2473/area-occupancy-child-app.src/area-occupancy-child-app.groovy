@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v7.0.0.2"
+    return "v7.0.0.3"
 }
 
 definition    (
@@ -414,27 +414,30 @@ def entryMotionActiveEventHandler(evt) {
     atomicState.emii = false
     def child = getChildDevice(getArea())
     def areaState = child.getAreaState()
+    if (movementDetectedWhileDoorClosedActivatesEngaged) {
+        def doorsState = doors.currentState("contact")
+       	if (!doorsState.value.contains("open") && !['engaged','engagedon','engagedonmotion'].contains(areaState)) {
+           	engaged()
+            return
+       	}
+    }
     if (['occupiedon','vacanton','vacantdimmed'].contains(areaState)) {
         child.generateEvent('occupiedonmotion')
+        return
     }
     if (['occupied','vacant'].contains(areaState)) {
         child.generateEvent('occupiedmotion')
+        return
     }
     if (['engagedon'].contains(areaState)) {
         child.generateEvent('engagedonmotion')
         unschedule(donotdusturb)
+        return
     }
     if (['engaged'].contains(areaState)) {
         child.generateEvent('engagedmotion')
         unschedule(donotdusturb)
-    }
-    if (movementDetectedWhileDoorClosedActivatesEngaged) {
-    	if (doors) {
-        	def doorsState = doors.currentState("contact")
-        	if (!doorsState.value.contains("open") && !['engaged','engagedon','engagedonmotion'].contains(areaState)) {
-            	engaged()
-        	}
-    	}  
+        return
     }
 }
 
