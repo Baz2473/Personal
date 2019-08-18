@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v6.3.3.1"
+    return "v6.3.3.2"
 }
 
 definition    (
@@ -514,7 +514,9 @@ def entryMotionActiveEventHandler(evt) {
     }    
     if (['occupiedon','vacanton','vacantdimmed'].contains(areaState)) {
         child.generateEvent('occupiedonmotion')
-        unschedule(turnalloff)
+        if (vacantDimmedOffCheck) {
+        	unschedule(turnalloff)
+        }
     }
     if (['occupied','vacant'].contains(areaState)) {
         child.generateEvent('occupiedmotion')
