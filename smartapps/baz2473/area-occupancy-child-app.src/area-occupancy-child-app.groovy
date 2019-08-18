@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v7.0.0.3"
+    return "v7.0.0.4"
 }
 
 definition    (
@@ -490,6 +490,7 @@ def entryMotionInactiveEventHandler(evt) {
             						  		 	  it.setLevel(newLevel)
         						  			  }
     						   } 
+                               return
                             } else {
                                     child.generateEvent('vacanton')
                                     return
@@ -510,6 +511,7 @@ def entryMotionInactiveEventHandler(evt) {
             											   it.setLevel(newLevel)
         											   }
     									} 
+                                        return
     								} else {
                                             child.generateEvent('vacanton')
                                             return
@@ -524,6 +526,7 @@ def entryMotionInactiveEventHandler(evt) {
            												  it.setLevel(newLevel)
        					 							  }
     								  } 
+                                      return
     						   }
                         }
                     } else {
@@ -553,6 +556,7 @@ def entryMotionInactiveEventHandler(evt) {
            									 it.setLevel(newLevel)
         								 }
    				 		  }
+                          return
     				   } else {
                                child.generateEvent('vacantonclosed')
                                return
@@ -567,6 +571,7 @@ def entryMotionInactiveEventHandler(evt) {
             								 it.setLevel(newLevel)
         								 }
     					  }
+                          return
     			  }
               } else {
                       child.generateEvent('vacantonclosed')
