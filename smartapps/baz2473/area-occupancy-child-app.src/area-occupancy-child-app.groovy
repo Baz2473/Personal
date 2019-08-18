@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v7.0.0.1"
+    return "v7.0.0.2"
 }
 
 definition    (
@@ -21,7 +21,6 @@ definition    (
 
 preferences {
     page(name: "areaName")
-    page(name: "versions")
 }
 
 
@@ -129,10 +128,6 @@ def areaName() {
                     input "switches2", "capability.switchLevel", title: "Lights?", required: true, multiple: true, submitOnChange: true
                     if (switches2) {
                         input "dimByLevel", "number", title: "Reduce level by %\nbefore turning off!", required: false, multiple: false, range: "1..99", submitOnChange: false, defaultValue: null
-                    }
-                    input "vacantDimmedOffCheck", "bool", title: "Double check the dimmed lights have gone off?", defaultValue: false, submitOnChange: true
-                    if (vacantDimmedOffCheck) {
-                        input "checkInThisAmountOfTime", "number", title: "Check in how many minutes?", required: true, range: "1..10", submitOnChange: true, defaultValue: null
                     }
                 }
               }
@@ -421,9 +416,6 @@ def entryMotionActiveEventHandler(evt) {
     def areaState = child.getAreaState()
     if (['occupiedon','vacanton','vacantdimmed'].contains(areaState)) {
         child.generateEvent('occupiedonmotion')
-        if (vacantDimmedOffCheck) {
-        	unschedule(turnalloff)
-        }
     }
     if (['occupied','vacant'].contains(areaState)) {
         child.generateEvent('occupiedmotion')
@@ -495,9 +487,6 @@ def entryMotionInactiveEventHandler(evt) {
             						  		 	  it.setLevel(newLevel)
         						  			  }
     						   } 
-                               if (vacantDimmedOffCheck) {
-                               	   runIn(checkInThisAmountOfTime * 60, turnalloff)
-                               }
                             } else {
                                     child.generateEvent('vacanton')
                                     return
@@ -518,9 +507,6 @@ def entryMotionInactiveEventHandler(evt) {
             											   it.setLevel(newLevel)
         											   }
     									} 
-                               		    if (vacantDimmedOffCheck) {
-                                            runIn(checkInThisAmountOfTime * 60, turnalloff)
-                                        }
     								} else {
                                             child.generateEvent('vacanton')
                                             return
@@ -535,9 +521,6 @@ def entryMotionInactiveEventHandler(evt) {
            												  it.setLevel(newLevel)
        					 							  }
     								  } 
-                              	      if (vacantDimmedOffCheck) {
-                                          runIn(checkInThisAmountOfTime * 60, turnalloff)
-                                      }
     						   }
                         }
                     } else {
@@ -567,9 +550,6 @@ def entryMotionInactiveEventHandler(evt) {
            									 it.setLevel(newLevel)
         								 }
    				 		  }
-                          if (vacantDimmedOffCheck) {
-                              runIn(checkInThisAmountOfTime * 60, turnalloff)
-                          }
     				   } else {
                                child.generateEvent('vacantonclosed')
                                return
@@ -584,9 +564,6 @@ def entryMotionInactiveEventHandler(evt) {
             								 it.setLevel(newLevel)
         								 }
     					  }
-                          if (vacantDimmedOffCheck) {
-                              runIn(checkInThisAmountOfTime * 60, turnalloff)
-                          }
     			  }
               } else {
                       child.generateEvent('vacantonclosed')
@@ -611,10 +588,8 @@ def exitMotionInactiveEventHandler(evt) {
 				   		switches2.each {
        		   	   		it.setLevel(0)
                         }
-                        unschedule(turnalloff)
            			} else if (offRequired && atomicState.emii) {
     					       turnalloff()
-                               unschedule(turnalloff)
                     } 
         	}
     	} else {
@@ -622,10 +597,8 @@ def exitMotionInactiveEventHandler(evt) {
 				   switches2.each {
        		   	   it.setLevel(0)
    			   	   }
-                   unschedule(turnalloff)
         		} else if (offRequired && atomicState.emii)  {
     					   turnalloff()
-                           unschedule(turnalloff)
                 } 
         }
     }
