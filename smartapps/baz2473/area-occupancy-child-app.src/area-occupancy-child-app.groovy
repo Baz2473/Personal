@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v7.0.0.0"
+    return "v7.0.0.1"
 }
 
 definition    (
@@ -24,15 +24,7 @@ preferences {
     page(name: "versions")
 }
 
-def versions() {
-    dynamicPage(name: "versions", title: "\t\t\t\t      Reference") {
-        section("") {
-            paragraph image : "https://raw.githubusercontent.com/Baz2473/Personal/master/Ao3.png",
-            title: "\t  Current App Versions:\n\nArea Occupancy:\t\t\t\t\t${areaOccupancyVersion()}\n\nArea Occupancy Child App:\t\t${areaOccupancyChildAppVersion()}\n\nArea Occupancy DTH:\t\t\t${areaOccupancyDTHVersion()}",
-            end
-        } 
-    }
-} 
+
 
 def areaName() {
     dynamicPage(name: "areaName", title: "A New Device Will Be Created With This Name!", install: true, uninstall: childCreated()) {
@@ -45,9 +37,7 @@ def areaName() {
                 paragraph "Area Name:\n${app.label}"
             }
         }
-        section("") {
-            href(name: "href", title: "View App Versions", required: false, page: "versions")
-        }
+        
         section("Select the Entry motion sensors in '$app.label'") {
             input "entryMotionSensors", "capability.motionSensor", title: "Entry sensors?", required: true, multiple: true, submitOnChange: true
         }
