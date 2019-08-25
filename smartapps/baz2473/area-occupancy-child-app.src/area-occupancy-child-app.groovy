@@ -4,7 +4,7 @@
  */
 
 public static String areaOccupancyChildAppVersion() {
-    return "v7.0.0.5"
+    return "v7.0.1.0"
 }
 
 definition    (
@@ -125,7 +125,7 @@ def areaName() {
                 }
             if (delayedOff) {
                 section("Turn OFF which lights\nafter $app.label changes to 'VACANT'") {
-                    input "switches2", "capability.switchLevel", title: "Lights?", required: true, multiple: true, submitOnChange: true
+                    input "switches2", "capability.switch", title: "Lights?", required: true, multiple: true, submitOnChange: true
                     if (switches2) {
                         input "dimByLevel", "number", title: "Reduce level by %\nbefore turning off!", required: false, multiple: false, range: "1..99", submitOnChange: false, defaultValue: null
                     }
@@ -484,11 +484,13 @@ def entryMotionInactiveEventHandler(evt) {
                                atomicState.emii = true
                                child.generateEvent('vacantdimmed')
 				  		       switches2.each {
-       						   			      def currentLevel = it.currentValue("level")
-      								  		  if (currentLevel > dimByLevel) {
-            							 	 	  def newLevel = (currentLevel - dimByLevel)
-            						  		 	  it.setLevel(newLevel)
-        						  			  }
+                               				   if (it.hasCommand("setLevel")) {
+       						   			      	   def currentLevel = it.currentValue("level")
+      								  		  	   if (currentLevel > dimByLevel) {
+            							 	 	       def newLevel = (currentLevel - dimByLevel)
+            						  		 	       it.setLevel(newLevel)
+        						  			       }
+                                               }
     						   } 
                                return
                             } else {
@@ -505,13 +507,15 @@ def entryMotionInactiveEventHandler(evt) {
                                         atomicState.emii = true
                                         child.generateEvent('vacantdimmed')
 										switches2.each {
-       												   def currentLevel = it.currentValue("level")
-        											   if (currentLevel > dimByLevel) {
-           												   def newLevel = (currentLevel - dimByLevel)
-            											   it.setLevel(newLevel)
-        											   }
-    									} 
-                                        return
+                               				   if (it.hasCommand("setLevel")) {
+       						   			      	   def currentLevel = it.currentValue("level")
+      								  		  	   if (currentLevel > dimByLevel) {
+            							 	 	       def newLevel = (currentLevel - dimByLevel)
+            						  		 	       it.setLevel(newLevel)
+        						  			       }
+                                               }
+    						   			} 
+                               			return
     								} else {
                                             child.generateEvent('vacanton')
                                             return
@@ -520,13 +524,15 @@ def entryMotionInactiveEventHandler(evt) {
                                        atomicState.emii = true
                                        child.generateEvent('vacantdimmed')
 									   switches2.each {
-        											  def currentLevel = it.currentValue("level")
-      												  if (currentLevel > dimByLevel) {
-           												  def newLevel = (currentLevel - dimByLevel)
-           												  it.setLevel(newLevel)
-       					 							  }
-    								  } 
-                                      return
+                               				   if (it.hasCommand("setLevel")) {
+       						   			      	   def currentLevel = it.currentValue("level")
+      								  		  	   if (currentLevel > dimByLevel) {
+            							 	 	       def newLevel = (currentLevel - dimByLevel)
+            						  		 	       it.setLevel(newLevel)
+        						  			       }
+                                               }
+    						   			} 
+                               			return
     						   }
                         }
                     } else {
@@ -550,13 +556,15 @@ def entryMotionInactiveEventHandler(evt) {
                           atomicState.emii = true
                           child.generateEvent('vacantdimmedclosed')
 						  switches2.each {
-       									 def currentLevel = it.currentValue("level")
-      									 if (currentLevel > dimByLevel) {
-            								 def newLevel = (currentLevel - dimByLevel)
-           									 it.setLevel(newLevel)
-        								 }
-   				 		  }
-                          return
+                               				   if (it.hasCommand("setLevel")) {
+       						   			      	   def currentLevel = it.currentValue("level")
+      								  		  	   if (currentLevel > dimByLevel) {
+            							 	 	       def newLevel = (currentLevel - dimByLevel)
+            						  		 	       it.setLevel(newLevel)
+        						  			       }
+                                               }
+    						   } 
+                               return
     				   } else {
                                child.generateEvent('vacantonclosed')
                                return
@@ -565,13 +573,15 @@ def entryMotionInactiveEventHandler(evt) {
                           atomicState.emii = true
                           child.generateEvent('vacantdimmedclosed')
 						  switches2.each {
-        								 def currentLevel = it.currentValue("level")
-        								 if (currentLevel > dimByLevel) {
-          									 def newLevel = (currentLevel - dimByLevel)
-            								 it.setLevel(newLevel)
-        								 }
-    					  }
-                          return
+                               				   if (it.hasCommand("setLevel")) {
+       						   			      	   def currentLevel = it.currentValue("level")
+      								  		  	   if (currentLevel > dimByLevel) {
+            							 	 	       def newLevel = (currentLevel - dimByLevel)
+            						  		 	       it.setLevel(newLevel)
+        						  			       }
+                                               }
+    						   } 
+                               return
     			  }
               } else {
                       child.generateEvent('vacantonclosed')
@@ -594,23 +604,29 @@ def exitMotionInactiveEventHandler(evt) {
 			} else {
            	  	    if (offRequired && ['vacantdimmed','vacantdimmedclosed'].contains(areaState)) {
 				   		switches2.each {
-       		   	   		it.setLevel(0)
+                        if (it.hasCommand("setLevel")) {
+                    			  it.setLevel(0)
+                			  } else {
+                    				  it.off()
+                			  }
                         }
                         return
            			} else if (offRequired && atomicState.emii) {
     					       turnalloff()
-                               return
                     } 
         	}
     	} else {
        		    if (offRequired && ['vacantdimmed'].contains(areaState))  {
 				   switches2.each {
-       		   	   it.setLevel(0)
-   			   	   }
-                   return
+                        if (it.hasCommand("setLevel")) {
+                    			  it.setLevel(0)
+                			  } else {
+                    				  it.off()
+                			  }
+                        }
+                        return
         		} else if (offRequired && atomicState.emii)  {
     					   turnalloff()
-                           return
                 } 
         }
     }
