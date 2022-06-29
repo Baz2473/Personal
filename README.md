@@ -1,2 +1,0 @@
-# Personal
-My Personal Stuff
